@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Course</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
+
+.tabs { display:flex; background:#111; border-bottom:1px solid #222; flex-shrink:0; }
+.tab { flex:1; text-align:center; padding:10px 4px 8px; font-size:11px; font-weight:700; color:#555; cursor:pointer; border-bottom:2px solid transparent; letter-spacing:0.3px; }
+.tab.on { color:#00ff44; border-bottom-color:#00ff44; }
+
+#app { height:100dvh; display:flex; flex-direction:column; overflow:hidden; }
+.screen { display:none; flex-direction:column; flex:1; padding:8px 12px env(safe-area-inset-bottom,8px); gap:6px; overflow:hidden; }
+.screen.on { display:flex; }
+
+.block { background:#111; border-radius:12px; padding:6px 10px; border:1px solid #222; flex-shrink:0; }
+.block-title { font-size:9px; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:5px; }
+.row { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+.row:last-child { margin-bottom:0; }
+.lbl { font-size:11px; font-weight:600; color:#888; width:54px; flex-shrink:0; }
+.fields { display:flex; gap:4px; flex:1; }
+.fw { display:flex; flex-direction:column; flex:1; min-width:0; }
+.unit { font-size:8px; color:#444; text-align:center; margin-bottom:1px; font-weight:600; text-transform:uppercase; }
+
+input[type="number"], input[type="text"] {
+  width:100%; background:#000; border:1.5px solid #00aa2a; border-radius:7px;
+  color:#00ff44; font-size:15px; font-weight:700; text-align:center;
+  padding:5px 2px; outline:none; -webkit-appearance:none; appearance:none; height:32px;
+}
+input[type="text"] { font-size:13px; }
+input:focus { border-color:#00ff44; background:#001508; }
+input::placeholder { color:#163a20; }
+
+.rf { flex:1; background:#0a1a0e; border:1.5px solid #1e4428; border-radius:7px; color:#00cc33; font-size:15px; font-weight:700; text-align:center; height:32px; display:flex; align-items:center; justify-content:center; }
+.rf.hi { border-color:#00ff44; background:#001508; color:#00ff44; }
+.rf.dim { opacity:0.3; }
+
+.mode-wrap { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; flex-shrink:0; }
+.mode-btn { background:#1a1a1a; border:1px solid #333; border-radius:8px; color:#666; font-size:10px; font-weight:600; padding:5px 2px; text-align:center; cursor:pointer; line-height:1.2; }
+.mode-btn.sel { background:#001a08; border-color:#00cc33; color:#00ff44; }
+
+.btns { display:flex; gap:6px; flex-shrink:0; }
+.calc-btn { flex:3; background:#00cc33; border:none; border-radius:12px; color:#000; font-size:14px; font-weight:800; height:42px; cursor:pointer; letter-spacing:1px; }
+.calc-btn:active { background:#00ff44; }
+.save-run-btn { flex:2; background:#001a3a; border:1.5px solid #0077cc; border-radius:12px; color:#33aaff; font-size:12px; font-weight:700; height:42px; cursor:pointer; }
+.save-run-btn:active { background:#002a5a; }
+.reset-btn { flex:1; background:transparent; border:1.5px solid #333; border-radius:12px; color:#555; font-size:13px; font-weight:600; height:42px; cursor:pointer; }
+.error { background:#1a0000; border:1px solid #cc0000; border-radius:8px; color:#ff5555; font-size:11px; padding:5px 10px; flex-shrink:0; display:none; }
+
+/* ── CHAUSSURES ── */
+.shoe-card { background:#111; border:1px solid #222; border-radius:14px; padding:10px 12px; flex-shrink:0; }
+.shoe-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.shoe-icon { font-size:22px; }
+.shoe-name-input { flex:1; background:#000; border:1.5px solid #333; border-radius:8px; color:#fff; font-size:14px; font-weight:700; padding:5px 8px; outline:none; height:34px; -webkit-appearance:none; text-align:left; }
+.shoe-name-input:focus { border-color:#00ff44; }
+.km-total { font-size:30px; font-weight:800; color:#00ff44; text-align:center; line-height:1; margin-bottom:2px; }
+.km-total span { font-size:14px; font-weight:600; color:#00aa2a; }
+.km-sub { font-size:10px; color:#555; text-align:center; margin-bottom:8px; }
+.km-bar-wrap { margin-bottom:10px; }
+.km-bar-bg { background:#1a1a1a; border-radius:6px; height:10px; overflow:hidden; }
+.km-bar-fill { height:100%; border-radius:6px; transition:width 0.4s; }
+.km-labels { display:flex; justify-content:space-between; margin-top:3px; font-size:9px; color:#555; }
+.km-ops { display:flex; gap:6px; align-items:center; }
+.km-input { flex:1; background:#000; border:1.5px solid #00aa2a; border-radius:8px; color:#00ff44; font-size:16px; font-weight:700; text-align:center; padding:5px; height:36px; outline:none; -webkit-appearance:none; appearance:none; }
+.km-input:focus { border-color:#00ff44; background:#001508; }
+.op-btn { width:36px; height:36px; border:none; border-radius:8px; font-size:22px; font-weight:800; line-height:1; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.op-add { background:#00cc33; color:#000; }
+.op-add:active { background:#00ff44; }
+.op-sub { background:#1a1a1a; border:1.5px solid #cc4400; color:#ff6622; }
+.op-sub:active { background:#2a0a00; }
+.raz-btn { background:transparent; border:1px solid #333; border-radius:8px; color:#444; font-size:11px; font-weight:600; height:36px; padding:0 10px; cursor:pointer; }
+.shoe-sep { height:1px; background:#1a1a1a; flex-shrink:0; margin:0 4px; }
+
+/* ── THÈMES CHAUSSURES ── */
+.shoe-card-1 { background:linear-gradient(135deg,#0a1628 0%,#0d1f3c 100%); border:1px solid #1a3a6e; }
+.shoe-card-1 .km-total { color:#4d9fff; }
+.shoe-card-1 .km-total span { color:#2a7acc; }
+.shoe-card-1 .shoe-name-input { border-color:#1a3a6e; color:#a0c8ff; }
+.shoe-card-1 .shoe-name-input:focus { border-color:#4d9fff; }
+.shoe-card-1 .km-input { border-color:#1a4a8e; color:#4d9fff; }
+.shoe-card-1 .km-input:focus { border-color:#4d9fff; background:#050d1a; }
+.shoe-card-1 .op-add { background:#1a5fcc; color:#fff; }
+.shoe-card-1 .op-add:active { background:#2a7aff; }
+.shoe-card-1 .km-bar-fill { background:linear-gradient(90deg,#0a3a8e,#4d9fff) !important; }
+.shoe-card-1 .km-labels { color:#2a5a8e; }
+.shoe-card-2 { background:linear-gradient(135deg,#1e1c14 0%,#2a2718 100%); border:1px solid #5a5238; }
+.shoe-card-2 .km-total { color:#c8b878; }
+.shoe-card-2 .km-total span { color:#a09050; }
+.shoe-card-2 .shoe-name-input { border-color:#5a5238; color:#d4c48a; }
+.shoe-card-2 .shoe-name-input:focus { border-color:#c8b878; }
+.shoe-card-2 .km-input { border-color:#6a6040; color:#c8b878; }
+.shoe-card-2 .km-input:focus { border-color:#c8b878; background:#100f08; }
+.shoe-card-2 .op-add { background:#7a6a30; color:#fff; }
+.shoe-card-2 .op-add:active { background:#a08a40; }
+.shoe-card-2 .km-bar-fill { background:linear-gradient(90deg,#5a4a20,#c8b878) !important; }
+.shoe-card-2 .km-labels { color:#6a5a38; }
+.shoe-card-2 .op-sub { border-color:#8a4a20; color:#cc7744; }
+
+
+/* ── GRAPHIQUE ── */
+.sc-graph { overflow-y:auto; }
+.graph-header { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.graph-title { font-size:13px; font-weight:800; color:#fff; }
+.graph-count { font-size:11px; color:#555; }
+.metric-tabs { display:flex; gap:4px; flex-shrink:0; }
+.mtab { flex:1; text-align:center; padding:6px 4px; background:#1a1a1a; border:1px solid #333; border-radius:8px; font-size:10px; font-weight:700; color:#666; cursor:pointer; }
+.mtab.on { background:#001a08; border-color:#00cc33; color:#00ff44; }
+.canvas-wrap { flex-shrink:0; position:relative; }
+canvas#chart { width:100%; border-radius:12px; background:#0a0a0a; display:block; }
+.runs-list { flex-shrink:0; overflow-y:auto; max-height:200px; }
+.run-item { display:flex; align-items:center; gap:8px; padding:7px 10px; background:#111; border-radius:10px; border:1px solid #1a1a1a; margin-bottom:4px; }
+.run-dot { width:8px; height:8px; border-radius:50%; background:#00ff44; flex-shrink:0; }
+.run-date { font-size:11px; color:#888; flex-shrink:0; width:68px; }
+.run-info { flex:1; font-size:12px; font-weight:700; color:#fff; }
+.run-chrono { font-size:12px; color:#00cc33; font-weight:700; flex-shrink:0; }
+.run-del { width:26px; height:26px; background:transparent; border:1px solid #330000; border-radius:6px; color:#cc2200; font-size:14px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.run-del:active { background:#1a0000; }
+.empty-state { text-align:center; padding:30px 20px; color:#333; font-size:13px; }
+.empty-icon { font-size:36px; margin-bottom:8px; }
+
+/* ── SAUVEGARDE ── */
+.backup-bar { display:flex; gap:6px; padding:5px 12px; background:#0d0d0d; border-top:1px solid #1a1a1a; flex-shrink:0; }
+.bk-btn { flex:1; height:30px; border-radius:8px; font-size:10px; font-weight:700; cursor:pointer; border:none; }
+.bk-export { background:#001a3a; border:1.5px solid #0077cc; color:#33aaff; }
+.bk-export:active { background:#002a5a; }
+.bk-import { background:#1a0a00; border:1.5px solid #aa5500; color:#ff9933; }
+.bk-import:active { background:#2a1200; }
+.bk-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:900; align-items:center; justify-content:center; padding:20px; }
+.bk-modal.on { display:flex; }
+.bk-box { background:#111; border:1px solid #333; border-radius:16px; padding:16px; width:100%; max-width:400px; }
+.bk-box h3 { font-size:13px; font-weight:800; color:#fff; margin-bottom:10px; }
+.bk-textarea { width:100%; background:#000; border:1.5px solid #333; border-radius:8px; color:#00ff44; font-size:10px; font-family:monospace; padding:8px; height:160px; resize:none; outline:none; }
+.bk-textarea:focus { border-color:#00ff44; }
+.bk-actions { display:flex; gap:8px; margin-top:10px; }
+.bk-copy { flex:2; height:36px; background:#00cc33; border:none; border-radius:10px; color:#000; font-size:12px; font-weight:800; cursor:pointer; }
+.bk-copy:active { background:#00ff44; }
+.bk-ok { flex:1; height:36px; background:transparent; border:1.5px solid #333; border-radius:10px; color:#555; font-size:12px; font-weight:700; cursor:pointer; }
+.bk-hint { font-size:10px; color:#555; margin-top:8px; line-height:1.4; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="tabs">
+    <div class="tab on" id="tab_calc" onclick="showTab('calc')">⏱ Calculateur</div>
+    <div class="tab" id="tab_graph" onclick="showTab('graph')">📈 Courbes</div>
+    <div class="tab" id="tab_shoes" onclick="showTab('shoes')">👟 Chaussures</div>
+  </div>
+
+  <!-- ══ CALCULATEUR ══ -->
+  <div class="screen on" id="sc_calc">
+    <div class="mode-wrap">
+      <div class="mode-btn sel" id="btn_dc" onclick="sel('dc')">Dist<br>+ Chrono</div>
+      <div class="mode-btn" id="btn_dv" onclick="sel('dv')">Dist<br>+ Vitesse</div>
+      <div class="mode-btn" id="btn_da" onclick="sel('da')">Dist<br>+ Allure</div>
+      <div class="mode-btn" id="btn_cv" onclick="sel('cv')">Chrono<br>+ Vitesse</div>
+      <div class="mode-btn" id="btn_ca" onclick="sel('ca')">Chrono<br>+ Allure</div>
+      <div class="mode-btn" id="btn_va" onclick="sel('va')">Vitesse<br>+ Allure</div>
+    </div>
+    <div class="block">
+      <div class="block-title">Entrées</div>
+      <div class="row" id="r_dist">
+        <div class="lbl">Distance</div>
+        <div class="fields"><div class="fw"><div class="unit">Km</div>
+          <input type="number" id="i_dist" placeholder="0" min="0" step="0.001" inputmode="decimal">
+        </div></div>
+      </div>
+      <div class="row" id="r_chr">
+        <div class="lbl">Chrono</div>
+        <div class="fields">
+          <div class="fw"><div class="unit">H</div><input type="number" id="i_h" placeholder="0" min="0" inputmode="numeric"></div>
+          <div class="fw"><div class="unit">Min</div><input type="number" id="i_m" placeholder="0" min="0" max="59" inputmode="numeric"></div>
+          <div class="fw"><div class="unit">Sec</div><input type="number" id="i_s" placeholder="0" min="0" max="59" inputmode="numeric"></div>
+        </div>
+      </div>
+      <div class="row" id="r_vit" style="display:none">
+        <div class="lbl">Vitesse</div>
+        <div class="fields"><div class="fw"><div class="unit">Km/h</div>
+          <input type="number" id="i_vit" placeholder="0" min="0" step="0.1" inputmode="decimal">
+        </div></div>
+      </div>
+      <div class="row" id="r_all" style="display:none">
+        <div class="lbl">Allure</div>
+        <div class="fields">
+          <div class="fw"><div class="unit">Min/km</div><input type="number" id="i_am" placeholder="0" min="0" inputmode="numeric"></div>
+          <div class="fw"><div class="unit">Sec</div><input type="number" id="i_as" placeholder="0" min="0" max="59" inputmode="numeric"></div>
+        </div>
+      </div>
+    </div>
+    <div class="error" id="err"></div>
+    <div class="btns">
+      <button class="calc-btn" onclick="calc()">CALCULER</button>
+      <button class="save-run-btn" onclick="saveRun()">💾 Sauver</button>
+      <button class="reset-btn" onclick="raz()">RAZ</button>
+    </div>
+    <div class="block">
+      <div class="block-title">Résultats</div>
+      <div class="row">
+        <div class="lbl">Distance</div>
+        <div class="fields"><div class="fw"><div class="unit">Km</div><div class="rf dim" id="o_dist">-</div></div></div>
+      </div>
+      <div class="row">
+        <div class="lbl">Chrono</div>
+        <div class="fields">
+          <div class="fw"><div class="unit">H</div><div class="rf dim" id="o_h">-</div></div>
+          <div class="fw"><div class="unit">Min</div><div class="rf dim" id="o_m">-</div></div>
+          <div class="fw"><div class="unit">Sec</div><div class="rf dim" id="o_s">-</div></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="lbl">Vitesse</div>
+        <div class="fields"><div class="fw"><div class="unit">Km/h</div><div class="rf dim" id="o_vit">-</div></div></div>
+      </div>
+      <div class="row">
+        <div class="lbl">Allure</div>
+        <div class="fields">
+          <div class="fw"><div class="unit">Min/km</div><div class="rf dim" id="o_am">-</div></div>
+          <div class="fw"><div class="unit">Sec</div><div class="rf dim" id="o_as">-</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CHAUSSURES ══ -->
+  <div class="screen" id="sc_shoes">
+    <div class="shoe-card shoe-card-1">
+      <div class="shoe-header">
+        <div class="shoe-icon">👟</div>
+        <input class="shoe-name-input" type="text" id="shoe1_name" placeholder="Asics" oninput="saveName(1)" maxlength="30">
+      </div>
+      <div class="km-total" id="shoe1_total">0.0 <span>km</span></div>
+      <div class="km-sub" id="shoe1_sub">sur 800 km recommandés</div>
+      <div class="km-bar-wrap">
+        <div class="km-bar-bg"><div class="km-bar-fill" id="shoe1_bar" style="width:0%"></div></div>
+        <div class="km-labels"><span>0</span><span id="shoe1_pct">0%</span><span>800 km</span></div>
+      </div>
+      <div class="km-ops">
+        <button class="op-btn op-sub" onclick="opKm(1,-1)">−</button>
+        <input class="km-input" type="number" id="shoe1_val" placeholder="km" min="0" step="0.1" inputmode="decimal">
+        <button class="op-btn op-add" onclick="opKm(1,+1)">+</button>
+        <button class="raz-btn" onclick="resetShoe(1)">RAZ</button>
+      </div>
+    </div>
+    <div class="shoe-sep"></div>
+    <div class="shoe-card shoe-card-2">
+      <div class="shoe-header">
+        <div class="shoe-icon">👟</div>
+        <input class="shoe-name-input" type="text" id="shoe2_name" placeholder="Technika" oninput="saveName(2)" maxlength="30">
+      </div>
+      <div class="km-total" id="shoe2_total">0.0 <span>km</span></div>
+      <div class="km-sub" id="shoe2_sub">sur 800 km recommandés</div>
+      <div class="km-bar-wrap">
+        <div class="km-bar-bg"><div class="km-bar-fill" id="shoe2_bar" style="width:0%"></div></div>
+        <div class="km-labels"><span>0</span><span id="shoe2_pct">0%</span><span>800 km</span></div>
+      </div>
+      <div class="km-ops">
+        <button class="op-btn op-sub" onclick="opKm(2,-1)">−</button>
+        <input class="km-input" type="number" id="shoe2_val" placeholder="km" min="0" step="0.1" inputmode="decimal">
+        <button class="op-btn op-add" onclick="opKm(2,+1)">+</button>
+        <button class="raz-btn" onclick="resetShoe(2)">RAZ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ GRAPHIQUE / COURBES ══ -->
+  <div class="screen sc-graph" id="sc_graph">
+    <div class="graph-header">
+      <div class="graph-title">📈 Mes courses</div>
+      <div class="graph-count" id="graph-count">0 course(s)</div>
+    </div>
+    <div class="metric-tabs">
+      <div class="mtab on" id="mtab_chrono" onclick="setMetric('chrono')">⏱ Chrono</div>
+      <div class="mtab" id="mtab_dist"   onclick="setMetric('dist')">📏 Distance</div>
+      <div class="mtab" id="mtab_vit"    onclick="setMetric('vit')">⚡ Vitesse</div>
+      <div class="mtab" id="mtab_all"    onclick="setMetric('all')">🏃 Allure</div>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="chart"></canvas>
+    </div>
+    <div class="runs-list" id="runs-list"></div>
+  </div>
+
+  <!-- ══ BARRE SAUVEGARDE GLOBALE ══ -->
+  <div class="backup-bar">
+    <button class="bk-btn bk-export" onclick="openExport()">📋 Copier sauvegarde</button>
+    <button class="bk-btn bk-import" onclick="openImport()">♻️ Restaurer</button>
+  </div>
+
+</div>
+
+<!-- Modal Export -->
+<div class="bk-modal" id="modal-export">
+  <div class="bk-box">
+    <h3>📋 Copier ta sauvegarde</h3>
+    <textarea class="bk-textarea" id="export-text" readonly></textarea>
+    <p class="bk-hint">Copie ce texte et colle-le dans Notes ou Mail pour le conserver.</p>
+    <div class="bk-actions">
+      <button class="bk-copy" onclick="copyBackup()">Tout copier</button>
+      <button class="bk-ok" onclick="closeModals()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Import -->
+<div class="bk-modal" id="modal-import">
+  <div class="bk-box">
+    <h3>♻️ Restaurer une sauvegarde</h3>
+    <textarea class="bk-textarea" id="import-text" placeholder="Colle ici le texte de ta sauvegarde…"></textarea>
+    <p class="bk-hint">Colle le texte copié précédemment, puis appuie sur Restaurer.</p>
+    <div class="bk-actions">
+      <button class="bk-copy" onclick="doRestore()">Restaurer</button>
+      <button class="bk-ok" onclick="closeModals()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── TABS ── */
+function showTab(t) {
+  ['calc','shoes','graph'].forEach(id => {
+    document.getElementById('sc_'+id).classList.toggle('on', id===t);
+    document.getElementById('tab_'+id).classList.toggle('on', id===t);
+  });
+  if (t==='shoes') renderShoes();
+  if (t==='graph') renderGraph();
+}
+
+/* ── CALCULATEUR ── */
+let mode = 'dc';
+let lastResult = null;
+
+const modeMap = {
+  dc:{show:['r_dist','r_chr'], hide:['r_vit','r_all']},
+  dv:{show:['r_dist','r_vit'], hide:['r_chr','r_all']},
+  da:{show:['r_dist','r_all'], hide:['r_chr','r_vit']},
+  cv:{show:['r_chr','r_vit'],  hide:['r_dist','r_all']},
+  ca:{show:['r_chr','r_all'],  hide:['r_dist','r_vit']},
+  va:{show:['r_vit','r_all'],  hide:['r_dist','r_chr']},
+};
+function sel(m) {
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('btn_'+m).classList.add('sel');
+  const c=modeMap[m];
+  c.show.forEach(id=>document.getElementById(id).style.display='flex');
+  c.hide.forEach(id=>document.getElementById(id).style.display='none');
+  clearOut(); hideErr(); lastResult=null;
+}
+const g   = id => { const v=parseFloat(document.getElementById(id).value); return isNaN(v)?0:v; };
+const pad = n  => n<10?'0'+n:''+n;
+const rnd = (v,d) => Math.round(v*10**d)/10**d;
+
+function showErr(msg){ const e=document.getElementById('err'); e.textContent=msg; e.style.display='block'; }
+function hideErr(){ document.getElementById('err').style.display='none'; }
+function clearOut(){
+  ['o_dist','o_h','o_m','o_s','o_vit','o_am','o_as'].forEach(id=>{
+    const el=document.getElementById(id); el.textContent='-'; el.className='rf dim';
+  });
+}
+function setOut(dist,tsec,vit,allsec,known){
+  const set=(id,val,hi)=>{const el=document.getElementById(id);el.textContent=val;el.className='rf'+(hi?' hi':'');};
+  if(dist!==null) set('o_dist',rnd(dist,3),known.includes('d'));
+  if(tsec!==null){
+    const h=Math.floor(tsec/3600),m=Math.floor((tsec%3600)/60),s=Math.round(tsec%60),hi=known.includes('c');
+    set('o_h',h,hi); set('o_m',pad(m),hi); set('o_s',pad(s),hi);
+  }
+  if(vit!==null) set('o_vit',rnd(vit,2),known.includes('v'));
+  if(allsec!==null){
+    const am=Math.floor(allsec/60),as_=Math.round(allsec%60),hi=known.includes('a');
+    set('o_am',am,hi); set('o_as',pad(as_),hi);
+  }
+}
+function calc(){
+  hideErr(); clearOut(); lastResult=null;
+  let dist=null,tsec=null,vit=null,allsec=null,known=[];
+  if(mode==='dc'){
+    dist=g('i_dist'); tsec=g('i_h')*3600+g('i_m')*60+g('i_s');
+    if(dist<=0){showErr('Distance > 0 requise');return;}
+    if(tsec<=0){showErr('Chrono > 0 requis');return;}
+    vit=dist/(tsec/3600); allsec=tsec/dist; known=['d','c'];
+  } else if(mode==='dv'){
+    dist=g('i_dist'); vit=g('i_vit');
+    if(dist<=0){showErr('Distance > 0 requise');return;}
+    if(vit<=0){showErr('Vitesse > 0 requise');return;}
+    tsec=dist/vit*3600; allsec=3600/vit; known=['d','v'];
+  } else if(mode==='da'){
+    dist=g('i_dist'); allsec=g('i_am')*60+g('i_as');
+    if(dist<=0){showErr('Distance > 0 requise');return;}
+    if(allsec<=0){showErr('Allure > 0 requise');return;}
+    tsec=allsec*dist; vit=3600/allsec; known=['d','a'];
+  } else if(mode==='cv'){
+    tsec=g('i_h')*3600+g('i_m')*60+g('i_s'); vit=g('i_vit');
+    if(tsec<=0){showErr('Chrono > 0 requis');return;}
+    if(vit<=0){showErr('Vitesse > 0 requise');return;}
+    dist=vit*(tsec/3600); allsec=tsec/dist; known=['c','v'];
+  } else if(mode==='ca'){
+    tsec=g('i_h')*3600+g('i_m')*60+g('i_s'); allsec=g('i_am')*60+g('i_as');
+    if(tsec<=0){showErr('Chrono > 0 requis');return;}
+    if(allsec<=0){showErr('Allure > 0 requise');return;}
+    dist=tsec/allsec; vit=3600/allsec; known=['c','a'];
+  } else if(mode==='va'){
+    vit=g('i_vit'); allsec=g('i_am')*60+g('i_as');
+    if(vit<=0){showErr('Vitesse > 0 requise');return;}
+    if(allsec<=0){showErr('Allure > 0 requise');return;}
+    const vc=3600/allsec;
+    if(Math.abs(vit-vc)>0.5) showErr('Incohérence : '+rnd(vit,2)+' km/h ≠ allure ('+rnd(vc,2)+' km/h)');
+    dist=vit; tsec=3600; known=['v','a'];
+  }
+  lastResult={dist,tsec,vit,allsec};
+  setOut(dist,tsec,vit,allsec,known);
+}
+function raz(){
+  ['i_dist','i_h','i_m','i_s','i_vit','i_am','i_as'].forEach(id=>document.getElementById(id).value='');
+  clearOut(); hideErr(); lastResult=null;
+}
+
+/* ── SAUVER UNE COURSE ── */
+function saveRun() {
+  if (!lastResult || lastResult.tsec<=0) { alert('Calculez d\'abord !'); return; }
+  if (!lastResult.dist || lastResult.dist<=0) { alert('Distance manquante !'); return; }
+  const runs = loadRuns();
+  const today = new Date().toISOString().split('T')[0];
+  runs.push({
+    id: Date.now(),
+    date: today,
+    dist: rnd(lastResult.dist,3),
+    tsec: Math.round(lastResult.tsec),
+    vit:  rnd(lastResult.vit,2),
+    allsec: rnd(lastResult.allsec,1)
+  });
+  saveRuns(runs);
+  alert('Course enregistrée !');
+}
+
+/* ── COURSES STORAGE ── */
+const loadRuns = () => { const r=localStorage.getItem('runs'); return r?JSON.parse(r):[]; };
+const saveRuns = arr => localStorage.setItem('runs', JSON.stringify(arr));
+
+/* ── GRAPHIQUE ── */
+let currentMetric = 'chrono';
+
+function setMetric(m) {
+  currentMetric=m;
+  document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('mtab_'+m).classList.add('on');
+  renderGraph();
+}
+
+function fmtDate(iso) { const [,mo,d]=iso.split('-'); return d+'/'+mo; }
+function fmtChrono(sec) {
+  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=Math.round(sec%60);
+  return h>0 ? h+'h'+pad(m)+'\''+pad(s)+'"' : m+'\''+pad(s)+'"';
+}
+function fmtAllure(sec) { return Math.floor(sec/60)+'\''+pad(Math.round(sec%60))+'"'; }
+
+function renderGraph() {
+  const runs = loadRuns();
+  document.getElementById('graph-count').textContent = runs.length+' course(s)';
+  const list = document.getElementById('runs-list');
+  if (runs.length===0) {
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">🏁</div>Aucune course sauvegardée.<br>Calculez et cliquez sur 💾 Sauver !</div>';
+    drawEmptyChart(); return;
+  }
+  const sorted=[...runs].reverse();
+  list.innerHTML = sorted.map(r=>`
+    <div class="run-item">
+      <div class="run-dot"></div>
+      <div class="run-date">${fmtDate(r.date)}</div>
+      <div class="run-info">${r.dist} km</div>
+      <div class="run-chrono">${fmtChrono(r.tsec)}</div>
+      <button class="run-del" onclick="deleteRun(${r.id})">×</button>
+    </div>`).join('');
+  drawChart(runs);
+}
+
+function deleteRun(id) {
+  saveRuns(loadRuns().filter(r=>r.id!==id));
+  renderGraph();
+}
+
+function drawEmptyChart() {
+  const canvas=document.getElementById('chart');
+  const W=canvas.parentElement.clientWidth;
+  const H=160;
+  canvas.width=W*devicePixelRatio; canvas.height=H*devicePixelRatio;
+  canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d'); ctx.scale(devicePixelRatio,devicePixelRatio);
+  ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#222'; ctx.font='12px -apple-system,sans-serif'; ctx.textAlign='center';
+  ctx.fillText('Pas encore de données', W/2, H/2+4);
+}
+
+function drawChart(runs) {
+  const canvas=document.getElementById('chart');
+  const W=canvas.parentElement.clientWidth;
+  const H=Math.min(210, Math.floor(W*0.52));
+  canvas.width=W*devicePixelRatio; canvas.height=H*devicePixelRatio;
+  canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d'); ctx.scale(devicePixelRatio,devicePixelRatio);
+
+  const PAD={top:22,right:14,bottom:40,left:8};
+  const gW=W-PAD.left-PAD.right;
+  const gH=H-PAD.top-PAD.bottom;
+
+  let vals, labelFn, unit;
+  if (currentMetric==='chrono') {
+    vals=runs.map(r=>r.tsec);       labelFn=v=>fmtChrono(v);    unit='';
+  } else if (currentMetric==='dist') {
+    vals=runs.map(r=>r.dist);       labelFn=v=>rnd(v,1)+'km';   unit='km';
+  } else if (currentMetric==='vit') {
+    vals=runs.map(r=>r.vit);        labelFn=v=>rnd(v,1)+'';     unit='km/h';
+  } else {
+    vals=runs.map(r=>r.allsec);     labelFn=v=>fmtAllure(v);    unit='min/km';
+  }
+
+  const minV=Math.min(...vals), maxV=Math.max(...vals), range=maxV-minV||1;
+  const norm=v=>(v-minV)/range;
+
+  const pts=runs.map((r,i)=>({
+    x: PAD.left+(runs.length===1?gW/2:i/(runs.length-1)*gW),
+    y: PAD.top+gH-norm(vals[i])*gH,
+    val:vals[i], date:r.date
+  }));
+
+  /* fond */
+  ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,W,H);
+
+  /* grille */
+  ctx.strokeStyle='#1c1c1c'; ctx.lineWidth=1;
+  for(let t=0;t<=4;t++){
+    const y=PAD.top+t*(gH/4);
+    ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+gW,y); ctx.stroke();
+  }
+
+  /* aire */
+  if(pts.length>1){
+    const grad=ctx.createLinearGradient(0,PAD.top,0,PAD.top+gH);
+    grad.addColorStop(0,'rgba(0,255,68,0.22)'); grad.addColorStop(1,'rgba(0,255,68,0)');
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x,PAD.top+gH);
+    pts.forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.lineTo(pts[pts.length-1].x,PAD.top+gH);
+    ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+  }
+
+  /* ligne */
+  ctx.beginPath(); ctx.strokeStyle='#00ff44'; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.lineCap='round';
+  pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+  ctx.stroke();
+
+  /* points + labels */
+  pts.forEach(p=>{
+    ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2);
+    ctx.fillStyle='#00ff44'; ctx.fill();
+    ctx.strokeStyle='#000'; ctx.lineWidth=1.5; ctx.stroke();
+
+    /* valeur au-dessus */
+    ctx.fillStyle='#00ff44'; ctx.font='bold 9px -apple-system,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(labelFn(p.val), p.x, p.y-9);
+
+    /* date en dessous */
+    ctx.fillStyle='#555'; ctx.font='8px -apple-system,sans-serif';
+    const dx=Math.max(PAD.left+16,Math.min(PAD.left+gW-16,p.x));
+    ctx.fillText(fmtDate(p.date), dx, PAD.top+gH+15);
+  });
+
+  /* unité */
+  if(unit){ ctx.fillStyle='#333'; ctx.font='8px -apple-system,sans-serif'; ctx.textAlign='left'; ctx.fillText(unit,2,PAD.top+4); }
+}
+
+/* ── CHAUSSURES ── */
+const MAX=800;
+const load = n => { const r=localStorage.getItem('shoe'+n); return r?JSON.parse(r):{name:'',total:0}; };
+const save = (n,d) => localStorage.setItem('shoe'+n, JSON.stringify(d));
+function saveName(n){ const d=load(n); d.name=document.getElementById('shoe'+n+'_name').value; save(n,d); }
+function opKm(n,sign){
+  const inp=document.getElementById('shoe'+n+'_val');
+  const km=parseFloat(inp.value);
+  if(isNaN(km)||km<=0){inp.focus();return;}
+  const d=load(n); d.total=Math.max(0,rnd(d.total+sign*km,2));
+  save(n,d); inp.value=''; renderShoes();
+}
+function resetShoe(n){
+  if(!confirm('Remettre à zéro les km ?'))return;
+  const d=load(n); d.total=0; save(n,d); renderShoes();
+}
+function renderShoes(){
+  for(let n=1;n<=2;n++){
+    const d=load(n);
+    const nameEl=document.getElementById('shoe'+n+'_name');
+    if(document.activeElement!==nameEl) nameEl.value=d.name;
+    document.getElementById('shoe'+n+'_total').innerHTML=rnd(d.total,1)+' <span>km</span>';
+    const pct=Math.min(100,(d.total/MAX)*100);
+    const bar=document.getElementById('shoe'+n+'_bar');
+    bar.style.width=pct+'%';
+    const col=pct>=90?'#ff4444':pct>=70?'#ffaa00':'#00ff44';
+    bar.style.background='linear-gradient(90deg,#00aa2a,'+col+')';
+    document.getElementById('shoe'+n+'_pct').textContent=Math.round(pct)+'%';
+    const sub=document.getElementById('shoe'+n+'_sub');
+    if(d.total>=MAX) sub.innerHTML='<span style="color:#ff4444">⚠️ Limite recommandée dépassée !</span>';
+    else sub.textContent='sur '+MAX+' km — reste '+rnd(MAX-d.total,0)+' km';
+  }
+}
+
+/* ── SAUVEGARDE / RESTAURATION ── */
+function openExport() {
+  const data = {
+    shoes: { shoe1: load(1), shoe2: load(2) },
+    runs: loadRuns()
+  };
+  document.getElementById('export-text').value = JSON.stringify(data);
+  document.getElementById('modal-export').classList.add('on');
+}
+
+function copyBackup() {
+  const ta = document.getElementById('export-text');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(() => {
+    const btn = document.querySelector('#modal-export .bk-copy');
+    btn.textContent = '✅ Copié !';
+    setTimeout(() => btn.textContent = 'Tout copier', 2000);
+  }).catch(() => {
+    // Fallback si clipboard API indisponible
+    document.execCommand('copy');
+    alert('Copié ! Colle-le maintenant dans Notes.');
+  });
+}
+
+function openImport() {
+  document.getElementById('import-text').value = '';
+  document.getElementById('modal-import').classList.add('on');
+}
+
+function doRestore() {
+  const txt = document.getElementById('import-text').value.trim();
+  if (!txt) { alert('Aucun texte collé.'); return; }
+  try {
+    const data = JSON.parse(txt);
+    if (data.shoes) {
+      if (data.shoes.shoe1) save(1, data.shoes.shoe1);
+      if (data.shoes.shoe2) save(2, data.shoes.shoe2);
+    }
+    if (data.runs && Array.isArray(data.runs)) saveRuns(data.runs);
+    closeModals();
+    renderShoes();
+    alert('✅ Données restaurées !');
+  } catch(e) {
+    alert('❌ Texte invalide, vérifie que tu as tout copié.');
+  }
+}
+
+function closeModals() {
+  document.querySelectorAll('.bk-modal').forEach(m => m.classList.remove('on'));
+}
+
+/* ── INIT ── */
+renderShoes();
+</script>
+</body>
+</html>
