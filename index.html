@@ -65,7 +65,8 @@ input::placeholder { color:#163a20; }
 
 .km-total { font-size:30px; font-weight:800; text-align:center; line-height:1; margin-bottom:2px; }
 .km-total span { font-size:14px; font-weight:600; opacity:0.7; }
-.km-sub { font-size:10px; color:#888; text-align:center; margin-bottom:8px; }
+.km-sub { font-size:10px; color:#888; text-align:center; margin-bottom:4px; }
+.km-last-date { font-size:10px; color:#4a8a55; text-align:center; margin-bottom:8px; font-weight:600; }
 .km-bar-wrap { margin-bottom:10px; }
 .km-bar-bg { background:rgba(0,0,0,0.4); border-radius:6px; height:10px; overflow:hidden; }
 .km-bar-fill { height:100%; border-radius:6px; transition:width 0.4s; }
@@ -228,7 +229,7 @@ canvas#chart { width:100%; border-radius:12px; background:#0a0a0a; display:block
       <div class="mode-btn" id="btn_da" onclick="sel('da')">Dist<br>+ Allure</div>
       <div class="mode-btn" id="btn_cv" onclick="sel('cv')">Chrono<br>+ Vitesse</div>
       <div class="mode-btn" id="btn_ca" onclick="sel('ca')">Chrono<br>+ Allure</div>
-      <div class="mode-btn" id="btn_va" onclick="sel('va')">Vitesse<br>+ Allure</div>
+
     </div>
     <div class="block">
       <div class="block-title">Entrées</div>
@@ -702,6 +703,7 @@ function opShoeKm(id, sign) {
   const shoe = shoes.find(s => s.id === id);
   if (shoe) {
     shoe.total = Math.max(0, rnd(shoe.total + sign * km, 2));
+    if (sign > 0) shoe.lastDate = new Date().toISOString().split('T')[0];
     saveShoes(shoes);
     inp.value = '';
     renderShoes();
@@ -747,6 +749,7 @@ function renderShoes() {
       </div>
       <div class="km-total">${totalFmt} <span>km</span></div>
       <div class="km-sub">${subText}</div>
+      ${shoe.lastDate ? `<div class="km-last-date">🗓 Dernière sortie : ${(([y,mo,d])=>d+'/'+mo+'/'+y)(shoe.lastDate.split('-'))}</div>` : ''}
       <div class="km-bar-wrap">
         <div class="km-bar-bg">
           <div class="km-bar-fill" style="${barStyle}${barColor ? ';background:linear-gradient(90deg,#aa2200,'+barColor+') !important' : ''}"></div>
