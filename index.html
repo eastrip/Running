@@ -9,7 +9,7 @@
 html, body { height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
 
 .tabs { display:flex; background:#111; border-bottom:1px solid #222; flex-shrink:0; }
-.tab { flex:1; text-align:center; padding:10px 4px 8px; font-size:11px; font-weight:700; color:#555; cursor:pointer; border-bottom:2px solid transparent; letter-spacing:0.3px; }
+.tab { flex:1; text-align:center; padding:13px 4px 11px; font-size:13px; font-weight:700; color:#555; cursor:pointer; border-bottom:2px solid transparent; letter-spacing:0.3px; }
 .tab.on { color:#00ff44; border-bottom-color:#00ff44; }
 
 #app { height:100dvh; display:flex; flex-direction:column; overflow:hidden; }
@@ -142,6 +142,33 @@ input::placeholder { color:#163a20; }
 .shoe-palette-5 .op-add:active { background:#ffdd00; }
 .shoe-palette-5 .km-bar-fill { background:linear-gradient(90deg,#9e8000,#ffdd44) !important; }
 .shoe-palette-5 .shoe-name-input:focus { border-color:#ffdd44; }
+
+/* ── RECORD PERSONNEL ── */
+.pr-box {
+  background:linear-gradient(135deg,#0d1f0a,#0a1a18);
+  border:1.5px solid #1a5a20;
+  border-radius:12px;
+  padding:10px 12px;
+  flex-shrink:0;
+  position:relative;
+  overflow:hidden;
+}
+.pr-box::before {
+  content:'';
+  position:absolute;
+  top:-20px; right:-20px;
+  width:80px; height:80px;
+  background:radial-gradient(circle,rgba(0,255,68,0.08),transparent 70%);
+  border-radius:50%;
+}
+.pr-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.pr-title { font-size:10px; font-weight:800; color:#00cc33; text-transform:uppercase; letter-spacing:1.5px; }
+.pr-date { font-size:10px; color:#3a7a44; font-weight:600; }
+.pr-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
+.pr-cell { background:rgba(0,0,0,0.35); border-radius:8px; padding:5px 4px; text-align:center; }
+.pr-cell-val { font-size:13px; font-weight:800; color:#00ff44; line-height:1.1; }
+.pr-cell-lbl { font-size:8px; color:#3a7a44; font-weight:600; text-transform:uppercase; margin-top:2px; }
+.pr-empty { text-align:center; color:#2a5a30; font-size:11px; padding:4px 0; }
 
 /* ── GRAPHIQUE ── */
 .sc-graph { overflow-y:auto; }
@@ -288,6 +315,7 @@ canvas#chart { width:100%; border-radius:12px; background:#0a0a0a; display:block
     <div class="canvas-wrap">
       <canvas id="chart"></canvas>
     </div>
+    <div id="pr-box-wrap"></div>
     <div class="runs-list" id="runs-list"></div>
   </div>
 
@@ -468,10 +496,55 @@ function renderGraph() {
   const runs = loadRuns();
   document.getElementById('graph-count').textContent = runs.length+' course(s)';
   const list = document.getElementById('runs-list');
+  const prWrap = document.getElementById('pr-box-wrap');
+
   if (runs.length===0) {
     list.innerHTML='<div class="empty-state"><div class="empty-icon">🏁</div>Aucune course sauvegardée.<br>Calculez et cliquez sur 💾 Sauver !</div>';
+    prWrap.innerHTML='';
     drawEmptyChart(); return;
   }
+
+  // ── Record : meilleure allure (la plus faible sec/km = la plus rapide)
+  const pr = runs.reduce((best, r) => {
+    if (!best) return r;
+    // Priorité : meilleure allure ; si égale, plus grande distance
+    if (r.allsec < best.allsec) return r;
+    if (r.allsec === best.allsec && r.dist > best.dist) return r;
+    return best;
+  }, null);
+
+  if (pr) {
+    const [y,mo,d] = pr.date.split('-');
+    const dateStr = d+'/'+mo+'/'+y;
+    prWrap.innerHTML = `
+      <div class="pr-box">
+        <div class="pr-header">
+          <div class="pr-title">🏆 Record personnel</div>
+          <div class="pr-date">${dateStr}</div>
+        </div>
+        <div class="pr-grid">
+          <div class="pr-cell">
+            <div class="pr-cell-val">${rnd(pr.dist,2)}</div>
+            <div class="pr-cell-lbl">km</div>
+          </div>
+          <div class="pr-cell">
+            <div class="pr-cell-val">${fmtChrono(pr.tsec)}</div>
+            <div class="pr-cell-lbl">chrono</div>
+          </div>
+          <div class="pr-cell">
+            <div class="pr-cell-val">${rnd(pr.vit,1)}</div>
+            <div class="pr-cell-lbl">km/h</div>
+          </div>
+          <div class="pr-cell">
+            <div class="pr-cell-val">${fmtAllure(pr.allsec)}</div>
+            <div class="pr-cell-lbl">min/km</div>
+          </div>
+        </div>
+      </div>`;
+  } else {
+    prWrap.innerHTML = '';
+  }
+
   const sorted=[...runs].reverse();
   list.innerHTML = sorted.map(r=>`
     <div class="run-item">
