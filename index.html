@@ -45,8 +45,12 @@ input::placeholder { color:#0e2a40; }
 .btns { display:flex; gap:6px; flex-shrink:0; }
 .calc-btn { flex:3; background:#009fcc; border:none; border-radius:12px; color:#000; font-size:14px; font-weight:800; height:42px; cursor:pointer; letter-spacing:1px; }
 .calc-btn:active { background:#00c8ff; }
-.save-run-btn { flex:2; background:#003a10; border:1.5px solid #00aa33; border-radius:12px; color:#00ff55; font-size:12px; font-weight:700; height:42px; cursor:pointer; }
-.save-run-btn:active { background:#005520; }
+@keyframes flash-btn {
+  0%, 85%, 100% { background:#001a2e; box-shadow:none; }
+  90% { background:#004a70; box-shadow:0 0 10px #00c8ff66; }
+}
+.save-run-btn { flex:2; background:#001a2e; border:1.5px solid #009fcc; border-radius:12px; color:#00c8ff; font-size:12px; font-weight:700; height:42px; cursor:pointer; animation:flash-btn 5s ease-in-out infinite; }
+.save-run-btn:active { animation:none; background:#002a45; }
 .reset-btn { flex:1; background:transparent; border:1.5px solid #333; border-radius:12px; color:#555; font-size:13px; font-weight:600; height:42px; cursor:pointer; }
 .error { background:#1a0000; border:1px solid #cc0000; border-radius:8px; color:#ff5555; font-size:11px; padding:5px 10px; flex-shrink:0; display:none; }
 
@@ -268,9 +272,9 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 <div id="app">
 
   <div class="tabs">
-    <div class="tab on" id="tab_calc" onclick="showTab('calc')">⏱ Calculateur</div>
-    <div class="tab" id="tab_graph" onclick="showTab('graph')">📈 Courbes</div>
-    <div class="tab" id="tab_shoes" onclick="showTab('shoes')">👟 Chaussures</div>
+    <div class="tab on" id="tab_calc" onclick="showTab('calc')">CALCULATEUR</div>
+    <div class="tab" id="tab_graph" onclick="showTab('graph')">SUIVI</div>
+    <div class="tab" id="tab_shoes" onclick="showTab('shoes')">CHAUSSURES</div>
   </div>
 
   <!-- ══ CALCULATEUR ══ -->
@@ -315,7 +319,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <div class="error" id="err"></div>
     <div class="btns">
       <button class="calc-btn" onclick="calc()">CALCULER</button>
-      <button class="save-run-btn" onclick="saveRun()">💾 Sauver</button>
+      <button class="save-run-btn" onclick="saveRun()">Ajouter au suivi</button>
       <button class="reset-btn" onclick="raz()">RAZ</button>
     </div>
     <div class="block">
@@ -368,7 +372,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
   <!-- ══ GRAPHIQUE / COURBES ══ -->
   <div class="screen sc-graph" id="sc_graph">
     <div class="graph-header">
-      <div class="graph-title">📈 Mes courses</div>
+      <div class="graph-title">Mes courses</div>
       <div class="graph-count" id="graph-count">0 course(s)</div>
     </div>
     <div class="metric-tabs">
@@ -387,8 +391,8 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 
   <!-- ══ BARRE SAUVEGARDE GLOBALE ══ -->
   <div class="backup-bar">
-    <button class="bk-btn bk-export" onclick="openExport()">📋 Copier sauvegarde</button>
-    <button class="bk-btn bk-import" onclick="openImport()">♻️ Restaurer</button>
+    <button class="bk-btn bk-export" onclick="openExport()">Copier sauvegarde</button>
+    <button class="bk-btn bk-import" onclick="openImport()">Restaurer</button>
   </div>
 
 </div>
@@ -444,6 +448,14 @@ function showTab(t) {
   });
   if (t==='shoes') renderShoes();
   if (t==='graph') renderGraph();
+  if (t==='calc') {
+    // Restaure le bouton de mode actif sans réinitialiser
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('sel'));
+    document.getElementById('btn_'+mode).classList.add('sel');
+    const c = modeMap[mode];
+    c.show.forEach(id => document.getElementById(id).style.display='flex');
+    c.hide.forEach(id => document.getElementById(id).style.display='none');
+  }
 }
 
 /* ── CALCULATEUR ── */
@@ -574,7 +586,7 @@ function renderGraph() {
   const prWrap = document.getElementById('pr-box-wrap');
 
   if (runs.length===0) {
-    list.innerHTML='<div class="empty-state"><div class="empty-icon">🏁</div>Aucune course sauvegardée.<br>Calculez et cliquez sur 💾 Sauver !</div>';
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">🏁</div>Aucune course sauvegardée.<br>Calculez et cliquez sur "Ajouter au suivi" !</div>';
     prWrap.innerHTML='';
     drawEmptyChart(); return;
   }
@@ -971,8 +983,23 @@ function renderShoeHistory() {
 /* ── SAUVEGARDE / RESTAURATION ── */
 function openExport() {
   const data = { shoes_v2: loadShoes(), runs: loadRuns(), shoe_history: loadShoeHistory() };
-  document.getElementById('export-text').value = JSON.stringify(data);
-  document.getElementById('modal-export').classList.add('on');
+  const text = JSON.stringify(data);
+  const btn = document.querySelector('.bk-export');
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Copié !';
+    btn.style.borderColor = '#00aa33';
+    btn.style.color = '#00ff55';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2000);
+  }).catch(() => {
+    const ta = document.getElementById('export-text');
+    ta.value = text;
+    document.getElementById('modal-export').classList.add('on');
+  });
 }
 
 function copyBackup() {
