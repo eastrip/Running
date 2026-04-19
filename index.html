@@ -448,14 +448,6 @@ function showTab(t) {
   });
   if (t==='shoes') renderShoes();
   if (t==='graph') renderGraph();
-  if (t==='calc') {
-    // Restaure le bouton de mode actif sans réinitialiser
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('sel'));
-    document.getElementById('btn_'+mode).classList.add('sel');
-    const c = modeMap[mode];
-    c.show.forEach(id => document.getElementById(id).style.display='flex');
-    c.hide.forEach(id => document.getElementById(id).style.display='none');
-  }
 }
 
 /* ── CALCULATEUR ── */
