@@ -34,7 +34,7 @@ input[type="text"] { font-size:16px; }
 input:focus { border-color:#00c8ff; background:#001a2e; }
 input::placeholder { color:#0e2a40; }
 
-.rf { flex:1; background:#000; border:1.5px solid #1a3a55; border-radius:7px; color:#009fcc; font-size:16px; font-weight:700; text-align:center; height:64px; display:flex; align-items:center; justify-content:center; }
+.rf { width:100%; background:#000; border:1.5px solid #1a3a55; border-radius:7px; color:#009fcc; font-size:16px; font-weight:700; text-align:center; height:38px; display:flex; align-items:center; justify-content:center; box-sizing:border-box; }
 .rf.hi { border-color:#00c8ff; background:#001a2e; color:#00c8ff; }
 .rf.dim { opacity:0.3; }
 
@@ -717,15 +717,27 @@ function drawChart(runs) {
     grad.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.beginPath();
     ctx.moveTo(pts[0].x, PAD.top + gH);
-    pts.forEach(p => ctx.lineTo(p.x, p.y));
-    ctx.lineTo(pts[pts.length - 1].x, PAD.top + gH);
+    ctx.lineTo(pts[0].x, pts[0].y);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const cpX = (pts[i].x + pts[i+1].x) / 2;
+      ctx.bezierCurveTo(cpX, pts[i].y, cpX, pts[i+1].y, pts[i+1].x, pts[i+1].y);
+    }
+    ctx.lineTo(pts[pts.length-1].x, PAD.top + gH);
     ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
   }
 
-  // Ligne principale
+  // Courbe lissée (Bézier cubique)
   ctx.beginPath(); ctx.strokeStyle = '#00c8ff'; ctx.lineWidth = 1;
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  if (pts.length === 1) {
+    ctx.moveTo(pts[0].x, pts[0].y);
+  } else {
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const cpX = (pts[i].x + pts[i+1].x) / 2;
+      ctx.bezierCurveTo(cpX, pts[i].y, cpX, pts[i+1].y, pts[i+1].x, pts[i+1].y);
+    }
+  }
   ctx.stroke();
 
   // Points + labels
