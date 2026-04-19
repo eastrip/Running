@@ -442,6 +442,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 <script>
 /* ── TABS ── */
 function showTab(t) {
+  localStorage.setItem('lastTab', t);
   ['calc','shoes','graph'].forEach(id => {
     document.getElementById('sc_'+id).classList.toggle('on', id===t);
     document.getElementById('tab_'+id).classList.toggle('on', id===t);
@@ -1127,6 +1128,8 @@ _mc.hide.forEach(id=>document.getElementById(id).style.display='none');
 // Restaurer le bouton métrique actif
 document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('on'));
 document.getElementById('mtab_'+currentMetric).classList.add('on');
+// Restaurer l'onglet actif
+showTab(localStorage.getItem('lastTab') || 'calc');
 </script>
 </body>
 </html>
