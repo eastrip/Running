@@ -86,6 +86,9 @@ input::placeholder { color:#0e2a40; }
 .shoe-name-input::placeholder { color:#555 !important; opacity:1; }
 .km-input::placeholder { color:#555 !important; opacity:1; }
 
+.sort-btn { background:#0a0a0a; border:1px solid #222; border-radius:8px; color:#555; font-size:10px; font-weight:700; padding:5px 10px; cursor:pointer; flex-shrink:0; }
+.sort-btn.on { background:#001a2e; border-color:#009fcc; color:#00c8ff; }
+
 /* Bouton historique chaussures */
 .shoe-history-btn {
   display:flex; align-items:center; justify-content:center; gap:6px;
@@ -271,7 +274,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 .bk-modal.on { display:flex; }
 .bk-box { background:#010101; border:1px solid #333; border-radius:16px; padding:16px; width:100%; max-width:400px; }
 .bk-box h3 { font-size:13px; font-weight:800; color:#fff; margin-bottom:10px; }
-.bk-textarea { width:100%; background:#000; border:1.5px solid #333; border-radius:8px; color:#00c8ff; font-size:10px; font-family:monospace; padding:8px; height:160px; resize:none; outline:none; }
+.bk-textarea { width:100%; background:#000; border:1.5px solid #333; border-radius:8px; color:#00c8ff; font-size:16px; font-family:monospace; padding:8px; height:160px; resize:none; outline:none; }
 .bk-textarea:focus { border-color:#00c8ff; }
 .bk-actions { display:flex; gap:8px; margin-top:10px; }
 .bk-copy { flex:2; height:36px; background:#00aa33; border:none; border-radius:10px; color:#000; font-size:12px; font-weight:800; cursor:pointer; }
@@ -415,6 +418,14 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <div class="hist-header">
       <div class="hist-title" style="display:flex;align-items:center;gap:6px"><i class="fa-solid fa-list-ul"></i> Historique des courses</div>
       <button class="hist-close" onclick="closeRunsHistory()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;flex-shrink:0">
+      <button class="sort-btn on" id="sort_date"    onclick="setRunSort('date')">Date</button>
+      <button class="sort-btn"   id="sort_dist"    onclick="setRunSort('dist')">Distance</button>
+      <button class="sort-btn"   id="sort_chrono"  onclick="setRunSort('chrono')">Chrono</button>
+      <button class="sort-btn"   id="sort_allure"  onclick="setRunSort('allure')">Allure</button>
+      <button class="sort-btn"   id="sort_vit"     onclick="setRunSort('vit')">Vitesse</button>
+      <button class="sort-btn"   id="sort_reverse" onclick="toggleRunOrder()"><i class="fa-solid fa-arrow-up-arrow-down"></i></button>
     </div>
     <div class="hist-list" id="runs-list"></div>
   </div>
@@ -691,20 +702,15 @@ function renderGraph() {
     prWrap.innerHTML = '';
   }
 
-  const sorted=[...runs].reverse();
-  list.innerHTML = sorted.map(r=>`
-    <div class="run-item">
-      <div class="run-date">${fmtDate(r.date)}</div>
-      <div class="run-info">${r.dist} km</div>
-      <div class="run-chrono">${fmtChrono(r.tsec)}</div>
-      <div class="run-vit">${rnd(r.vit,1)} km/h</div>
-      <div class="run-allure">${fmtAllure(r.allsec)}/km</div>
-      <button class="run-del" onclick="deleteRun(${r.id})"><i class="fa-solid fa-xmark"></i></button>
-    </div>`).join('');
+  renderRunsList();
   drawChart(runs);
 }
 
 function openRunsHistory() {
+  currentRunSort = 'date';
+  runOrderAsc = false;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('on'));
+  document.getElementById('sort_date').classList.add('on');
   renderGraph();
   document.getElementById('modal-runs').classList.add('on');
 }
@@ -713,9 +719,54 @@ function closeRunsHistory() {
   document.getElementById('modal-runs').classList.remove('on');
 }
 
+let currentRunSort = 'date';
+let runOrderAsc = false;
+
+function setRunSort(s) {
+  currentRunSort = s;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('on'));
+  document.getElementById('sort_'+s).classList.add('on');
+  renderRunsList();
+}
+
+function toggleRunOrder() {
+  runOrderAsc = !runOrderAsc;
+  const btn = document.getElementById('sort_reverse');
+  btn.classList.toggle('on', runOrderAsc);
+  renderRunsList();
+}
+
+function renderRunsList() {
+  const runs = loadRuns();
+  const list = document.getElementById('runs-list');
+  if (runs.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-route"></i></div>Aucune course sauvegardée.<br>Calculez et cliquez sur "Ajouter au suivi" !</div>';
+    return;
+  }
+  const sorted = [...runs].sort((a, b) => {
+    let cmp = 0;
+    if (currentRunSort === 'date')   cmp = b.date.localeCompare(a.date);
+    if (currentRunSort === 'dist')   cmp = b.dist - a.dist;
+    if (currentRunSort === 'chrono') cmp = a.tsec - b.tsec;
+    if (currentRunSort === 'allure') cmp = a.allsec - b.allsec;
+    if (currentRunSort === 'vit')    cmp = b.vit - a.vit;
+    return runOrderAsc ? -cmp : cmp;
+  });
+  list.innerHTML = sorted.map(r => `
+    <div class="run-item">
+      <div class="run-date">${fmtDate(r.date)}</div>
+      <div class="run-info">${r.dist} km</div>
+      <div class="run-chrono">${fmtChrono(r.tsec)}</div>
+      <div class="run-vit">${rnd(r.vit,1)} km/h</div>
+      <div class="run-allure">${fmtAllure(r.allsec)}/km</div>
+      <button class="run-del" onclick="deleteRun(${r.id})"><i class="fa-solid fa-xmark"></i></button>
+    </div>`).join('');
+}
+
 function deleteRun(id) {
   saveRuns(loadRuns().filter(r=>r.id!==id));
   renderGraph();
+  renderRunsList();
 }
 
 /* ── GRAPHIQUE : scroll horizontal ── */
