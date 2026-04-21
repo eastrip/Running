@@ -219,7 +219,8 @@ input::placeholder { color:#0e2a40; }
   border-radius:50%;
 }
 .pr-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-.pr-title { font-size:10px; font-weight:800; color:#009fcc; text-transform:uppercase; letter-spacing:1.5px; }
+.pr-title { font-size:10px; font-weight:800; color:#009fcc; text-transform:uppercase; letter-spacing:1.5px; display:flex; align-items:center; gap:5px; }
+.pr-title i { font-size:16px; }
 .pr-date { font-size:10px; color:#3a6a8a; font-weight:600; }
 .pr-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
 .pr-cell { background:rgba(0,0,0,0.35); border-radius:8px; padding:5px 4px; text-align:center; }
@@ -397,7 +398,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     </div>
     <div class="chart-scroll-hint" id="chart-scroll-hint"></div>
     <div id="pr-box-wrap"></div>
-    <div class="runs-list" id="runs-list"></div>
+    <button class="shoe-history-btn" onclick="openRunsHistory()" style="align-self:flex-end"><i class="fa-solid fa-list-ul"></i> Historique des courses</button>
   </div>
 
   <!-- ══ BARRE SAUVEGARDE GLOBALE ══ -->
@@ -406,6 +407,17 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <button class="bk-btn bk-import" onclick="openImport()">Restaurer</button>
   </div>
 
+</div>
+
+<!-- Modale historique courses -->
+<div class="hist-modal" id="modal-runs">
+  <div class="hist-sheet">
+    <div class="hist-header">
+      <div class="hist-title" style="display:flex;align-items:center;gap:6px"><i class="fa-solid fa-list-ul"></i> Historique des courses</div>
+      <button class="hist-close" onclick="closeRunsHistory()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="hist-list" id="runs-list"></div>
+  </div>
 </div>
 
 <!-- Modal Couleur -->
@@ -690,6 +702,15 @@ function renderGraph() {
       <button class="run-del" onclick="deleteRun(${r.id})"><i class="fa-solid fa-xmark"></i></button>
     </div>`).join('');
   drawChart(runs);
+}
+
+function openRunsHistory() {
+  renderGraph();
+  document.getElementById('modal-runs').classList.add('on');
+}
+
+function closeRunsHistory() {
+  document.getElementById('modal-runs').classList.remove('on');
 }
 
 function deleteRun(id) {
