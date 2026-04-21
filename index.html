@@ -232,17 +232,20 @@ input::placeholder { color:#0e2a40; }
 .graph-title { font-size:13px; font-weight:800; color:#fff; }
 .graph-count { font-size:11px; color:#555; }
 .metric-tabs { display:flex; gap:4px; flex-shrink:0; }
-.mtab { flex:1; text-align:center; padding:6px 4px; background:#030303; border:1px solid #333; border-radius:8px; font-size:10px; font-weight:700; color:#666; cursor:pointer; }
+.mtab { flex:1; text-align:center; padding:6px 4px; background:#030303; border:1px solid #333; border-radius:8px; font-size:9px; font-weight:700; color:#666; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; line-height:1; }
+.mtab i { font-size:15px; }
 .mtab.on { background:#001a2e; border-color:#009fcc; color:#00c8ff; }
 .canvas-wrap { flex-shrink:0; position:relative; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; border-radius:12px; background:#030303; }
 .canvas-wrap::-webkit-scrollbar { display:none; }
 canvas#chart { display:block; height:180px; border-radius:12px; }
 .chart-scroll-hint { text-align:center; font-size:9px; color:#333; margin-top:2px; flex-shrink:0; }
 .runs-list { flex-shrink:0; overflow-y:auto; max-height:200px; }
-.run-item { display:flex; align-items:center; gap:8px; padding:7px 10px; background:#010101; border-radius:10px; border:1px solid #111; margin-bottom:4px; }
-.run-dot { width:8px; height:8px; border-radius:50%; background:#00c8ff; flex-shrink:0; }
-.run-date { font-size:11px; color:#888; flex-shrink:0; width:68px; }
-.run-info { flex:1; font-size:12px; font-weight:700; color:#fff; }
+.run-item { display:flex; align-items:center; justify-content:space-between; gap:4px; padding:7px 10px; background:#010101; border-radius:10px; border:1px solid #111; margin-bottom:4px; }
+.run-extra { width:100%; font-size:10px; color:#555; font-weight:600; padding-left:16px; margin-top:-2px; }
+.run-vit { font-size:11px; color:#009fcc; font-weight:600; flex-shrink:0; }
+.run-allure { font-size:11px; color:#00c8ff; font-weight:800; flex-shrink:0; }
+.run-date { font-size:11px; color:#888; font-weight:600; flex-shrink:0; }
+.run-info { font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
 .run-chrono { font-size:12px; color:#009fcc; font-weight:700; flex-shrink:0; }
 .run-del { width:26px; height:26px; background:transparent; border:1px solid #330000; border-radius:6px; color:#cc2200; font-size:14px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .run-del:active { background:#1a0000; }
@@ -679,10 +682,11 @@ function renderGraph() {
   const sorted=[...runs].reverse();
   list.innerHTML = sorted.map(r=>`
     <div class="run-item">
-      <div class="run-dot"></div>
       <div class="run-date">${fmtDate(r.date)}</div>
       <div class="run-info">${r.dist} km</div>
       <div class="run-chrono">${fmtChrono(r.tsec)}</div>
+      <div class="run-vit">${rnd(r.vit,1)} km/h</div>
+      <div class="run-allure">${fmtAllure(r.allsec)}/km</div>
       <button class="run-del" onclick="deleteRun(${r.id})"><i class="fa-solid fa-xmark"></i></button>
     </div>`).join('');
   drawChart(runs);
