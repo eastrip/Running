@@ -363,7 +363,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
   <div class="screen" id="sc_shoes">
     <button class="shoe-history-btn" onclick="openShoeHistory()"><i class="fa-solid fa-list-ul"></i> Historique des km</button>
     <div class="shoes-container" id="shoes-container"></div>
-    <button class="add-shoe-btn" onclick="addShoe()">➕ Ajouter une paire</button>
+    <button class="add-shoe-btn" onclick="addShoe()">+ Ajouter une paire</button>
   </div>
 
   <!-- Modale historique chaussures -->
@@ -371,7 +371,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <div class="hist-sheet">
       <div class="hist-header">
         <div class="hist-title" style="display:flex;align-items:center;gap:6px"><i class="fa-solid fa-list-ul"></i> Historique des km</div>
-        <button class="hist-close" onclick="closeShoeHistory()">✕</button>
+        <button class="hist-close" onclick="closeShoeHistory()"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="hist-list" id="hist-list"></div>
     </div>
@@ -411,7 +411,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <div class="color-sheet-header">
       <div style="width:30px"></div>
       <div class="color-sheet-title">Couleur</div>
-      <button class="color-sheet-close" onclick="closeColorModal()">✕</button>
+      <button class="color-sheet-close" onclick="closeColorModal()"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="color-grid" id="color-grid"></div>
     <div class="color-preview-bar">
@@ -424,7 +424,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 <!-- Modal Sélection chaussure -->
 <div class="bk-modal" id="modal-shoe-picker">
   <div class="bk-box" style="max-width:360px">
-    <h3>👟 Chaussures utilisées</h3>
+    <h3>Chaussures utilisées</h3>
     <p style="font-size:11px;color:#555;margin-bottom:10px">Course de <strong id="shoe-pick-dist" style="color:#00c8ff"></strong> — sélectionne la paire utilisée :</p>
     <div id="shoe-picker-list" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto"></div>
     <div class="bk-actions" style="margin-top:12px">
@@ -436,7 +436,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 <!-- Modal Export -->
 <div class="bk-modal" id="modal-export">
   <div class="bk-box">
-    <h3>📋 Copier ta sauvegarde</h3>
+    <h3>Copier ta sauvegarde</h3>
     <textarea class="bk-textarea" id="export-text" readonly></textarea>
     <p class="bk-hint">Copie ce texte et colle-le dans Notes ou Mail pour le conserver.</p>
     <div class="bk-actions">
@@ -449,7 +449,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 <!-- Modal Import -->
 <div class="bk-modal" id="modal-import">
   <div class="bk-box">
-    <h3>♻️ Restaurer une sauvegarde</h3>
+    <h3>Restaurer une sauvegarde</h3>
     <textarea class="bk-textarea" id="import-text" placeholder="Colle ici le texte de ta sauvegarde…"></textarea>
     <p class="bk-hint">Colle le texte copié précédemment, puis appuie sur Restaurer.</p>
     <div class="bk-actions">
@@ -566,7 +566,7 @@ function openShoePickerModal() {
   const dist = rnd(lastResult.dist, 3);
   const list = document.getElementById('shoe-picker-list');
   list.innerHTML =
-    '<div class="shoe-pick-item" onclick="confirmSaveRun(null)"><div class="shoe-pick-icon">🚫</div><div class="shoe-pick-name">Sans chaussure</div></div>'
+    '<div class="shoe-pick-item" onclick="confirmSaveRun(null)"><i class="fa-solid fa-ban" style="font-size:18px;flex-shrink:0;color:#555"></i><div class="shoe-pick-name">Sans chaussure</div></div>'
     + shoes.map(s =>
       '<div class="shoe-pick-item" onclick="confirmSaveRun('+s.id+')">'
       + '<div class="shoe-pick-swatch" style="background:'+(s.color||'#333')+'"></div>'
@@ -683,7 +683,7 @@ function renderGraph() {
       <div class="run-date">${fmtDate(r.date)}</div>
       <div class="run-info">${r.dist} km</div>
       <div class="run-chrono">${fmtChrono(r.tsec)}</div>
-      <button class="run-del" onclick="deleteRun(${r.id})">×</button>
+      <button class="run-del" onclick="deleteRun(${r.id})"><i class="fa-solid fa-xmark"></i></button>
     </div>`).join('');
   drawChart(runs);
 }
@@ -933,7 +933,7 @@ function renderShoes() {
     const totalFmt = rnd(shoe.total, 1);
     const remaining = rnd(MAX - shoe.total, 0);
     const subText = shoe.total >= MAX
-      ? '<span style="color:#ff4444">⚠️ Limite recommandée dépassée !</span>'
+      ? '<span style="color:#ff4444"><i class="fa-solid fa-triangle-exclamation"></i> Limite recommandée dépassée !</span>'
       : `sur ${MAX} km — reste ${remaining} km`;
 
     // Style inline de surcharge si couleur perso
@@ -957,7 +957,7 @@ function renderShoes() {
           oninput="updateShoeName(${shoe.id}, this.value)"
           maxlength="30"
           style="color:${accent||'#fff'};border-color:${accent ? accent+'88' : 'rgba(255,255,255,0.1)'}">
-        <button class="shoe-delete-btn" onclick="deleteShoe(${shoe.id})" title="Supprimer">✕</button>
+        <button class="shoe-delete-btn" onclick="deleteShoe(${shoe.id})" title="Supprimer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="km-total" ${accentStyle?`style="${accentStyle}"`:''}>${totalFmt} <span>km</span></div>
       <div class="km-sub">${subText}</div>
@@ -1020,7 +1020,7 @@ function renderShoeHistory() {
       <div class="hist-entry">
         <div class="hist-entry-date">${d}/${mo}/${y}</div>
         <div class="hist-entry-km" style="color:${e.sign > 0 ? shoeColor : '#cc4400'}">${shoeName ? shoeName+' · ' : ''}${e.sign > 0 ? '+' : '−'}${e.km} km</div>
-        <button class="hist-entry-del" onclick="deleteHistEntry('${e.hid}')">×</button>
+        <button class="hist-entry-del" onclick="deleteHistEntry('${e.hid}')"><i class="fa-solid fa-xmark"></i></button>
       </div>`;
   }).join('');
 }
@@ -1032,7 +1032,7 @@ function openExport() {
   const btn = document.querySelector('.bk-export');
   navigator.clipboard.writeText(text).then(() => {
     const orig = btn.innerHTML;
-    btn.innerHTML = '✅ Copié !';
+    btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Copié !';
     btn.style.borderColor = '#00aa33';
     btn.style.color = '#00ff55';
     setTimeout(() => {
@@ -1082,9 +1082,9 @@ function doRestore() {
     if (data.shoe_history && Array.isArray(data.shoe_history)) saveShoeHistory(data.shoe_history);
     closeModals();
     renderShoes();
-    alert('✅ Données restaurées !');
+    alert('Données restaurées !');
   } catch(e) {
-    alert('❌ Texte invalide, vérifie que tu as tout copié.');
+    alert('Texte invalide, vérifie que tu as tout copié.');
   }
 }
 
