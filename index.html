@@ -361,7 +361,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 
   <!-- ══ CHAUSSURES ══ -->
   <div class="screen" id="sc_shoes">
-    <button class="shoe-history-btn" onclick="openShoeHistory()"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 512 512" fill="currentColor"><path d="M64 144a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM64 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM112 432a48 48 0 1 0 -96 0 48 48 0 1 0 96 0z"/></svg> Historique des km</button>
+    <button class="shoe-history-btn" onclick="openShoeHistory()"><i class="fa-solid fa-list-ul"></i> Historique des km</button>
     <div class="shoes-container" id="shoes-container"></div>
     <button class="add-shoe-btn" onclick="addShoe()">➕ Ajouter une paire</button>
   </div>
@@ -370,7 +370,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
   <div class="hist-modal" id="modal-hist">
     <div class="hist-sheet">
       <div class="hist-header">
-        <div class="hist-title" style="display:flex;align-items:center;gap:6px"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 512 512" fill="currentColor"><path d="M64 144a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM64 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM112 432a48 48 0 1 0 -96 0 48 48 0 1 0 96 0z"/></svg> Historique des km</div>
+        <div class="hist-title" style="display:flex;align-items:center;gap:6px"><i class="fa-solid fa-list-ul"></i> Historique des km</div>
         <button class="hist-close" onclick="closeShoeHistory()">✕</button>
       </div>
       <div class="hist-list" id="hist-list"></div>
@@ -384,8 +384,8 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       <div class="graph-count" id="graph-count">0 course(s)</div>
     </div>
     <div class="metric-tabs">
-      <div class="mtab on" id="mtab_chrono" onclick="setMetric('chrono')">⏱ Chrono</div>
-      <div class="mtab" id="mtab_dist"   onclick="setMetric('dist')"><i class="fa-solid fa-map-location-dot"></i> Distance</div>
+      <div class="mtab on" id="mtab_chrono" onclick="setMetric('chrono')"><i class="fa-solid fa-stopwatch"></i> Chrono</div>
+      <div class="mtab" id="mtab_dist"   onclick="setMetric('dist')"><i class="fa-solid fa-route"></i> Distance</div>
       <div class="mtab" id="mtab_vit"    onclick="setMetric('vit')">⚡ Vitesse</div>
       <div class="mtab" id="mtab_all"    onclick="setMetric('all')">🏃🏻‍➡️ Allure</div>
     </div>
@@ -947,7 +947,9 @@ function renderShoes() {
     return `
     <div class="shoe-card shoe-palette-${palette}" ${accent ? `style="${bgStyle};${borderStyle}"` : ''}>
       <div class="shoe-header">
-        <div class="shoe-icon">👟</div>
+        <button class="shoe-color-btn" onclick="openColorModal(${shoe.id})"
+          style="background:${shoe.color||'#555'}"
+          title="Changer la couleur"></button>
         <input class="shoe-name-input" type="text"
           id="shoe_name_${shoe.id}"
           placeholder="Nom de la chaussure"
@@ -955,14 +957,11 @@ function renderShoes() {
           oninput="updateShoeName(${shoe.id}, this.value)"
           maxlength="30"
           style="color:${accent||'#fff'};border-color:${accent ? accent+'88' : 'rgba(255,255,255,0.1)'}">
-        <button class="shoe-color-btn" onclick="openColorModal(${shoe.id})"
-          style="background:${shoe.color||'#555'}"
-          title="Changer la couleur"></button>
         <button class="shoe-delete-btn" onclick="deleteShoe(${shoe.id})" title="Supprimer">✕</button>
       </div>
       <div class="km-total" ${accentStyle?`style="${accentStyle}"`:''}>${totalFmt} <span>km</span></div>
       <div class="km-sub">${subText}</div>
-      ${shoe.lastDate ? `<div class="km-last-date" ${accent?`style="color:${accent}99"`:''}>🗓 Dernière sortie : ${(([y,mo,d])=>d+'/'+mo+'/'+y)(shoe.lastDate.split('-'))}</div>` : ''}
+      ${shoe.lastDate ? `<div class="km-last-date" ${accent?`style="color:${accent}99"`:''}>Dernière sortie : ${(([y,mo,d])=>d+'/'+mo+'/'+y)(shoe.lastDate.split('-'))}</div>` : ''}
       <div class="km-bar-wrap">
         <div class="km-bar-bg">
           <div class="km-bar-fill" style="${barStyle}"></div>
