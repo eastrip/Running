@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Course</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; width: 100%; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
@@ -384,7 +385,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     </div>
     <div class="metric-tabs">
       <div class="mtab on" id="mtab_chrono" onclick="setMetric('chrono')">⏱ Chrono</div>
-      <div class="mtab" id="mtab_dist"   onclick="setMetric('dist')">🏁 Distance</div>
+      <div class="mtab" id="mtab_dist"   onclick="setMetric('dist')"><i class="fa-light fa-map-location-dot"></i> Distance</div>
       <div class="mtab" id="mtab_vit"    onclick="setMetric('vit')">⚡ Vitesse</div>
       <div class="mtab" id="mtab_all"    onclick="setMetric('all')">🏃🏻‍➡️ Allure</div>
     </div>
