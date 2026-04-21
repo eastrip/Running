@@ -386,8 +386,8 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <div class="metric-tabs">
       <div class="mtab on" id="mtab_chrono" onclick="setMetric('chrono')"><i class="fa-solid fa-stopwatch"></i> Chrono</div>
       <div class="mtab" id="mtab_dist"   onclick="setMetric('dist')"><i class="fa-solid fa-route"></i> Distance</div>
-      <div class="mtab" id="mtab_vit"    onclick="setMetric('vit')">⚡ Vitesse</div>
-      <div class="mtab" id="mtab_all"    onclick="setMetric('all')">🏃🏻‍➡️ Allure</div>
+      <div class="mtab" id="mtab_vit"    onclick="setMetric('vit')"><i class="fa-solid fa-gauge-high"></i> Vitesse</div>
+      <div class="mtab" id="mtab_all"    onclick="setMetric('all')"><i class="fa-solid fa-person-running"></i> Allure</div>
     </div>
     <div class="canvas-wrap" id="canvas-wrap">
       <canvas id="chart"></canvas>
@@ -632,7 +632,7 @@ function renderGraph() {
   const prWrap = document.getElementById('pr-box-wrap');
 
   if (runs.length===0) {
-    list.innerHTML='<div class="empty-state"><div class="empty-icon">🏁</div>Aucune course sauvegardée.<br>Calculez et cliquez sur "Ajouter au suivi" !</div>';
+    list.innerHTML='<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-route"></i></div>Aucune course sauvegardée.<br>Calculez et cliquez sur "Ajouter au suivi" !</div>';
     prWrap.innerHTML='';
     drawEmptyChart(); return;
   }
@@ -650,7 +650,7 @@ function renderGraph() {
     prWrap.innerHTML = `
       <div class="pr-box">
         <div class="pr-header">
-          <div class="pr-title">🏆 Record personnel</div>
+          <div class="pr-title"><i class="fa-solid fa-medal"></i> Record personnel</div>
           <div class="pr-date">${d}/${mo}/${y}</div>
         </div>
         <div class="pr-grid">
