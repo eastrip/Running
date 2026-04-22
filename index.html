@@ -45,7 +45,7 @@ input::placeholder { color:#0e2a40; }
 .mode-btn.sel { background:#001a2e; border-color:#009fcc; color:#00c8ff; }
 
 .btns { display:flex; gap:6px; flex-shrink:0; }
-.calc-btn { flex:3; background:#009fcc; border:none; border-radius:12px; color:#000; font-size:14px; font-weight:800; height:42px; cursor:pointer; letter-spacing:1px; }
+.calc-btn { flex:2; background:#009fcc; border:none; border-radius:12px; color:#000; font-size:14px; font-weight:800; height:42px; cursor:pointer; letter-spacing:1px; }
 .calc-btn:active { background:#00c8ff; }
 @keyframes flash-btn {
   0%, 85%, 100% { background:#001a2e; box-shadow:none; }
@@ -270,21 +270,21 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 /* ── SAUVEGARDE ── */
 .backup-bar { display:flex; gap:6px; padding:5px 12px; background:#010101; border-top:1px solid #111; flex-shrink:0; }
 .bk-btn { flex:1; height:30px; border-radius:8px; font-size:10px; font-weight:700; cursor:pointer; border:none; }
-.bk-export { background:#003a10; border:1.5px solid #00aa33; color:#00ff55; }
-.bk-export:active { background:#005520; }
-.bk-import { background:#1a0a00; border:1.5px solid #aa5500; color:#ff9933; }
-.bk-import:active { background:#2a1200; }
+.bk-export { background:#001a2e; border:1px solid #009fcc; color:#00c8ff; }
+.bk-export:active { background:#002a40; }
+.bk-import { background:#0a0a0a; border:1px solid #333; color:#888; }
+.bk-import:active { background:#181818; }
 .bk-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:900; align-items:center; justify-content:center; padding:20px; }
 .bk-modal.on { display:flex; }
-.bk-box { background:#010101; border:1px solid #333; border-radius:16px; padding:16px; width:100%; max-width:400px; }
+.bk-box { background:#050505; border:1px solid #1a1a1a; border-radius:16px; padding:16px; width:100%; max-width:400px; }
 .bk-box h3 { font-size:13px; font-weight:800; color:#fff; margin-bottom:10px; }
-.bk-textarea { width:100%; background:#000; border:1.5px solid #333; border-radius:8px; color:#00c8ff; font-size:16px; font-family:monospace; padding:8px; height:160px; resize:none; outline:none; }
+.bk-textarea { width:100%; background:#000; border:1px solid #1a3a55; border-radius:8px; color:#00c8ff; font-size:16px; font-family:monospace; padding:8px; height:160px; resize:none; outline:none; }
 .bk-textarea:focus { border-color:#00c8ff; }
 .bk-actions { display:flex; gap:8px; margin-top:10px; }
-.bk-copy { flex:2; height:36px; background:#00aa33; border:none; border-radius:10px; color:#000; font-size:12px; font-weight:800; cursor:pointer; }
-.bk-copy:active { background:#00cc44; }
-.bk-ok { flex:1; height:36px; background:transparent; border:1.5px solid #333; border-radius:10px; color:#555; font-size:12px; font-weight:700; cursor:pointer; }
-.bk-hint { font-size:10px; color:#555; margin-top:8px; line-height:1.4; }
+.bk-copy { flex:2; height:36px; background:#001a2e; border:1px solid #009fcc; border-radius:10px; color:#00c8ff; font-size:12px; font-weight:800; cursor:pointer; }
+.bk-copy:active { background:#002a40; }
+.bk-ok { flex:1; height:36px; background:transparent; border:1px solid #222; border-radius:10px; color:#555; font-size:12px; font-weight:700; cursor:pointer; }
+.bk-hint { font-size:10px; color:#444; margin-top:8px; line-height:1.4; }
 </style>
 </head>
 <body>
@@ -338,7 +338,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <div class="error" id="err"></div>
     <div class="btns">
       <button class="calc-btn" onclick="calc()">CALCULER</button>
-      <button class="save-run-btn" onclick="saveRun()">Ajouter au suivi</button>
+      <button class="save-run-btn" onclick="saveRun()"><i class="fa-solid fa-chart-line"></i> Ajouter au suivi</button>
       <button class="reset-btn" onclick="raz()">RAZ</button>
     </div>
     <div class="block">
@@ -414,8 +414,8 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 
   <!-- ══ BARRE SAUVEGARDE GLOBALE ══ -->
   <div class="backup-bar">
-    <button class="bk-btn bk-export" onclick="openExport()">Copier sauvegarde</button>
-    <button class="bk-btn bk-import" onclick="openImport()">Restaurer</button>
+    <button class="bk-btn bk-export" onclick="openExport()"><i class="fa-solid fa-copy"></i> Copier sauvegarde</button>
+    <button class="bk-btn bk-import" onclick="openImport()"><i class="fa-solid fa-clock-rotate-left"></i> Restaurer</button>
   </div>
 
 </div>
@@ -487,7 +487,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <textarea class="bk-textarea" id="import-text" placeholder="Colle ici le texte de ta sauvegarde…"></textarea>
     <p class="bk-hint">Colle le texte copié précédemment, puis appuie sur Restaurer.</p>
     <div class="bk-actions">
-      <button class="bk-copy" onclick="doRestore()">Restaurer</button>
+      <button class="bk-copy" onclick="doRestore()"><i class="fa-solid fa-clock-rotate-left"></i> Restaurer</button>
       <button class="bk-ok" onclick="closeModals()">Annuler</button>
     </div>
   </div>
@@ -1143,8 +1143,8 @@ function openExport() {
   navigator.clipboard.writeText(text).then(() => {
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Copié !';
-    btn.style.borderColor = '#00aa33';
-    btn.style.color = '#00ff55';
+    btn.style.borderColor = '#00c8ff';
+    btn.style.color = '#00c8ff';
     setTimeout(() => {
       btn.innerHTML = orig;
       btn.style.borderColor = '';
@@ -1162,8 +1162,8 @@ function copyBackup() {
   ta.select();
   navigator.clipboard.writeText(ta.value).then(() => {
     const btn = document.querySelector('#modal-export .bk-copy');
-    btn.textContent = '✅ Copié !';
-    setTimeout(() => btn.textContent = 'Tout copier', 2000);
+    btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Copié !';
+    setTimeout(() => btn.innerHTML = 'Tout copier', 2000);
   }).catch(() => {
     document.execCommand('copy');
     alert('Copié ! Colle-le maintenant dans Notes.');
@@ -1192,7 +1192,9 @@ function doRestore() {
     if (data.shoe_history && Array.isArray(data.shoe_history)) saveShoeHistory(data.shoe_history);
     closeModals();
     renderShoes();
-    alert('Données restaurées !');
+    const btn = document.querySelector('#modal-import .bk-copy');
+    if (btn) { btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Restauré !'; }
+    setTimeout(() => { if (btn) btn.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i> Restaurer'; }, 2000);
   } catch(e) {
     alert('Texte invalide, vérifie que tu as tout copié.');
   }
