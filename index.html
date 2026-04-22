@@ -493,7 +493,38 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
   </div>
 </div>
 
+<!-- Modal Confirmation -->
+<div class="bk-modal" id="modal-confirm" onclick="closeConfirm()">
+  <div class="bk-box" style="max-width:320px" onclick="event.stopPropagation()">
+    <h3 id="confirm-title">Confirmer la suppression</h3>
+    <p id="confirm-msg" style="font-size:12px;color:#666;margin-bottom:16px;line-height:1.5"></p>
+    <div class="bk-actions">
+      <button class="bk-ok" style="flex:1" onclick="closeConfirm()">Annuler</button>
+      <button id="confirm-ok" style="flex:2;height:36px;background:transparent;border:1px solid #4a0000;border-radius:10px;color:#ff3333;font-size:12px;font-weight:800;cursor:pointer" onclick="execConfirm()"><i class="fa-solid fa-xmark"></i> Supprimer</button>
+    </div>
+  </div>
+</div>
+
 <script>
+/* ── CONFIRMATION ── */
+let _confirmCallback = null;
+
+function askConfirm(msg, cb) {
+  _confirmCallback = cb;
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('modal-confirm').classList.add('on');
+}
+
+function execConfirm() {
+  document.getElementById('modal-confirm').classList.remove('on');
+  if (_confirmCallback) { _confirmCallback(); _confirmCallback = null; }
+}
+
+function closeConfirm() {
+  document.getElementById('modal-confirm').classList.remove('on');
+  _confirmCallback = null;
+}
+
 /* ── TABS ── */
 function showTab(t) {
   localStorage.setItem('lastTab', t);
@@ -775,9 +806,11 @@ function renderRunsList() {
 }
 
 function deleteRun(id) {
-  saveRuns(loadRuns().filter(r=>r.id!==id));
-  renderGraph();
-  renderRunsList();
+  askConfirm('Supprimer cette course définitivement ?', () => {
+    saveRuns(loadRuns().filter(r=>r.id!==id));
+    renderGraph();
+    renderRunsList();
+  });
 }
 
 /* ── GRAPHIQUE : scroll horizontal ── */
@@ -961,8 +994,12 @@ function addShoe() {
 function deleteShoe(id) {
   const shoes = loadShoes();
   if (shoes.length <= 1) { alert('Tu dois garder au moins une paire !'); return; }
-  saveShoes(shoes.filter(s => s.id !== id));
-  renderShoes();
+  const shoe = shoes.find(s => s.id === +id);
+  const name = shoe?.name || 'cette chaussure';
+  askConfirm(`Supprimer "${name}" définitivement ?`, () => {
+    saveShoes(shoes.filter(s => s.id !== +id));
+    renderShoes();
+  });
 }
 
 function updateShoeName(id, name) {
@@ -1091,9 +1128,11 @@ function setHistFilter(f) {
 }
 
 function deleteHistEntry(hid) {
-  const hist = loadShoeHistory().filter(e => e.hid !== hid);
-  saveShoeHistory(hist);
-  renderShoeHistory();
+  askConfirm('Supprimer cette entrée de l\'historique ?', () => {
+    const hist = loadShoeHistory().filter(e => e.hid !== hid);
+    saveShoeHistory(hist);
+    renderShoeHistory();
+  });
 }
 
 function renderShoeHistory() {
