@@ -429,7 +429,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       <button class="sort-btn"   id="sort_chrono"  onclick="setRunSort('chrono')">Chrono</button>
       <button class="sort-btn"   id="sort_vit"     onclick="setRunSort('vit')">Vitesse</button>
       <button class="sort-btn"   id="sort_allure"  onclick="setRunSort('allure')">Allure</button>
-      <button class="sort-btn" id="sort_reverse" onclick="toggleRunOrder()"><i class="fa-solid fa-ranking-star"></i></button>
+      <button class="sort-btn" id="sort_reverse" onclick="toggleRunOrder()"><i class="fa-solid fa-trophy"></i></button>
     </div>
     <div class="hist-list" id="runs-list"></div>
   </div>
@@ -738,7 +738,7 @@ function toggleRunOrder() {
   const btn = document.getElementById('sort_reverse');
   btn.innerHTML = runOrderAsc
     ? '<i class="fa-solid fa-arrow-trend-down"></i>'
-    : '<i class="fa-solid fa-ranking-star"></i>';
+    : '<i class="fa-solid fa-trophy"></i>';
   btn.classList.toggle('on', runOrderAsc);
   renderRunsList();
 }
