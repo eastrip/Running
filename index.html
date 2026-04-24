@@ -437,7 +437,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       <button class="sort-btn"   id="sort_allure"  onclick="setRunSort('allure')">Allure</button>
       <button class="sort-btn" id="sort_reverse" onclick="toggleRunOrder()"><i class="fa-solid fa-trophy"></i></button>
     </div>
-    <div class="hist-list" id="runs-list"></div>
+    <div class="hist-list" id="modal-runs-list"></div>
   </div>
 </div>
 
@@ -728,11 +728,9 @@ function fmtAllure(sec) { return Math.floor(sec/60)+'\''+pad(Math.round(sec%60))
 function renderGraph() {
   const runs = loadRuns();
   document.getElementById('graph-count').textContent = runs.length+' course(s)';
-  const list = document.getElementById('runs-list');
   const prWrap = document.getElementById('pr-box-wrap');
 
   if (runs.length===0) {
-    list.innerHTML='<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-route"></i></div>Aucune course sauvegardée.<br>Calculez et cliquez sur "Ajouter au suivi" !</div>';
     prWrap.innerHTML='';
     drawEmptyChart(); return;
   }
@@ -815,11 +813,7 @@ function toggleRunOrder() {
 
 function renderRunsList() {
   const runs = loadRuns();
-  const list = document.getElementById('runs-list');
-  if (runs.length === 0) {
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-route"></i></div>Aucune course sauvegardée.<br>Calculez et cliquez sur "Ajouter au suivi" !</div>';
-    return;
-  }
+  const list = document.getElementById('modal-runs-list');
   const sorted = [...runs].sort((a, b) => {
     let cmp = 0;
     if (currentRunSort === 'date')   cmp = b.date.localeCompare(a.date);
