@@ -482,8 +482,9 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 <div class="bk-modal" id="modal-import" onclick="closeModals()">
   <div class="bk-box" onclick="event.stopPropagation()">
     <h3>Restaurer une sauvegarde</h3>
-    <textarea class="bk-textarea" id="import-text" placeholder="Colle ici le texte de ta sauvegarde…"></textarea>
-    <p class="bk-hint">Colle le texte copié précédemment, puis appuie sur Restaurer.</p>
+    <input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="loadImportFile(event)">
+    <button onclick="document.getElementById('import-file').click()" style="width:100%;height:38px;background:#001a2e;border:1px solid #009fcc;border-radius:8px;color:#00c8ff;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:10px"><i class="fa-solid fa-file-arrow-up"></i> Importer depuis Fichiers</button>
+    <textarea class="bk-textarea" id="import-text" placeholder="…ou colle ici le texte de ta sauvegarde"></textarea>
     <div class="bk-actions">
       <button class="bk-copy" onclick="doRestore()"><i class="fa-solid fa-clock-rotate-left"></i> Restaurer</button>
       <button class="bk-ok" onclick="closeModals()">Annuler</button>
@@ -1313,7 +1314,7 @@ function openExport() {
     const file = new File([text], fileName, { type: 'application/json' });
     if (navigator.canShare({ files: [file] })) {
       const orig = btn.innerHTML;
-      navigator.share({ files: [file], title: 'Sauvegarde Course' })
+      navigator.share({ files: [file] })
         .then(() => feedbackBtn(orig))
         .catch(() => fallbackCopy(text, btn));
       return;
@@ -1356,6 +1357,18 @@ function copyBackup() {
     document.execCommand('copy');
     alert('Copié ! Colle-le maintenant dans Notes.');
   });
+}
+
+function loadImportFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('import-text').value = e.target.result;
+  };
+  reader.readAsText(file);
+  // Reset pour permettre de recharger le même fichier
+  event.target.value = '';
 }
 
 function openImport() {
