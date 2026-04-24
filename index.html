@@ -374,7 +374,10 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 
   <!-- ══ CHAUSSURES ══ -->
   <div class="screen" id="sc_shoes">
-    <button class="shoe-history-btn" onclick="openShoeHistory()"><i class="fa-solid fa-list-ul"></i> Historique des km</button>
+    <div class="graph-header">
+      <div class="graph-title" id="shoes-count" style="color:#fff;font-weight:800">0 paire(s)</div>
+      <button class="shoe-history-btn" onclick="openShoeHistory()"><i class="fa-solid fa-list-ul"></i> Historique des km</button>
+    </div>
     <div class="shoes-container" id="shoes-container"></div>
     <button class="add-shoe-btn" onclick="addShoe()">+ Ajouter une paire</button>
   </div>
@@ -397,8 +400,8 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
   <!-- ══ GRAPHIQUE / COURBES ══ -->
   <div class="screen sc-graph" id="sc_graph">
     <div class="graph-header">
-      <div class="graph-title">Mes courses</div>
-      <div class="graph-count" id="graph-count">0 course(s)</div>
+      <div class="graph-title" id="graph-count" style="color:#fff;font-weight:800">0 course(s)</div>
+      <button class="shoe-history-btn" onclick="openRunsHistory()"><i class="fa-solid fa-list-ul"></i> Historique des courses</button>
     </div>
     <div class="metric-tabs">
       <div class="mtab" id="mtab_dist"   onclick="setMetric('dist')"><i class="fa-solid fa-route"></i> Distance</div>
@@ -411,7 +414,6 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     </div>
     <div class="chart-scroll-hint" id="chart-scroll-hint"></div>
     <div id="pr-box-wrap"></div>
-    <button class="shoe-history-btn" onclick="openRunsHistory()" style="align-self:flex-end"><i class="fa-solid fa-list-ul"></i> Historique des courses</button>
   </div>
 
   <!-- ══ BARRE SAUVEGARDE GLOBALE ══ -->
@@ -472,7 +474,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 <!-- Modal Export -->
 <div class="bk-modal" id="modal-export" style="background:rgba(0,0,0,0.3);align-items:flex-end;padding-bottom:80px" onclick="closeModals()">
   <div class="bk-box" style="max-width:320px;text-align:center;background:#050505cc;backdrop-filter:blur(10px)" onclick="event.stopPropagation()">
-    <p style="font-size:13px;color:#fff;line-height:1.6">La sauvegarde a été copiée dans le presse-papier. Colle-la maintenant dans l'endroit de ton choix pour la conserver.</p>
+    <p style="font-size:13px;color:#fff;line-height:1.6">La sauvegarde a été copiée dans le presse-papier. Colle-la dans Notes, Mail ou l'endroit de ton choix pour la conserver.</p>
   </div>
 </div>
 
@@ -1159,6 +1161,7 @@ function resetShoeKm(id) {
 
 function renderShoes() {
   const shoes = loadShoes();
+  document.getElementById('shoes-count').textContent = shoes.length + ' paire(s)';
   const container = document.getElementById('shoes-container');
 
   container.innerHTML = shoes.map((shoe, idx) => {
@@ -1291,22 +1294,55 @@ function openExport() {
   const data = { shoes_v2: loadShoes(), runs: loadRuns(), shoe_history: loadShoeHistory() };
   const text = JSON.stringify(data);
   const btn = document.querySelector('.bk-export');
-  navigator.clipboard.writeText(text).then(() => {
-    const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Copié !';
+  const date = new Date().toISOString().split('T')[0];
+  const fileName = 'sauvegarde-course-' + date + '.json';
+
+  const feedbackBtn = (orig) => {
+    btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Enregistré !';
     btn.style.borderColor = '#00c8ff';
     btn.style.color = '#00c8ff';
-    document.getElementById('modal-export').classList.add('on');
     setTimeout(() => {
       btn.innerHTML = orig;
       btn.style.borderColor = '';
       btn.style.color = '';
-      document.getElementById('modal-export').classList.remove('on');
     }, 4000);
+  };
+
+  // Essayer Web Share API avec fichier
+  if (navigator.canShare) {
+    const file = new File([text], fileName, { type: 'application/json' });
+    if (navigator.canShare({ files: [file] })) {
+      const orig = btn.innerHTML;
+      navigator.share({ files: [file], title: 'Sauvegarde Course' })
+        .then(() => feedbackBtn(orig))
+        .catch(() => fallbackCopy(text, btn));
+      return;
+    }
+  }
+  fallbackCopy(text, btn);
+}
+
+function fallbackCopy(text, btn) {
+  const orig = btn.innerHTML;
+  navigator.clipboard.writeText(text).then(() => {
+    feedbackAndModal(btn, orig);
   }).catch(() => {
     document.getElementById('modal-export').classList.add('on');
-    setTimeout(() => document.getElementById('modal-export').classList.remove('on'), 3000);
+    setTimeout(() => document.getElementById('modal-export').classList.remove('on'), 4000);
   });
+}
+
+function feedbackAndModal(btn, orig) {
+  btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Copié !';
+  btn.style.borderColor = '#00c8ff';
+  btn.style.color = '#00c8ff';
+  document.getElementById('modal-export').classList.add('on');
+  setTimeout(() => {
+    btn.innerHTML = orig;
+    btn.style.borderColor = '';
+    btn.style.color = '';
+    document.getElementById('modal-export').classList.remove('on');
+  }, 4000);
 }
 
 function copyBackup() {
