@@ -948,6 +948,7 @@ function drawEmptyChart() {
 }
 
 function drawChart(runs) {
+  runs = [...runs].sort((a, b) => a.date.localeCompare(b.date));
   const wrap = document.getElementById('canvas-wrap');
   const canvas = document.getElementById('chart');
 
