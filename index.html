@@ -738,40 +738,40 @@ function renderGraph() {
     drawEmptyChart(); return;
   }
 
-  // ── Record : meilleure allure
-  const pr = runs.reduce((best, r) => {
-    if (!best) return r;
-    if (r.allsec < best.allsec) return r;
-    if (r.allsec === best.allsec && r.dist > best.dist) return r;
-    return best;
-  }, null);
+  // ── Records : top 3 meilleures allures
+  const sorted = [...runs].sort((a, b) => a.allsec - b.allsec || b.dist - a.dist);
+  const top3 = sorted.slice(0, 3);
+  const pr = top3[0];
 
   if (pr) {
-    const [y,mo,d] = pr.date.split('-');
+    const medals = ['🥇', '🥈', '🥉'];
+    const fmtRow = (r, i) => {
+      const [y,mo,d] = r.date.split('-');
+      const isFirst = i === 0;
+      return `
+        <div style="display:flex;align-items:center;gap:8px;padding:${isFirst?'6px 4px':'4px 4px'};border-bottom:${i<2?'1px solid rgba(255,255,255,0.04)':'none'}">
+          <div style="font-size:${isFirst?'14px':'11px'};flex-shrink:0;width:20px;text-align:center">${medals[i]}</div>
+          <div style="font-size:${isFirst?'10px':'9px'};color:${isFirst?'#3a6a8a':'#2a4a5a'};flex-shrink:0;width:36px">${d}/${mo}</div>
+          <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;text-align:right">
+            <div style="font-size:${isFirst?'13px':'10px'};font-weight:800;color:${isFirst?'#00c8ff':'#2a6a8a'}">${rnd(r.dist,1)}<span style="font-size:${isFirst?'8px':'7px'};opacity:0.6"> km</span></div>
+            <div style="font-size:${isFirst?'13px':'10px'};font-weight:700;color:${isFirst?'#00c8ff':'#2a6a8a'}">${fmtChrono(r.tsec)}</div>
+            <div style="font-size:${isFirst?'13px':'10px'};font-weight:700;color:${isFirst?'#00c8ff':'#2a6a8a'}">${rnd(r.vit,1)}<span style="font-size:${isFirst?'8px':'7px'};opacity:0.6"> km/h</span></div>
+            <div style="font-size:${isFirst?'13px':'10px'};font-weight:800;color:${isFirst?'#00c8ff':'#2a6a8a'}">${fmtAllure(r.allsec)}<span style="font-size:${isFirst?'8px':'7px'};opacity:0.6">/km</span></div>
+          </div>
+        </div>`;
+    };
+
     prWrap.innerHTML = `
       <div class="pr-box">
         <div class="pr-header">
-          <div class="pr-title"><i class="fa-solid fa-medal"></i> Record personnel</div>
-          <div class="pr-date">${d}/${mo}/${y}</div>
+          <div class="pr-title"><i class="fa-solid fa-medal"></i> Meilleures performances</div>
         </div>
-        <div class="pr-grid">
-          <div class="pr-cell">
-            <div class="pr-cell-val">${rnd(pr.dist,2)}</div>
-            <div class="pr-cell-lbl">km</div>
-          </div>
-          <div class="pr-cell">
-            <div class="pr-cell-val">${fmtChrono(pr.tsec)}</div>
-            <div class="pr-cell-lbl">chrono</div>
-          </div>
-          <div class="pr-cell">
-            <div class="pr-cell-val">${rnd(pr.vit,1)}</div>
-            <div class="pr-cell-lbl">km/h</div>
-          </div>
-          <div class="pr-cell">
-            <div class="pr-cell-val">${fmtAllure(pr.allsec)}</div>
-            <div class="pr-cell-lbl">min/km</div>
+        <div style="display:flex;justify-content:flex-end;gap:16px;margin-bottom:4px;padding:0 4px">
+          <div style="flex:1;display:grid;grid-template-columns:20px 36px 1fr 1fr 1fr 1fr;gap:4px;font-size:8px;color:#2a4a5a;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;text-align:right">
+            <div></div><div></div><div>km</div><div>chrono</div><div>km/h</div><div>allure</div>
           </div>
         </div>
+        ${top3.map((r, i) => fmtRow(r, i)).join('')}
       </div>`;
   } else {
     prWrap.innerHTML = '';
@@ -952,7 +952,7 @@ function drawChart(runs) {
   const wrap = document.getElementById('canvas-wrap');
   const canvas = document.getElementById('chart');
 
-  const VISIBLE = 10;
+  const VISIBLE = 8;
   const containerW = wrap.parentElement.clientWidth - 24;
   const H = 180;
   const PT_SPACING = containerW / VISIBLE;
