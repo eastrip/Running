@@ -15,8 +15,9 @@ html, body { height: 100%; width: 100%; background: #000; color: #fff; font-fami
 .tab.on { color:#00c8ff; border-bottom-color:#00c8ff; background:rgba(0,200,255,0.05); }
 
 #app { height:100dvh; display:flex; flex-direction:column; overflow:hidden; background:#000; }
-.screen { display:none; flex-direction:column; flex:1; padding:8px 12px env(safe-area-inset-bottom,8px); gap:6px; overflow:hidden; background:#000; }
+.screen { display:none; flex-direction:column; flex:1; padding:8px 12px env(safe-area-inset-bottom,8px); gap:6px; overflow:hidden; background:#000000; position:relative; }
 .screen.on { display:flex; }
+.screen > * { position:relative; z-index:1; }
 
 .block { background:#010101; border-radius:12px; padding:6px 10px; border:1px solid #181818; flex-shrink:0; }
 .block-title { font-size:9px; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:5px; }
@@ -94,7 +95,7 @@ input::placeholder { color:#0e2a40; }
 /* Bouton historique chaussures */
 .shoe-history-btn {
   display:flex; align-items:center; justify-content:center; gap:6px;
-  background:transparent; border:1px solid #333; border-radius:10px;
+  background:#000; border:1px solid #333; border-radius:10px;
   color:#555; font-size:11px; font-weight:700; padding:8px 14px;
   cursor:pointer; flex-shrink:0; align-self:flex-end;
   letter-spacing:0.5px;
@@ -126,6 +127,7 @@ input::placeholder { color:#0e2a40; }
   color:#444; font-size:13px; font-weight:700; padding:14px;
   cursor:pointer; width:100%; flex-shrink:0;
   transition: border-color 0.2s, color 0.2s;
+  margin-bottom:12px;
 }
 .add-shoe-btn:active { border-color:#00c8ff; color:#00c8ff; }
 
@@ -145,7 +147,7 @@ input::placeholder { color:#0e2a40; }
 .color-preview-label { font-size:12px; color:#888; flex:1; }
 
 /* Palettes de couleurs pour les chaussures */
-.shoe-palette-0 { background:linear-gradient(135deg,#0a1628,#0d1f3c); border:1px solid #1a3a6e; }
+.shoe-palette-0 { background:linear-gradient(135deg,#0d2040,#122860); border:1px solid #2a5aaa; }
 .shoe-palette-0 .km-total { color:#4d9fff; }
 .shoe-palette-0 .km-input { border-color:#1a4a8e; color:#4d9fff; }
 .shoe-palette-0 .km-input:focus { border-color:#4d9fff; }
@@ -155,7 +157,7 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-0 .shoe-name-input:focus { border-color:#4d9fff; }
 .shoe-palette-0 .km-last-date { color:#2a6aaa; }
 
-.shoe-palette-1 { background:linear-gradient(135deg,#1e1c14,#2a2718); border:1px solid #5a5238; }
+.shoe-palette-1 { background:linear-gradient(135deg,#2e2a18,#3a3420); border:1px solid #7a6e44; }
 .shoe-palette-1 .km-total { color:#c8b878; }
 .shoe-palette-1 .km-input { border-color:#6a6040; color:#c8b878; }
 .shoe-palette-1 .km-input:focus { border-color:#c8b878; }
@@ -165,7 +167,7 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-1 .shoe-name-input:focus { border-color:#c8b878; }
 .shoe-palette-1 .km-last-date { color:#8a7a40; }
 
-.shoe-palette-2 { background:linear-gradient(135deg,#1a0a28,#2a1040); border:1px solid #5a2a8e; }
+.shoe-palette-2 { background:linear-gradient(135deg,#280a3e,#381060); border:1px solid #8844cc; }
 .shoe-palette-2 .km-total { color:#cc88ff; }
 .shoe-palette-2 .km-input { border-color:#6a3aaa; color:#cc88ff; }
 .shoe-palette-2 .km-input:focus { border-color:#cc88ff; }
@@ -175,7 +177,7 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-2 .shoe-name-input:focus { border-color:#cc88ff; }
 .shoe-palette-2 .km-last-date { color:#8a44bb; }
 
-.shoe-palette-3 { background:linear-gradient(135deg,#1a1010,#2a1818); border:1px solid #8e2a2a; }
+.shoe-palette-3 { background:linear-gradient(135deg,#281010,#3a1818); border:1px solid #bb3a3a; }
 .shoe-palette-3 .km-total { color:#ff8888; }
 .shoe-palette-3 .km-input { border-color:#aa4040; color:#ff8888; }
 .shoe-palette-3 .km-input:focus { border-color:#ff8888; }
@@ -185,7 +187,7 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-3 .shoe-name-input:focus { border-color:#ff8888; }
 .shoe-palette-3 .km-last-date { color:#aa4444; }
 
-.shoe-palette-4 { background:linear-gradient(135deg,#0a1a18,#0d2a28); border:1px solid #1a6e5a; }
+.shoe-palette-4 { background:linear-gradient(135deg,#0a2820,#0d3830); border:1px solid #22aa88; }
 .shoe-palette-4 .km-total { color:#44ffcc; }
 .shoe-palette-4 .km-input { border-color:#1a8a6a; color:#44ffcc; }
 .shoe-palette-4 .km-input:focus { border-color:#44ffcc; }
@@ -195,7 +197,7 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-4 .shoe-name-input:focus { border-color:#44ffcc; }
 .shoe-palette-4 .km-last-date { color:#1a9e7a; }
 
-.shoe-palette-5 { background:linear-gradient(135deg,#1a1500,#2a2200); border:1px solid #6e5a00; }
+.shoe-palette-5 { background:linear-gradient(135deg,#282000,#383000); border:1px solid #aa8800; }
 .shoe-palette-5 .km-total { color:#ffdd44; }
 .shoe-palette-5 .km-input { border-color:#aa8800; color:#ffdd44; }
 .shoe-palette-5 .km-input:focus { border-color:#ffdd44; }
@@ -206,6 +208,7 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-5 .km-last-date { color:#aa8800; }
 
 /* ── RECORD PERSONNEL ── */
+#pr-box-wrap { background:#000; border-radius:14px; flex-shrink:0; }
 .pr-box {
   background:linear-gradient(135deg,#0a1520,#0a1a18);
   border:1.5px solid #1a4a6e;
@@ -1192,8 +1195,7 @@ function renderShoes() {
   document.getElementById('shoes-count').textContent = shoes.length + ' paire(s)';
   const container = document.getElementById('shoes-container');
 
-  container.innerHTML = shoes.map((shoe, idx) => {
-    const palette = idx % NUM_PALETTES;
+  container.innerHTML = shoes.map((shoe, idx) => {    const palette = idx % NUM_PALETTES;
     const accent = shoe.color || null; // couleur perso si définie
     const pct = Math.min(100, (shoe.total / MAX) * 100);
     const barColor = pct >= 90 ? '#ff4444' : pct >= 70 ? '#ffaa00' : (accent || null);
@@ -1205,13 +1207,14 @@ function renderShoes() {
 
     // Style inline de surcharge si couleur perso
     const accentStyle = accent ? `color:${accent}` : '';
-    const bgStyle = accent ? `background:linear-gradient(135deg,${accent}18,${accent}08)` : '';
-    const borderStyle = accent ? `border:1px solid ${accent}44` : '';
+    const bgStyle = accent ? `background:linear-gradient(135deg,${accent}35,${accent}18)` : '';
+    const borderStyle = accent ? `border:1px solid ${accent}66` : '';
     const barStyle = barColor
       ? `width:${pct}%;background:linear-gradient(90deg,${barColor}66,${barColor}) !important`
       : `width:${pct}%`;
 
     return `
+    <div style="background:#000;border-radius:12px;flex-shrink:0">
     <div class="shoe-card shoe-palette-${palette}" ${accent ? `style="${bgStyle};${borderStyle}"` : ''}>
       <div class="shoe-header">
         <button class="shoe-color-btn" onclick="openColorModal(${shoe.id})"
@@ -1241,6 +1244,7 @@ function renderShoes() {
           ${accent ? `style="color:${accent};border:1px solid ${accent}88;"` : ''}>+</button>
         <button class="raz-btn" onclick="resetShoeKm(${shoe.id})">RAZ</button>
       </div>
+    </div>
     </div>`;
   }).join('');
 }
