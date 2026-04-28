@@ -62,7 +62,6 @@ input::placeholder { color:#0e2a40; }
 .shoes-container { display:flex; flex-direction:column; gap:6px; flex:1; }
 .shoe-card { border-radius:10px; padding:8px 10px; flex-shrink:0; position:relative; }
 .shoe-header { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
-.shoe-icon { font-size:22px; }
 .shoe-name-input { flex:1; background:rgba(0,0,0,0.4) !important; border:1.5px solid rgba(255,255,255,0.1) !important; border-radius:8px; color:#fff !important; font-size:16px; font-weight:700; padding:2px 8px !important; outline:none; height:34px !important; -webkit-appearance:none; text-align:left; }
 .shoe-name-input:focus { border-bottom-color:#00c8ff; }
 .shoe-delete-btn { width:26px; height:26px; background:transparent; border:1px solid #4a0000; border-radius:6px; color:#ff3333; font-size:14px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
@@ -71,8 +70,6 @@ input::placeholder { color:#0e2a40; }
 
 .km-total { font-size:22px; font-weight:800; text-align:center; line-height:1; margin-bottom:2px; }
 .km-total span { font-size:11px; font-weight:600; opacity:0.6; }
-.km-sub { font-size:9px; color:#888; text-align:center; margin-bottom:4px; }
-.km-last-date { font-size:9px; text-align:center; margin-bottom:6px; font-weight:600; }
 .km-bar-wrap { margin-bottom:8px; }
 .km-bar-bg { background:rgba(0,0,0,0.4); border-radius:4px; height:6px; overflow:hidden; }
 .km-bar-fill { height:100%; border-radius:4px; transition:width 0.4s; }
@@ -111,8 +108,6 @@ input::placeholder { color:#0e2a40; }
 .hist-close { width:30px; height:30px; background:#1a1a1a; border:none; border-radius:50%; color:#888; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .hist-close:active { background:#333; }
 .hist-list { overflow-y:auto; flex:1; padding-bottom:24px; }
-.hist-shoe-section { margin-bottom:16px; }
-.hist-shoe-label { font-size:10px; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px; padding-left:2px; }
 .hist-entry { display:flex; align-items:center; gap:8px; padding:6px 4px; background:transparent; border-radius:0; border:none; border-bottom:1px solid #111; margin-bottom:0; }
 .hist-entry-date { font-size:11px; color:#555; flex-shrink:0; width:72px; }
 .hist-entry-km { flex:1; font-size:13px; font-weight:700; }
@@ -147,7 +142,7 @@ input::placeholder { color:#0e2a40; }
 .color-preview-label { font-size:12px; color:#888; flex:1; }
 
 /* Palettes de couleurs pour les chaussures */
-.shoe-palette-0 { background:linear-gradient(135deg,#0d2040,#122860); border:1px solid #2a5aaa; }
+.shoe-palette-0 { background:linear-gradient(135deg,#0a1828,#0e1e48); border:1px solid #1e4080; }
 .shoe-palette-0 .km-total { color:#4d9fff; }
 .shoe-palette-0 .km-input { border-color:#1a4a8e; color:#4d9fff; }
 .shoe-palette-0 .km-input:focus { border-color:#4d9fff; }
@@ -155,9 +150,8 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-0 .op-add:active { background:#0a2a5e; }
 .shoe-palette-0 .km-bar-fill { background:linear-gradient(90deg,#0a3a8e,#4d9fff) !important; }
 .shoe-palette-0 .shoe-name-input:focus { border-color:#4d9fff; }
-.shoe-palette-0 .km-last-date { color:#2a6aaa; }
 
-.shoe-palette-1 { background:linear-gradient(135deg,#2e2a18,#3a3420); border:1px solid #7a6e44; }
+.shoe-palette-1 { background:linear-gradient(135deg,#232016,#2e2a1a); border:1px solid #5a5030; }
 .shoe-palette-1 .km-total { color:#c8b878; }
 .shoe-palette-1 .km-input { border-color:#6a6040; color:#c8b878; }
 .shoe-palette-1 .km-input:focus { border-color:#c8b878; }
@@ -165,9 +159,8 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-1 .op-add:active { background:#2a2010; }
 .shoe-palette-1 .km-bar-fill { background:linear-gradient(90deg,#5a4a20,#c8b878) !important; }
 .shoe-palette-1 .shoe-name-input:focus { border-color:#c8b878; }
-.shoe-palette-1 .km-last-date { color:#8a7a40; }
 
-.shoe-palette-2 { background:linear-gradient(135deg,#280a3e,#381060); border:1px solid #8844cc; }
+.shoe-palette-2 { background:linear-gradient(135deg,#1e0830,#2a0c4a); border:1px solid #6030aa; }
 .shoe-palette-2 .km-total { color:#cc88ff; }
 .shoe-palette-2 .km-input { border-color:#6a3aaa; color:#cc88ff; }
 .shoe-palette-2 .km-input:focus { border-color:#cc88ff; }
@@ -175,9 +168,8 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-2 .op-add:active { background:#2a1050; }
 .shoe-palette-2 .km-bar-fill { background:linear-gradient(90deg,#5a1a9e,#cc88ff) !important; }
 .shoe-palette-2 .shoe-name-input:focus { border-color:#cc88ff; }
-.shoe-palette-2 .km-last-date { color:#8a44bb; }
 
-.shoe-palette-3 { background:linear-gradient(135deg,#281010,#3a1818); border:1px solid #bb3a3a; }
+.shoe-palette-3 { background:linear-gradient(135deg,#1e0c0c,#2c1414); border:1px solid #8a2a2a; }
 .shoe-palette-3 .km-total { color:#ff8888; }
 .shoe-palette-3 .km-input { border-color:#aa4040; color:#ff8888; }
 .shoe-palette-3 .km-input:focus { border-color:#ff8888; }
@@ -185,9 +177,8 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-3 .op-add:active { background:#2a1010; }
 .shoe-palette-3 .km-bar-fill { background:linear-gradient(90deg,#9e1a1a,#ff8888) !important; }
 .shoe-palette-3 .shoe-name-input:focus { border-color:#ff8888; }
-.shoe-palette-3 .km-last-date { color:#aa4444; }
 
-.shoe-palette-4 { background:linear-gradient(135deg,#0a2820,#0d3830); border:1px solid #22aa88; }
+.shoe-palette-4 { background:linear-gradient(135deg,#081e18,#0a2c24); border:1px solid #188060; }
 .shoe-palette-4 .km-total { color:#44ffcc; }
 .shoe-palette-4 .km-input { border-color:#1a8a6a; color:#44ffcc; }
 .shoe-palette-4 .km-input:focus { border-color:#44ffcc; }
@@ -195,9 +186,8 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-4 .op-add:active { background:#0a2a20; }
 .shoe-palette-4 .km-bar-fill { background:linear-gradient(90deg,#0a9e7a,#44ffcc) !important; }
 .shoe-palette-4 .shoe-name-input:focus { border-color:#44ffcc; }
-.shoe-palette-4 .km-last-date { color:#1a9e7a; }
 
-.shoe-palette-5 { background:linear-gradient(135deg,#282000,#383000); border:1px solid #aa8800; }
+.shoe-palette-5 { background:linear-gradient(135deg,#1e1a00,#2c2600); border:1px solid #806600; }
 .shoe-palette-5 .km-total { color:#ffdd44; }
 .shoe-palette-5 .km-input { border-color:#aa8800; color:#ffdd44; }
 .shoe-palette-5 .km-input:focus { border-color:#ffdd44; }
@@ -205,7 +195,6 @@ input::placeholder { color:#0e2a40; }
 .shoe-palette-5 .op-add:active { background:#2a2000; }
 .shoe-palette-5 .km-bar-fill { background:linear-gradient(90deg,#9e8000,#ffdd44) !important; }
 .shoe-palette-5 .shoe-name-input:focus { border-color:#ffdd44; }
-.shoe-palette-5 .km-last-date { color:#aa8800; }
 
 /* ── RECORD PERSONNEL ── */
 #pr-box-wrap { background:#000; border-radius:14px; flex-shrink:0; }
@@ -229,17 +218,10 @@ input::placeholder { color:#0e2a40; }
 .pr-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
 .pr-title { font-size:10px; font-weight:800; color:#009fcc; text-transform:uppercase; letter-spacing:1.5px; display:flex; align-items:center; gap:5px; }
 .pr-title i { font-size:16px; }
-.pr-date { font-size:10px; color:#3a6a8a; font-weight:600; }
-.pr-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
-.pr-cell { background:rgba(0,0,0,0.35); border-radius:8px; padding:5px 4px; text-align:center; }
-.pr-cell-val { font-size:13px; font-weight:800; color:#00c8ff; line-height:1.1; }
-.pr-cell-lbl { font-size:8px; color:#3a6a8a; font-weight:600; text-transform:uppercase; margin-top:2px; }
-
 /* ── GRAPHIQUE ── */
 .sc-graph { overflow-y:auto; }
 .graph-header { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
 .graph-title { font-size:13px; font-weight:800; color:#fff; }
-.graph-count { font-size:11px; color:#555; }
 .metric-tabs { display:flex; gap:4px; flex-shrink:0; }
 .mtab { flex:1; text-align:center; padding:6px 4px; background:#030303; border:1px solid #333; border-radius:8px; font-size:9px; font-weight:700; color:#666; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; line-height:1; }
 .mtab i { font-size:15px; }
@@ -248,7 +230,6 @@ input::placeholder { color:#0e2a40; }
 .canvas-wrap::-webkit-scrollbar { display:none; }
 canvas#chart { display:block; height:180px; border-radius:12px; }
 .chart-scroll-hint { text-align:center; font-size:9px; color:#333; margin-top:2px; flex-shrink:0; }
-.runs-list { flex-shrink:0; overflow-y:auto; max-height:200px; }
 .run-item { display:grid; grid-template-columns:0.7fr 1fr 1fr 1fr 1fr auto auto; align-items:center; gap:4px; padding:6px 4px; background:transparent; border-radius:0; border:none; border-bottom:1px solid #111; margin-bottom:0; }
 .run-extra { width:100%; font-size:10px; color:#555; font-weight:600; padding-left:16px; margin-top:-2px; }
 .run-date { font-size:11px; color:#888; font-weight:600; text-align:right; }
@@ -265,7 +246,6 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 
 .shoe-pick-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:#0a0a0a; border:1px solid #1a1a1a; border-radius:10px; cursor:pointer; }
 .shoe-pick-item:active { background:#001a2e; border-color:#009fcc; }
-.shoe-pick-icon { font-size:20px; flex-shrink:0; }
 .shoe-pick-swatch { width:26px; height:26px; border-radius:50%; flex-shrink:0; border:2px solid rgba(255,255,255,0.15); }
 .shoe-pick-name { flex:1; font-size:13px; font-weight:700; color:#fff; }
 .shoe-pick-km { font-size:11px; color:#555; font-weight:600; flex-shrink:0; }
@@ -287,6 +267,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 .bk-copy { flex:2; height:36px; background:#001a2e; border:1px solid #009fcc; border-radius:10px; color:#00c8ff; font-size:12px; font-weight:800; cursor:pointer; }
 .bk-copy:active { background:#002a40; }
 .bk-ok { flex:1; height:36px; background:transparent; border:1px solid #222; border-radius:10px; color:#555; font-size:12px; font-weight:700; cursor:pointer; }
+.note-textarea::placeholder { color:#1a3a55; opacity:1; }
 .bk-hint { font-size:10px; color:#444; margin-top:8px; line-height:1.4; }
 </style>
 </head>
@@ -525,7 +506,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       </div>
       <div>
         <div style="font-size:10px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Note</div>
-        <textarea id="edit-note" placeholder="Ressenti, météo, terrain…" style="width:100%;background:#000;border:1px solid #1a3a55;border-radius:8px;color:#00c8ff;font-size:15px;padding:8px 10px;outline:none;resize:none;height:70px;font-family:-apple-system,sans-serif;box-sizing:border-box"></textarea>
+        <textarea id="edit-note" placeholder="Ressenti, météo, terrain…" style="width:100%;background:#000;border:1px solid #1a3a55;border-radius:8px;color:#00c8ff;font-size:15px;padding:8px 10px;outline:none;resize:none;height:70px;font-family:-apple-system,sans-serif;box-sizing:border-box" class="note-textarea"></textarea>
       </div>
     </div>
     <div class="bk-actions" style="margin-top:14px">
@@ -577,6 +558,26 @@ function showTab(t) {
   if (t==='shoes') renderShoes();
   if (t==='graph') renderGraph();
 }
+
+/* ── SWIPE ENTRE ONGLETS ── */
+const tabOrder = ['calc', 'graph', 'shoes'];
+let _swipeStartX = 0;
+let _swipeStartY = 0;
+
+document.getElementById('app').addEventListener('touchstart', e => {
+  _swipeStartX = e.touches[0].clientX;
+  _swipeStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.getElementById('app').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - _swipeStartX;
+  const dy = e.changedTouches[0].clientY - _swipeStartY;
+  if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
+  const current = localStorage.getItem('lastTab') || 'calc';
+  const idx = tabOrder.indexOf(current);
+  if (dx < 0 && idx < tabOrder.length - 1) showTab(tabOrder[idx + 1]);
+  if (dx > 0 && idx > 0) showTab(tabOrder[idx - 1]);
+}, { passive: true });
 
 /* ── CALCULATEUR ── */
 let mode = localStorage.getItem('lastMode') || 'dc';
@@ -706,9 +707,9 @@ function confirmSaveRun(shoeId) {
   }
   document.getElementById('modal-shoe-picker').classList.remove('on');
   const btn = document.querySelector('.save-run-btn');
-  const orig = btn.textContent;
-  btn.textContent = 'Enregistré !';
-  setTimeout(() => btn.textContent = orig, 2000);
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Enregistré !';
+  setTimeout(() => btn.innerHTML = orig, 2000);
 }
 
 /* ── COURSES STORAGE ── */
