@@ -236,7 +236,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 .run-info { font-size:12px; font-weight:700; color:#fff; text-align:right; }
 .run-chrono { font-size:12px; color:#009fcc; font-weight:700; text-align:right; }
 .run-vit { font-size:11px; color:#009fcc; font-weight:600; text-align:right; }
-.run-allure { font-size:11px; color:#00c8ff; font-weight:800; text-align:right; padding-right:6px; }
+.run-allure { font-size:11px; color:#00c8ff; font-weight:800; text-align:right; padding-right:2px; }
 .run-edit { width:26px; height:26px; background:transparent; border:1px solid #1a3a55; border-radius:6px; color:#009fcc; font-size:12px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .run-edit:active { background:#001a2e; }
 .run-del { width:26px; height:26px; background:transparent; border:1px solid #330000; border-radius:6px; color:#cc2200; font-size:14px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
@@ -727,7 +727,7 @@ function setMetric(m) {
   renderGraph();
 }
 
-function fmtDate(iso) { const [,mo,d]=iso.split('-'); return d+'/'+mo; }
+function fmtDate(iso) { const [y,mo,d]=iso.split('-'); return d+'/'+mo+'/'+y.slice(2); }
 function fmtChrono(sec) {
   const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=Math.round(sec%60);
   return h>0 ? h+'h'+pad(m)+'\''+pad(s)+'"' : m+'\''+pad(s)+'"';
@@ -757,7 +757,7 @@ function renderGraph() {
       return `
         <div style="display:flex;align-items:center;gap:8px;padding:${isFirst?'6px 4px':'4px 4px'};border-bottom:${i<2?'1px solid rgba(255,255,255,0.04)':'none'}">
           <div style="font-size:${isFirst?'14px':'11px'};flex-shrink:0;width:20px;text-align:center">${medals[i]}</div>
-          <div style="font-size:${isFirst?'10px':'9px'};color:${isFirst?'#3a6a8a':'#2a4a5a'};flex-shrink:0;width:36px">${d}/${mo}</div>
+          <div style="font-size:${isFirst?'10px':'9px'};color:${isFirst?'#3a6a8a':'#2a4a5a'};flex-shrink:0;width:46px">${d}/${mo}/${y.slice(2)}</div>
           <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;text-align:right">
             <div style="font-size:${isFirst?'13px':'10px'};font-weight:800;color:${isFirst?'#00c8ff':'#2a6a8a'}">${rnd(r.dist,1)}<span style="font-size:${isFirst?'8px':'7px'};opacity:0.6"> km</span></div>
             <div style="font-size:${isFirst?'13px':'10px'};font-weight:700;color:${isFirst?'#00c8ff':'#2a6a8a'}">${fmtChrono(r.tsec)}</div>
@@ -979,7 +979,7 @@ function drawChart(runs) {
   ctx.scale(devicePixelRatio, devicePixelRatio);
   const W = totalW;
 
-  const PAD = { top: 22, right: 20, bottom: 40, left: 40 };
+  const PAD = { top: 22, right: 10, bottom: 40, left: 10 };
   const gW = W - PAD.left - PAD.right;
   const gH = H - PAD.top - PAD.bottom;
 
@@ -1081,7 +1081,7 @@ function drawChart(runs) {
     ctx.fillText(fmtDate(p.date), dx, PAD.top + gH + 14);
   });
 
-  if (unit) { ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = '8px -apple-system,sans-serif'; ctx.textAlign = 'left'; ctx.fillText(unit, 4, PAD.top + 4); }
+
 
   // Scroll vers la droite (courses les plus récentes)
   wrap.scrollLeft = wrap.scrollWidth;
@@ -1315,7 +1315,7 @@ function renderShoeHistory() {
     const [y,mo,d] = e.date.split('-');
     return `
       <div class="hist-entry">
-        <div class="hist-entry-date">${d}/${mo}/${y}</div>
+        <div class="hist-entry-date">${d}/${mo}/${y.slice(2)}</div>
         <div class="hist-entry-km" style="color:${e.sign > 0 ? shoeColor : '#cc4400'}">${shoeName ? shoeName+' · ' : ''}${e.sign > 0 ? '+' : '−'}${e.km} km</div>
         ${currentHistFilter === 'all' ? `<button class="hist-entry-del" onclick="deleteHistEntry('${e.hid}')"><i class="fa-solid fa-xmark"></i></button>` : ''}
       </div>`;
