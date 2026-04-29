@@ -62,8 +62,6 @@ input::placeholder { color:#2a6a8a; }
 .shoes-container { display:flex; flex-direction:column; gap:6px; flex:1; }
 .shoe-card { border-radius:10px; padding:8px 10px; flex-shrink:0; position:relative; }
 .shoe-header { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
-.shoe-name-input { flex:1; background:rgba(0,0,0,0.4) !important; border:1.5px solid rgba(255,255,255,0.1) !important; border-radius:8px; color:#fff !important; font-size:16px; font-weight:700; padding:2px 8px !important; outline:none; height:34px !important; -webkit-appearance:none; text-align:left; }
-.shoe-name-input:focus { border-bottom-color:#00c8ff; }
 .shoe-delete-btn { width:26px; height:26px; background:transparent; border:1px solid #4a0000; border-radius:6px; color:#ff3333; font-size:14px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .shoe-delete-btn:active { background:#1a0000; }
 .shoe-color-btn { width:22px; height:22px; border-radius:50%; border:2px solid rgba(255,255,255,0.2); cursor:pointer; flex-shrink:0; }
@@ -73,7 +71,7 @@ input::placeholder { color:#2a6a8a; }
 .km-bar-wrap { margin-bottom:8px; }
 .km-bar-bg { background:rgba(0,0,0,0.4); border-radius:4px; height:6px; overflow:hidden; }
 .km-bar-fill { height:100%; border-radius:4px; transition:width 0.4s; }
-.km-labels { display:flex; justify-content:space-between; margin-top:2px; font-size:8px; opacity:0.4; }
+.km-labels { display:flex; justify-content:space-between; margin-top:3px; font-size:10px; opacity:0.6; }
 .km-ops { display:flex; gap:5px; align-items:stretch; }
 .km-input { flex:1; background:rgba(0,0,0,0.3) !important; border:1px solid rgba(255,255,255,0.1) !important; border-radius:7px; color:#fff !important; font-size:16px; font-weight:700; text-align:center; padding:0 !important; height:34px !important; outline:none; -webkit-appearance:none; appearance:none; }
 .km-input:focus { background:rgba(0,0,0,0.6); }
@@ -82,7 +80,6 @@ input::placeholder { color:#2a6a8a; }
 .op-sub:active { background:#2a0800; }
 .raz-btn { background:#000; border:1px solid rgba(255,255,255,0.08); border-radius:7px; color:rgba(255,255,255,0.3); font-size:9px; font-weight:600; height:34px; min-height:34px; padding:0 7px; cursor:pointer; align-self:stretch; }
 
-.shoe-name-input::placeholder { color:#888 !important; opacity:1; }
 .km-input::placeholder { color:#888 !important; opacity:1; }
 
 .sort-btn { background:#0a0a0a; border:1px solid #666; border-radius:8px; color:#888; font-size:10px; font-weight:700; padding:5px 10px; cursor:pointer; flex-shrink:0; }
@@ -118,7 +115,7 @@ input::placeholder { color:#2a6a8a; }
 /* Bouton ajouter chaussure */
 .add-shoe-btn {
   display:flex; align-items:center; justify-content:center; gap:8px;
-  background:transparent; border:2px dashed #666; border-radius:14px;
+  background:transparent; border:1px dashed #666; border-radius:14px;
   color:#888; font-size:13px; font-weight:700; padding:14px;
   cursor:pointer; width:100%; flex-shrink:0;
   transition: border-color 0.2s, color 0.2s;
@@ -149,8 +146,6 @@ input::placeholder { color:#2a6a8a; }
 .shoe-palette-0 .op-add { background:transparent; border:1px solid #1a4a8e; color:#4d9fff; }
 .shoe-palette-0 .op-add:active { background:#0a2a5e; }
 .shoe-palette-0 .km-bar-fill { background:linear-gradient(90deg,#0a3a8e,#4d9fff) !important; }
-.shoe-palette-0 .shoe-name-input:focus { border-color:#4d9fff; }
-
 .shoe-palette-1 { background:linear-gradient(135deg,#232016,#2e2a1a); border:1px solid #5a5030; }
 .shoe-palette-1 .km-total { color:#c8b878; }
 .shoe-palette-1 .km-input { border-color:#6a6040; color:#c8b878; }
@@ -158,8 +153,6 @@ input::placeholder { color:#2a6a8a; }
 .shoe-palette-1 .op-add { background:transparent; border:1px solid #6a6040; color:#c8b878; }
 .shoe-palette-1 .op-add:active { background:#2a2010; }
 .shoe-palette-1 .km-bar-fill { background:linear-gradient(90deg,#5a4a20,#c8b878) !important; }
-.shoe-palette-1 .shoe-name-input:focus { border-color:#c8b878; }
-
 .shoe-palette-2 { background:linear-gradient(135deg,#1e0830,#2a0c4a); border:1px solid #6030aa; }
 .shoe-palette-2 .km-total { color:#cc88ff; }
 .shoe-palette-2 .km-input { border-color:#6a3aaa; color:#cc88ff; }
@@ -167,8 +160,6 @@ input::placeholder { color:#2a6a8a; }
 .shoe-palette-2 .op-add { background:transparent; border:1px solid #6a3aaa; color:#cc88ff; }
 .shoe-palette-2 .op-add:active { background:#2a1050; }
 .shoe-palette-2 .km-bar-fill { background:linear-gradient(90deg,#5a1a9e,#cc88ff) !important; }
-.shoe-palette-2 .shoe-name-input:focus { border-color:#cc88ff; }
-
 .shoe-palette-3 { background:linear-gradient(135deg,#1e0c0c,#2c1414); border:1px solid #8a2a2a; }
 .shoe-palette-3 .km-total { color:#ff8888; }
 .shoe-palette-3 .km-input { border-color:#aa4040; color:#ff8888; }
@@ -176,8 +167,6 @@ input::placeholder { color:#2a6a8a; }
 .shoe-palette-3 .op-add { background:transparent; border:1px solid #aa4040; color:#ff8888; }
 .shoe-palette-3 .op-add:active { background:#2a1010; }
 .shoe-palette-3 .km-bar-fill { background:linear-gradient(90deg,#9e1a1a,#ff8888) !important; }
-.shoe-palette-3 .shoe-name-input:focus { border-color:#ff8888; }
-
 .shoe-palette-4 { background:linear-gradient(135deg,#081e18,#0a2c24); border:1px solid #188060; }
 .shoe-palette-4 .km-total { color:#44ffcc; }
 .shoe-palette-4 .km-input { border-color:#1a8a6a; color:#44ffcc; }
@@ -185,8 +174,6 @@ input::placeholder { color:#2a6a8a; }
 .shoe-palette-4 .op-add { background:transparent; border:1px solid #1a8a6a; color:#44ffcc; }
 .shoe-palette-4 .op-add:active { background:#0a2a20; }
 .shoe-palette-4 .km-bar-fill { background:linear-gradient(90deg,#0a9e7a,#44ffcc) !important; }
-.shoe-palette-4 .shoe-name-input:focus { border-color:#44ffcc; }
-
 .shoe-palette-5 { background:linear-gradient(135deg,#1e1a00,#2c2600); border:1px solid #806600; }
 .shoe-palette-5 .km-total { color:#ffdd44; }
 .shoe-palette-5 .km-input { border-color:#aa8800; color:#ffdd44; }
@@ -194,8 +181,6 @@ input::placeholder { color:#2a6a8a; }
 .shoe-palette-5 .op-add { background:transparent; border:1px solid #aa8800; color:#ffdd44; }
 .shoe-palette-5 .op-add:active { background:#2a2000; }
 .shoe-palette-5 .km-bar-fill { background:linear-gradient(90deg,#9e8000,#ffdd44) !important; }
-.shoe-palette-5 .shoe-name-input:focus { border-color:#ffdd44; }
-
 /* ── RECORD PERSONNEL ── */
 #pr-box-wrap { background:#000; border-radius:14px; flex-shrink:0; }
 .pr-box {
@@ -226,7 +211,7 @@ input::placeholder { color:#2a6a8a; }
 .mtab { flex:1; text-align:center; padding:6px 4px; background:#030303; border:1px solid #888; border-radius:8px; font-size:9px; font-weight:700; color:#666; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; line-height:1; }
 .mtab i { font-size:15px; }
 .mtab.on { background:#001a2e; border-color:#009fcc; color:#00c8ff; }
-.canvas-wrap { flex-shrink:0; position:relative; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; border-radius:12px; background:#030303; }
+.canvas-wrap { flex-shrink:0; position:relative; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; border-radius:12px; background:transparent; }
 .canvas-wrap::-webkit-scrollbar { display:none; }
 canvas#chart { display:block; height:180px; border-radius:12px; }
 .chart-scroll-hint { text-align:center; font-size:9px; color:#888; margin-top:2px; flex-shrink:0; }
@@ -589,26 +574,6 @@ function showTab(t) {
   if (t==='graph') renderGraph();
 }
 
-/* ── SWIPE ENTRE ONGLETS ── */
-const tabOrder = ['calc', 'graph', 'shoes'];
-let _swipeStartX = 0;
-let _swipeStartY = 0;
-
-document.getElementById('app').addEventListener('touchstart', e => {
-  _swipeStartX = e.touches[0].clientX;
-  _swipeStartY = e.touches[0].clientY;
-}, { passive: true });
-
-document.getElementById('app').addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - _swipeStartX;
-  const dy = e.changedTouches[0].clientY - _swipeStartY;
-  if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
-  const current = localStorage.getItem('lastTab') || 'calc';
-  const idx = tabOrder.indexOf(current);
-  if (dx < 0 && idx < tabOrder.length - 1) showTab(tabOrder[idx + 1]);
-  if (dx > 0 && idx > 0) showTab(tabOrder[idx - 1]);
-}, { passive: true });
-
 /* ── CALCULATEUR ── */
 let mode = localStorage.getItem('lastMode') || 'dc';
 let lastResult = null;
@@ -758,6 +723,7 @@ function setMetric(m) {
 }
 
 function fmtDate(iso) { const [y,mo,d]=iso.split('-'); return d+'/'+mo+'/'+y.slice(2); }
+function fmtDateShort(iso) { const [,mo,d]=iso.split('-'); return d+'/'+mo; }
 function fmtChrono(sec) {
   const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=Math.round(sec%60);
   return h>0 ? h+'h'+pad(m)+'\''+pad(s)+'"' : m+'\''+pad(s)+'"';
@@ -788,7 +754,7 @@ function renderGraph() {
         <div style="display:flex;align-items:center;gap:8px;padding:${isFirst?'6px 4px':'4px 4px'};border-bottom:${i<2?'1px solid rgba(255,255,255,0.04)':'none'}">
           <div style="font-size:${isFirst?'14px':'11px'};flex-shrink:0;width:20px;text-align:center">${medals[i]}</div>
           <div style="font-size:${isFirst?'10px':'9px'};color:${isFirst?'#3a6a8a':'#2a4a5a'};flex-shrink:0;width:46px">${d}/${mo}/${y.slice(2)}</div>
-          <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;text-align:right">
+          <div style="flex:1;display:grid;grid-template-columns:1.2fr 1.4fr 1.2fr 1.2fr;gap:6px;text-align:right">
             <div style="font-size:${isFirst?'13px':'10px'};font-weight:800;color:${isFirst?'#00c8ff':'#2a6a8a'}">${rnd(r.dist,1)}<span style="font-size:${isFirst?'8px':'7px'};opacity:0.6"> km</span></div>
             <div style="font-size:${isFirst?'13px':'10px'};font-weight:700;color:${isFirst?'#00c8ff':'#2a6a8a'}">${fmtChrono(r.tsec)}</div>
             <div style="font-size:${isFirst?'13px':'10px'};font-weight:700;color:${isFirst?'#00c8ff':'#2a6a8a'}">${rnd(r.vit,1)}<span style="font-size:${isFirst?'8px':'7px'};opacity:0.6"> km/h</span></div>
@@ -803,7 +769,7 @@ function renderGraph() {
           <div class="pr-title"><i class="fa-solid fa-medal"></i> Meilleures performances</div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:16px;margin-bottom:4px;padding:0 4px">
-          <div style="flex:1;display:grid;grid-template-columns:20px 36px 1fr 1fr 1fr 1fr;gap:4px;font-size:8px;color:#3a6a8a;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;text-align:right">
+          <div style="flex:1;display:grid;grid-template-columns:20px 46px 1.2fr 1.4fr 1.2fr 1.2fr;gap:6px;font-size:8px;color:#3a6a8a;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;text-align:right">
             <div></div><div></div><div>km</div><div>chrono</div><div>km/h</div><div>allure</div>
           </div>
         </div>
@@ -992,7 +958,7 @@ function drawChart(runs) {
   const canvas = document.getElementById('chart');
 
   const VISIBLE = 8;
-  const containerW = wrap.parentElement.clientWidth - 24;
+  const containerW = wrap.clientWidth;
   const H = 180;
   const PT_SPACING = containerW / VISIBLE;
 
@@ -1009,7 +975,7 @@ function drawChart(runs) {
   ctx.scale(devicePixelRatio, devicePixelRatio);
   const W = totalW;
 
-  const PAD = { top: 22, right: 10, bottom: 40, left: 10 };
+  const PAD = { top: 28, right: 20, bottom: 40, left: 20 };
   const gW = W - PAD.left - PAD.right;
   const gH = H - PAD.top - PAD.bottom;
 
@@ -1033,7 +999,7 @@ function drawChart(runs) {
     val: vals[i], date: r.date
   }));
 
-  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, W, H);
 
   // Grille horizontale fine
   ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
@@ -1059,23 +1025,26 @@ function drawChart(runs) {
     ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
   }
 
-  // Ligne de tendance (régression linéaire) — vitesse seulement — dessinée AVANT la courbe
+  // Courbe de tendance — moyenne mobile sur 8 sorties (vitesse seulement)
   if (pts.length >= 3 && currentMetric === 'vit') {
-    const n = pts.length;
-    const sumX = pts.reduce((s, p) => s + p.x, 0);
-    const sumY = pts.reduce((s, p) => s + p.y, 0);
-    const sumXY = pts.reduce((s, p) => s + p.x * p.y, 0);
-    const sumXX = pts.reduce((s, p) => s + p.x * p.x, 0);
-    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-    const intercept = (sumY - slope * sumX) / n;
-    const trendY1 = slope * pts[0].x + intercept;
-    const trendY2 = slope * pts[n-1].x + intercept;
+    const window = 8;
+    const movAvg = pts.map((p, i) => {
+      const start = Math.max(0, i - Math.floor(window / 2));
+      const end = Math.min(pts.length, start + window);
+      const slice = pts.slice(start, end);
+      const avgY = slice.reduce((s, pp) => s + pp.y, 0) / slice.length;
+      return { x: p.x, y: avgY };
+    });
     ctx.beginPath();
     ctx.strokeStyle = 'rgba(255,255,255,0.55)';
     ctx.lineWidth = 1;
     ctx.setLineDash([1, 2]);
-    ctx.moveTo(pts[0].x, trendY1);
-    ctx.lineTo(pts[n-1].x, trendY2);
+    ctx.lineJoin = 'round';
+    ctx.moveTo(movAvg[0].x, movAvg[0].y);
+    for (let i = 0; i < movAvg.length - 1; i++) {
+      const cpX = (movAvg[i].x + movAvg[i+1].x) / 2;
+      ctx.bezierCurveTo(cpX, movAvg[i].y, cpX, movAvg[i+1].y, movAvg[i+1].x, movAvg[i+1].y);
+    }
     ctx.stroke();
     ctx.setLineDash([]);
   }
@@ -1106,12 +1075,10 @@ function drawChart(runs) {
     ctx.fillStyle = '#00c8ff'; ctx.font = '700 9px -apple-system,sans-serif'; ctx.textAlign = 'center';
     ctx.fillText(labelFn(p.val), p.x, p.y - 11);
     // Date en dessous
-    ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.font = '8px -apple-system,sans-serif';
+    ctx.fillStyle = '#666666'; ctx.font = '8px -apple-system,sans-serif';
     const dx = Math.max(PAD.left + 16, Math.min(PAD.left + gW - 16, p.x));
-    ctx.fillText(fmtDate(p.date), dx, PAD.top + gH + 14);
+    ctx.fillText(fmtDateShort(p.date), dx, PAD.top + gH + 14);
   });
-
-
 
   // Scroll vers la droite (courses les plus récentes)
   wrap.scrollLeft = wrap.scrollWidth;
@@ -1203,15 +1170,6 @@ function pickNewShoeColor(color, el) {
   el.style.border = '2px solid #fff';
 }
 
-function selectNewShoeColor(color) {
-  _newShoeColor = color;
-  document.querySelectorAll('[id^="new-shoe-color-"]').forEach(el => {
-    el.style.border = '2px solid transparent';
-  });
-  const id = 'new-shoe-color-' + color.replace('#','');
-  const el = document.getElementById(id);
-  if (el) el.style.border = '2px solid #fff';
-}
 
 function openNewShoeModal() {
   _maxShoeIsNew = true;
@@ -1232,6 +1190,7 @@ function closeMaxModal() {
   document.getElementById('modal-max-km').classList.remove('on');
   _maxShoeId = null;
   _maxShoeIsNew = false;
+  _newShoeColor = null;
 }
 
 function saveMaxKm() {
@@ -1268,13 +1227,6 @@ function updateShoeMax(id, val, name) {
     if (name !== undefined) shoe.name = name;
     saveShoes(shoes); renderShoes();
   }
-}
-
-function updateShoeName(id, name) {
-  id = +id;
-  const shoes = loadShoes();
-  const shoe = shoes.find(s => s.id === id);
-  if (shoe) { shoe.name = name; saveShoes(shoes); }
 }
 
 function opShoeKm(id, sign) {
