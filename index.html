@@ -531,6 +531,11 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
         <span style="font-size:11px;color:#888">Couleur sélectionnée</span>
       </div>
     </div>
+    <div id="max-km-edit-name-wrap" style="margin-bottom:10px;display:none">
+      <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;text-align:left">Nom</div>
+      <input type="text" id="max-km-edit-name" placeholder="Nom de la chaussure" maxlength="30"
+        style="width:100%;background:#000;border:1px solid #1a3a55;border-radius:8px;color:#00c8ff;font-size:16px;font-weight:700;text-align:left;padding:6px 10px;outline:none;height:38px;box-sizing:border-box">
+    </div>
     <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;text-align:left">Limite (km)</div>
     <input type="number" id="max-km-input" min="100" step="50" inputmode="numeric"
       style="width:100%;background:#000;border:1px solid #1a3a55;border-radius:8px;color:#00c8ff;font-size:16px;font-weight:800;text-align:center;padding:10px;outline:none;height:52px;box-sizing:border-box">
@@ -1179,8 +1184,12 @@ let _maxShoeIsNew = false;
 function openMaxModal(id, current) {
   _maxShoeId = id;
   _maxShoeIsNew = false;
-  document.getElementById('max-km-title').textContent = 'Limite de km';
+  const shoes = loadShoes();
+  const shoe = shoes.find(s => s.id === +id);
+  document.getElementById('max-km-title').textContent = 'Modifier la paire';
   document.getElementById('max-km-name-wrap').style.display = 'none';
+  document.getElementById('max-km-edit-name-wrap').style.display = 'block';
+  document.getElementById('max-km-edit-name').value = shoe?.name || '';
   document.getElementById('max-km-input').value = current;
   document.getElementById('modal-max-km').classList.add('on');
 }
@@ -1210,6 +1219,7 @@ function openNewShoeModal() {
   _newShoeColor = '#4d9fff';
   document.getElementById('max-km-title').textContent = 'Nouvelle paire';
   document.getElementById('max-km-name-wrap').style.display = 'block';
+  document.getElementById('max-km-edit-name-wrap').style.display = 'none';
   document.getElementById('max-km-name').value = '';
   document.getElementById('max-km-input').value = DEFAULT_MAX;
   document.getElementById('new-shoe-color-preview').style.background = _newShoeColor;
@@ -1241,18 +1251,23 @@ function saveMaxKm() {
       container.scrollTop = container.scrollHeight;
     }, 50);
   } else {
-    updateShoeMax(_maxShoeId, val);
+    const newName = document.getElementById('max-km-edit-name').value.trim();
+    updateShoeMax(_maxShoeId, val, newName);
     closeMaxModal();
   }
 }
 
-function updateShoeMax(id, val) {
+function updateShoeMax(id, val, name) {
   id = +id;
   const max = parseInt(val);
   if (!max || max < 100) return;
   const shoes = loadShoes();
   const shoe = shoes.find(s => s.id === id);
-  if (shoe) { shoe.max = max; saveShoes(shoes); renderShoes(); }
+  if (shoe) {
+    shoe.max = max;
+    if (name !== undefined) shoe.name = name;
+    saveShoes(shoes); renderShoes();
+  }
 }
 
 function updateShoeName(id, name) {
