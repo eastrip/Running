@@ -29,7 +29,7 @@ html, body { height: 100%; width: 100%; background: #000; color: #fff; font-fami
 .unit { font-size:8px; color:#888; text-align:center; margin-bottom:1px; font-weight:600; text-transform:uppercase; }
 
 input[type="number"], input[type="text"] {
-  width:100%; background:#000; border:1.5px solid #007eaa; border-radius:7px;
+  width:100%; background:#000; border:1px solid #007eaa; border-radius:7px;
   color:#00c8ff; font-size:16px; font-weight:700; text-align:center;
   padding:5px 2px; outline:none; -webkit-appearance:none; appearance:none; height:38px;
 }
@@ -37,7 +37,7 @@ input[type="text"] { font-size:16px; }
 input:focus { border-color:#00c8ff; background:#001a2e; }
 input::placeholder { color:#2a6a8a; }
 
-.rf { width:100%; background:#000; border:1.5px solid #1a3a55; border-radius:7px; color:#009fcc; font-size:16px; font-weight:700; text-align:center; height:38px; display:flex; align-items:center; justify-content:center; box-sizing:border-box; }
+.rf { width:100%; background:#000; border:1px solid #1a3a55; border-radius:7px; color:#009fcc; font-size:16px; font-weight:700; text-align:center; height:38px; display:flex; align-items:center; justify-content:center; box-sizing:border-box; }
 .rf.hi { border-color:#00c8ff; background:#001a2e; color:#00c8ff; }
 .rf.dim { opacity:0.3; }
 
@@ -52,9 +52,9 @@ input::placeholder { color:#2a6a8a; }
   0%, 85%, 100% { background:#001a2e; box-shadow:none; }
   90% { background:#004a70; box-shadow:0 0 10px #00c8ff66; }
 }
-.save-run-btn { flex:2; background:#001a2e; border:1.5px solid #009fcc; border-radius:12px; color:#00c8ff; font-size:12px; font-weight:700; height:42px; cursor:pointer; animation:flash-btn 5s ease-in-out infinite; }
+.save-run-btn { flex:2; background:#001a2e; border:1px solid #009fcc; border-radius:12px; color:#00c8ff; font-size:12px; font-weight:700; height:42px; cursor:pointer; animation:flash-btn 5s ease-in-out infinite; }
 .save-run-btn:active { animation:none; background:#002a45; }
-.reset-btn { flex:1; background:#000; border:1.5px solid #888; border-radius:12px; color:#888; font-size:13px; font-weight:600; height:42px; cursor:pointer; }
+.reset-btn { flex:1; background:#000; border:1px solid #888; border-radius:12px; color:#888; font-size:13px; font-weight:600; height:42px; cursor:pointer; }
 .error { background:#1a0000; border:1px solid #cc0000; border-radius:8px; color:#ff5555; font-size:11px; padding:5px 10px; flex-shrink:0; display:none; }
 
 /* ── CHAUSSURES ── */
@@ -64,7 +64,7 @@ input::placeholder { color:#2a6a8a; }
 .shoe-header { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
 .shoe-delete-btn { width:26px; height:26px; background:transparent; border:1px solid #4a0000; border-radius:6px; color:#ff3333; font-size:14px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .shoe-delete-btn:active { background:#1a0000; }
-.shoe-color-btn { width:22px; height:22px; border-radius:50%; border:2px solid rgba(255,255,255,0.2); cursor:pointer; flex-shrink:0; }
+.shoe-color-btn { width:22px; height:22px; border-radius:50%; border:1px solid rgba(255,255,255,0.2); cursor:pointer; flex-shrink:0; }
 
 .km-total { font-size:22px; font-weight:800; text-align:center; line-height:1; margin-bottom:2px; }
 .km-total span { font-size:11px; font-weight:600; opacity:0.6; }
@@ -84,7 +84,7 @@ input::placeholder { color:#2a6a8a; }
 
 .sort-btn { background:#0a0a0a; border:1px solid #666; border-radius:8px; color:#888; font-size:10px; font-weight:700; padding:5px 10px; cursor:pointer; flex-shrink:0; }
 .sort-btn.on { background:#001a2e; border-color:#009fcc; color:#00c8ff; }
-#sort_reverse { color:#aaa !important; background:#0a0a0a !important; border:0.75px solid #aaa !important; }
+#sort_reverse { color:#aaa !important; background:#0a0a0a !important; border:1px solid #aaa !important; }
 
 /* Bouton historique chaussures */
 .shoe-history-btn {
@@ -135,7 +135,7 @@ input::placeholder { color:#2a6a8a; }
 .color-cell:active { transform:scale(0.85); }
 .color-cell.sel { outline:3px solid #fff; outline-offset:1px; z-index:1; position:relative; border-radius:4px; }
 .color-preview-bar { display:flex; align-items:center; gap:12px; margin-top:14px; }
-.color-preview-swatch { width:44px; height:44px; border-radius:10px; flex-shrink:0; border:2px solid rgba(255,255,255,0.15); }
+.color-preview-swatch { width:44px; height:44px; border-radius:10px; flex-shrink:0; border:1px solid rgba(255,255,255,0.15); }
 .color-preview-label { font-size:12px; color:#888; flex:1; }
 
 /* Palettes de couleurs pour les chaussures */
@@ -185,7 +185,7 @@ input::placeholder { color:#2a6a8a; }
 #pr-box-wrap { background:#000; border-radius:14px; flex-shrink:0; }
 .pr-box {
   background:linear-gradient(135deg,#0a1520,#0a1a18);
-  border:1.5px solid #1a4a6e;
+  border:1px solid #1a4a6e;
   border-radius:12px;
   padding:10px 12px;
   flex-shrink:0;
@@ -231,7 +231,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 
 .shoe-pick-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:#0a0a0a; border:1px solid #1a1a1a; border-radius:10px; cursor:pointer; }
 .shoe-pick-item:active { background:#001a2e; border-color:#009fcc; }
-.shoe-pick-swatch { width:26px; height:26px; border-radius:50%; flex-shrink:0; border:2px solid rgba(255,255,255,0.15); }
+.shoe-pick-swatch { width:26px; height:26px; border-radius:50%; flex-shrink:0; border:1px solid rgba(255,255,255,0.15); }
 .shoe-pick-name { flex:1; font-size:13px; font-weight:700; color:#fff; }
 .shoe-pick-km { font-size:11px; color:#888; font-weight:600; flex-shrink:0; }
 
@@ -512,7 +512,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;text-align:left">Couleur</div>
       <div id="new-shoe-color-grid" style="display:grid;grid-template-columns:repeat(12,1fr);gap:3px;border-radius:8px;overflow:hidden;margin-bottom:8px"></div>
       <div style="display:flex;align-items:center;gap:10px">
-        <div id="new-shoe-color-preview" style="width:32px;height:32px;border-radius:8px;border:2px solid rgba(255,255,255,0.15);background:#4d9fff;flex-shrink:0"></div>
+        <div id="new-shoe-color-preview" style="width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:#4d9fff;flex-shrink:0"></div>
         <span style="font-size:11px;color:#888">Couleur sélectionnée</span>
       </div>
     </div>
