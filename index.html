@@ -1054,21 +1054,7 @@ function drawChart(runs) {
     ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
   }
 
-  // Courbe lissée (Bézier cubique)
-  ctx.beginPath(); ctx.strokeStyle = '#00c8ff'; ctx.lineWidth = 1;
-  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  if (pts.length === 1) {
-    ctx.moveTo(pts[0].x, pts[0].y);
-  } else {
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i = 0; i < pts.length - 1; i++) {
-      const cpX = (pts[i].x + pts[i+1].x) / 2;
-      ctx.bezierCurveTo(cpX, pts[i].y, cpX, pts[i+1].y, pts[i+1].x, pts[i+1].y);
-    }
-  }
-  ctx.stroke();
-
-  // Ligne de tendance (régression linéaire) — vitesse et allure seulement
+  // Ligne de tendance (régression linéaire) — vitesse seulement — dessinée AVANT la courbe
   if (pts.length >= 3 && currentMetric === 'vit') {
     const n = pts.length;
     const sumX = pts.reduce((s, p) => s + p.x, 0);
@@ -1088,6 +1074,20 @@ function drawChart(runs) {
     ctx.stroke();
     ctx.setLineDash([]);
   }
+
+  // Courbe lissée (Bézier cubique)
+  ctx.beginPath(); ctx.strokeStyle = '#00c8ff'; ctx.lineWidth = 1;
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  if (pts.length === 1) {
+    ctx.moveTo(pts[0].x, pts[0].y);
+  } else {
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const cpX = (pts[i].x + pts[i+1].x) / 2;
+      ctx.bezierCurveTo(cpX, pts[i].y, cpX, pts[i+1].y, pts[i+1].x, pts[i+1].y);
+    }
+  }
+  ctx.stroke();
 
   // Points + labels
   pts.forEach(p => {
