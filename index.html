@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Course</title>
+<title>Running</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -361,7 +361,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       <button class="shoe-history-btn" onclick="openShoeHistory()"><i class="fa-solid fa-list-ul"></i> Historique des km</button>
     </div>
     <div class="shoes-container" id="shoes-container"></div>
-    <button class="add-shoe-btn" onclick="addShoe()">+ Ajouter une paire</button>
+    <button class="add-shoe-btn" onclick="openNewShoeModal()">+ Ajouter une paire</button>
   </div>
 
   <!-- Modale historique chaussures -->
@@ -512,6 +512,31 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <div class="bk-actions" style="margin-top:14px">
       <button class="bk-ok" style="flex:1" onclick="closeEditRun()">Annuler</button>
       <button class="bk-copy" style="flex:2" onclick="saveEditRun()"><i class="fa-solid fa-check"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Limite km chaussure -->
+<div class="bk-modal" id="modal-max-km" onclick="closeMaxModal()">
+  <div class="bk-box" style="max-width:300px;text-align:center" onclick="event.stopPropagation()">
+    <h3 id="max-km-title">Nouvelle paire</h3>
+    <div id="max-km-name-wrap" style="margin-bottom:10px">
+      <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;text-align:left">Nom</div>
+      <input type="text" id="max-km-name" placeholder="Nom de la chaussure" maxlength="30"
+        style="width:100%;background:#000;border:1px solid #1a3a55;border-radius:8px;color:#00c8ff;font-size:16px;font-weight:700;text-align:left;padding:6px 10px;outline:none;height:38px;box-sizing:border-box">
+      <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;text-align:left">Couleur</div>
+      <div id="new-shoe-color-grid" style="display:grid;grid-template-columns:repeat(12,1fr);gap:3px;border-radius:8px;overflow:hidden;margin-bottom:8px"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="new-shoe-color-preview" style="width:32px;height:32px;border-radius:8px;border:2px solid rgba(255,255,255,0.15);background:#4d9fff;flex-shrink:0"></div>
+        <span style="font-size:11px;color:#888">Couleur sélectionnée</span>
+      </div>
+    </div>
+    <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;text-align:left">Limite (km)</div>
+    <input type="number" id="max-km-input" min="100" step="50" inputmode="numeric"
+      style="width:100%;background:#000;border:1px solid #1a3a55;border-radius:8px;color:#00c8ff;font-size:16px;font-weight:800;text-align:center;padding:10px;outline:none;height:52px;box-sizing:border-box">
+    <div class="bk-actions" style="margin-top:12px">
+      <button class="bk-ok" onclick="closeMaxModal()">Annuler</button>
+      <button class="bk-copy" onclick="saveMaxKm()"><i class="fa-solid fa-check"></i> OK</button>
     </div>
   </div>
 </div>
@@ -1057,7 +1082,7 @@ function drawChart(runs) {
     ctx.beginPath();
     ctx.strokeStyle = 'rgba(255,255,255,0.55)';
     ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
+    ctx.setLineDash([1, 2]);
     ctx.moveTo(pts[0].x, trendY1);
     ctx.lineTo(pts[n-1].x, trendY2);
     ctx.stroke();
@@ -1092,7 +1117,7 @@ function drawChart(runs) {
 }
 
 /* ── CHAUSSURES (dynamique) ── */
-const MAX = 800;
+const DEFAULT_MAX = 800;
 const NUM_PALETTES = 6;
 
 function loadShoes() {
@@ -1148,6 +1173,88 @@ function deleteShoe(id) {
   });
 }
 
+let _maxShoeId = null;
+let _maxShoeIsNew = false;
+
+function openMaxModal(id, current) {
+  _maxShoeId = id;
+  _maxShoeIsNew = false;
+  document.getElementById('max-km-title').textContent = 'Limite de km';
+  document.getElementById('max-km-name-wrap').style.display = 'none';
+  document.getElementById('max-km-input').value = current;
+  document.getElementById('modal-max-km').classList.add('on');
+}
+
+let _newShoeColor = null;
+
+function pickNewShoeColor(color, el) {
+  _newShoeColor = color;
+  document.getElementById('new-shoe-color-preview').style.background = color;
+  el.parentElement.querySelectorAll('div').forEach(d => d.style.border = '2px solid transparent');
+  el.style.border = '2px solid #fff';
+}
+
+function selectNewShoeColor(color) {
+  _newShoeColor = color;
+  document.querySelectorAll('[id^="new-shoe-color-"]').forEach(el => {
+    el.style.border = '2px solid transparent';
+  });
+  const id = 'new-shoe-color-' + color.replace('#','');
+  const el = document.getElementById(id);
+  if (el) el.style.border = '2px solid #fff';
+}
+
+function openNewShoeModal() {
+  _maxShoeIsNew = true;
+  _maxShoeId = null;
+  _newShoeColor = '#4d9fff';
+  document.getElementById('max-km-title').textContent = 'Nouvelle paire';
+  document.getElementById('max-km-name-wrap').style.display = 'block';
+  document.getElementById('max-km-name').value = '';
+  document.getElementById('max-km-input').value = DEFAULT_MAX;
+  document.getElementById('new-shoe-color-preview').style.background = _newShoeColor;
+  const grid = document.getElementById('new-shoe-color-grid');
+  grid.innerHTML = COLOR_PALETTE.map(c => `<div style="aspect-ratio:1;background:${c};cursor:pointer;border-radius:3px;border:${c===_newShoeColor?'2px solid #fff':'2px solid transparent'}" onclick="pickNewShoeColor('${c}', this)"></div>`).join('');
+  document.getElementById('modal-max-km').classList.add('on');
+}
+
+function closeMaxModal() {
+  document.getElementById('modal-max-km').classList.remove('on');
+  _maxShoeId = null;
+  _maxShoeIsNew = false;
+}
+
+function saveMaxKm() {
+  const val = parseInt(document.getElementById('max-km-input').value);
+  if (!val || val < 100) return;
+  if (_maxShoeIsNew) {
+    const name = document.getElementById('max-km-name').value.trim();
+    const color = _newShoeColor || '#4d9fff';
+    const shoes = loadShoes();
+    const newShoe = { id: newShoeId(), name, total: 0, max: val, color };
+    shoes.push(newShoe);
+    saveShoes(shoes);
+    closeMaxModal();
+    renderShoes();
+    setTimeout(() => {
+      const container = document.getElementById('sc_shoes');
+      container.scrollTop = container.scrollHeight;
+    }, 50);
+  } else {
+    updateShoeMax(_maxShoeId, val);
+    closeMaxModal();
+  }
+}
+
+function updateShoeMax(id, val) {
+  id = +id;
+  const max = parseInt(val);
+  if (!max || max < 100) return;
+  const shoes = loadShoes();
+  const shoe = shoes.find(s => s.id === id);
+  if (shoe) { shoe.max = max; saveShoes(shoes); renderShoes(); }
+}
+
 function updateShoeName(id, name) {
   id = +id;
   const shoes = loadShoes();
@@ -1198,6 +1305,7 @@ function renderShoes() {
 
   container.innerHTML = shoes.map((shoe, idx) => {    const palette = idx % NUM_PALETTES;
     const accent = shoe.color || null; // couleur perso si définie
+    const MAX = shoe.max || DEFAULT_MAX;
     const pct = Math.min(100, (shoe.total / MAX) * 100);
     const barColor = pct >= 90 ? '#ff4444' : pct >= 70 ? '#ffaa00' : (accent || null);
     const totalFmt = rnd(shoe.total, 1);
@@ -1216,18 +1324,13 @@ function renderShoes() {
 
     return `
     <div style="background:#000;border-radius:12px;flex-shrink:0">
-    <div class="shoe-card shoe-palette-${palette}" ${accent ? `style="${bgStyle};${borderStyle}"` : ''}>
+    <div class="${accent ? 'shoe-card' : `shoe-card shoe-palette-${palette}`}" ${accent ? `style="${bgStyle};${borderStyle}"` : ''}>
       <div class="shoe-header">
         <button class="shoe-color-btn" onclick="openColorModal(${shoe.id})"
           style="background:${shoe.color||'#555'}"
           title="Changer la couleur"></button>
-        <input class="shoe-name-input" type="text"
-          id="shoe_name_${shoe.id}"
-          placeholder="Nom de la chaussure"
-          value="${shoe.name.replace(/"/g,'&quot;')}"
-          oninput="updateShoeName(${shoe.id}, this.value)"
-          maxlength="30"
-          style="color:${accent||'#fff'};border-color:${accent ? accent+'88' : 'rgba(255,255,255,0.1)'}">
+        <div style="flex:1;font-size:15px;font-weight:700;color:#fff;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shoe.name||'Sans nom'}</div>
+        <button class="run-edit" onclick="openMaxModal(${shoe.id}, ${MAX})" title="Limite km" style="width:26px;height:26px"><i class="fa-solid fa-pen"></i></button>
         <button class="shoe-delete-btn" onclick="deleteShoe(${shoe.id})" title="Supprimer"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="km-total" ${accentStyle?`style="${accentStyle}"`:''}>${totalFmt} <span>km</span></div>
@@ -1242,7 +1345,7 @@ function renderShoes() {
         <input class="km-input" type="number" id="shoe_val_${shoe.id}" placeholder="km" min="0" step="0.1" inputmode="decimal"
           style="${accent ? `color:${accent};border-color:${accent}55;` : ''}--ph-color:#666">
         <button class="op-btn op-add" onclick="opShoeKm(${shoe.id},+1)"
-          ${accent ? `style="color:${accent};border:1px solid ${accent}88;"` : ''}>+</button>
+          ${accent ? `style="color:${accent};border:1px solid ${accent}88;background:transparent;"` : ''}>+</button>
         <button class="raz-btn" onclick="resetShoeKm(${shoe.id})">RAZ</button>
       </div>
     </div>
