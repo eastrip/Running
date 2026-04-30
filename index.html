@@ -70,7 +70,7 @@ input::placeholder { color:var(--accent-dark); }
 .shoe-header { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
 .shoe-delete-btn { width:26px; height:26px; background:transparent; border:1px solid #4a0000; border-radius:6px; color:#ff3333; font-size:14px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .shoe-delete-btn:active { background:#1a0000; }
-.shoe-color-btn { width:22px; height:22px; border-radius:50%; border:1px solid rgba(255,255,255,0.2); cursor:pointer; flex-shrink:0; }
+.shoe-color-btn { width:22px; height:22px; border-radius:50%; border:none; cursor:pointer; flex-shrink:0; }
 
 .km-total { font-size:22px; font-weight:800; text-align:center; line-height:1; margin-bottom:2px; }
 .km-total span { font-size:11px; font-weight:600; opacity:0.6; }
@@ -136,12 +136,12 @@ input::placeholder { color:var(--accent-dark); }
 .color-sheet-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .color-sheet-title { font-size:16px; font-weight:700; color:#fff; text-align:center; flex:1; }
 .color-sheet-close { width:30px; height:30px; background:#3a3a3c; border:none; border-radius:50%; color:#fff; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-.color-grid { display:grid; grid-template-columns:repeat(12,1fr); gap:3px; border-radius:12px; overflow:hidden; }
-.color-cell { aspect-ratio:1; cursor:pointer; border-radius:3px; transition:transform 0.1s; }
+.color-grid { display:grid; grid-template-columns:repeat(12,1fr); gap:3px; border-radius:0; overflow:visible; }
+.color-cell { aspect-ratio:1; cursor:pointer; border-radius:2px; transition:transform 0.1s; }
 .color-cell:active { transform:scale(0.85); }
-.color-cell.sel { outline:3px solid #fff; outline-offset:1px; z-index:1; position:relative; border-radius:4px; }
+.color-cell.sel { box-shadow:inset 0 0 0 2px #fff; z-index:1; position:relative; }
 .color-preview-bar { display:flex; align-items:center; gap:12px; margin-top:14px; }
-.color-preview-swatch { width:44px; height:44px; border-radius:10px; flex-shrink:0; border:1px solid rgba(255,255,255,0.15); }
+.color-preview-swatch { width:44px; height:44px; border-radius:10px; flex-shrink:0; border:none; }
 .color-preview-label { font-size:12px; color:#888; flex:1; }
 
 /* Palettes de couleurs pour les chaussures */
@@ -237,7 +237,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 
 .shoe-pick-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:#0a0a0a; border:1px solid #1a1a1a; border-radius:10px; cursor:pointer; }
 .shoe-pick-item:active { background:var(--accent-bg); border-color:var(--accent-dark); }
-.shoe-pick-swatch { width:26px; height:26px; border-radius:50%; flex-shrink:0; border:1px solid rgba(255,255,255,0.15); }
+.shoe-pick-swatch { width:26px; height:26px; border-radius:50%; flex-shrink:0; }
 .shoe-pick-name { flex:1; font-size:13px; font-weight:700; color:#fff; }
 .shoe-pick-km { font-size:11px; color:#888; font-weight:600; flex-shrink:0; }
 
@@ -393,7 +393,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
   <div class="backup-bar">
     <button onclick="openThemeColorModal()" title="Couleur du thème"
       id="theme-color-btn"
-      style="width:30px;height:30px;border:1px solid #888;border-radius:8px;cursor:pointer;background:var(--accent);flex-shrink:0;padding:0"></button>
+      style="width:30px;height:30px;border:none;border-radius:8px;cursor:pointer;background:var(--accent);flex-shrink:0;padding:0"></button>
     <button class="bk-btn bk-export" onclick="openExport()"><i class="fa-solid fa-copy"></i> Copier sauvegarde</button>
     <button class="bk-btn bk-import" onclick="openImport()"><i class="fa-solid fa-clock-rotate-left"></i> Restaurer</button>
   </div>
@@ -535,9 +535,9 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       <input type="text" id="max-km-name" placeholder="Nom de la chaussure" maxlength="30"
         style="width:100%;background:#000;border:1px solid var(--accent-bg);border-radius:8px;color:var(--accent);font-size:16px;font-weight:700;text-align:left;padding:6px 10px;outline:none;height:38px;box-sizing:border-box">
       <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;text-align:left">Couleur</div>
-      <div id="new-shoe-color-grid" style="display:grid;grid-template-columns:repeat(12,1fr);gap:3px;border-radius:8px;overflow:hidden;margin-bottom:8px"></div>
+      <div id="new-shoe-color-grid" style="display:grid;grid-template-columns:repeat(12,1fr);gap:3px;margin-bottom:8px"></div>
       <div style="display:flex;align-items:center;gap:10px">
-        <div id="new-shoe-color-preview" style="width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:#4d9fff;flex-shrink:0"></div>
+        <div id="new-shoe-color-preview" style="width:32px;height:32px;border-radius:8px;border:none;background:#4d9fff;flex-shrink:0"></div>
         <span style="font-size:11px;color:#888">Couleur sélectionnée</span>
       </div>
     </div>
@@ -1628,14 +1628,9 @@ function darken(hex, factor) {
   return '#' + [r,g,b].map(v => Math.round(v * factor).toString(16).padStart(2,'0')).join('');
 }
 
-function mixWithBlack(hex, factor) {
-  const {r,g,b} = hexToRgb(hex);
-  return '#' + [r,g,b].map(v => Math.round(v * factor).toString(16).padStart(2,'0')).join('');
-}
-
 function applyThemeColor(hex) {
   const dark = darken(hex, 0.75);
-  const bg = mixWithBlack(hex, 0.11);
+  const bg = darken(hex, 0.11);
   const {r,g,b} = hexToRgb(hex);
   document.documentElement.style.setProperty('--accent', hex);
   document.documentElement.style.setProperty('--accent-dark', dark);
