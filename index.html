@@ -190,7 +190,7 @@ input::placeholder { color:var(--accent-dark); }
 /* ── RECORD PERSONNEL ── */
 #pr-box-wrap { background:#000; border-radius:14px; flex-shrink:0; }
 .pr-box {
-  background:linear-gradient(135deg,var(--accent-bg),var(--accent-bg));
+  background:var(--accent-bg);
   border:1px solid var(--accent-dark);
   border-radius:12px;
   padding:10px 12px;
@@ -203,7 +203,7 @@ input::placeholder { color:var(--accent-dark); }
   position:absolute;
   top:-20px; right:-20px;
   width:80px; height:80px;
-  background:radial-gradient(circle,rgba(0,200,255,0.08),transparent 70%);
+  background:radial-gradient(circle,rgba(var(--accent-rgb),0.08),transparent 70%);
   border-radius:50%;
 }
 .pr-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
@@ -228,7 +228,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 .run-chrono { font-size:12px; color:var(--accent-dark); font-weight:700; text-align:right; }
 .run-vit { font-size:11px; color:var(--accent-dark); font-weight:600; text-align:right; }
 .run-allure { font-size:11px; color:var(--accent); font-weight:800; text-align:right; padding-right:2px; }
-.run-edit { width:26px; height:26px; background:transparent; border:1px solid var(--accent-bg); border-radius:6px; color:var(--accent-dark); font-size:12px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.run-edit { width:26px; height:26px; background:transparent; border:1px solid var(--accent); border-radius:6px; color:var(--accent); font-size:12px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; opacity:0.4; }
 .run-edit:active { background:var(--accent-bg); }
 .run-del { width:26px; height:26px; background:transparent; border:1px solid #330000; border-radius:6px; color:#cc2200; font-size:14px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .run-del:active { background:#1a0000; }
@@ -245,7 +245,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 .backup-bar { display:flex; gap:6px; padding:5px 12px; background:#010101; border-top:1px solid #111; flex-shrink:0; }
 .bk-btn { flex:1; height:30px; border-radius:8px; font-size:10px; font-weight:700; cursor:pointer; border:none; }
 .bk-export { background:var(--accent-bg); border:1px solid var(--accent-dark); color:var(--accent); }
-.bk-export:active { background:#002a40; }
+.bk-export:active { background:var(--accent-bg); }
 .bk-import { background:#0a0a0a; border:1px solid #888; color:#888; }
 .bk-import:active { background:#181818; }
 .bk-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:900; align-items:center; justify-content:center; padding:20px; }
@@ -256,7 +256,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 .bk-textarea:focus { border-color:var(--accent); }
 .bk-actions { display:flex; gap:8px; margin-top:10px; }
 .bk-copy { flex:2; height:36px; background:var(--accent-bg); border:1px solid var(--accent-dark); border-radius:10px; color:var(--accent); font-size:12px; font-weight:800; cursor:pointer; }
-.bk-copy:active { background:#002a40; }
+.bk-copy:active { background:var(--accent-bg); }
 .bk-ok { flex:1; height:36px; background:transparent; border:1px solid #666; border-radius:10px; color:#888; font-size:12px; font-weight:700; cursor:pointer; }
 .note-textarea::placeholder { color:var(--accent-dark); opacity:1; }
 .bk-hint { font-size:10px; color:#888; margin-top:8px; line-height:1.4; }
@@ -778,7 +778,7 @@ function renderGraph() {
       return `
         <div style="display:flex;align-items:center;gap:8px;padding:${isFirst?'6px 4px':'4px 4px'};border-bottom:${i<2?'1px solid rgba(255,255,255,0.04)':'none'}">
           <div style="font-size:${isFirst?'14px':'11px'};flex-shrink:0;width:20px;text-align:center">${medals[i]}</div>
-          <div style="font-size:${isFirst?'10px':'9px'};color:${isFirst?getAccentDark():'#888'};flex-shrink:0;width:46px">${d}/${mo}/${y.slice(2)}</div>
+          <div style="font-size:${isFirst?'10px':'9px'};color:${getAccentDark()};flex-shrink:0;width:46px">${d}/${mo}/${y.slice(2)}</div>
           <div style="flex:1;display:grid;grid-template-columns:1.2fr 1.4fr 1.2fr 1.2fr;gap:6px;text-align:right">
             <div style="font-size:${isFirst?'13px':'10px'};font-weight:800;color:${isFirst?getAccent():getAccentDark()}">${rnd(r.dist,1)}<span style="font-size:${isFirst?'8px':'7px'};opacity:0.6"> km</span></div>
             <div style="font-size:${isFirst?'13px':'10px'};font-weight:700;color:${isFirst?getAccent():getAccentDark()}">${fmtChrono(r.tsec)}</div>
@@ -1406,7 +1406,7 @@ function renderShoeHistory() {
 
   list.innerHTML = entries.map(e => {
     const shoe = shoes.find(s => s.id === +e.shoeId);
-    const shoeName = shoe?.name || 'Chaussure supprimée';
+    const shoeName = shoe ? (shoe.name || 'Sans nom') : 'Chaussure supprimée';
     const shoeColor = shoe?.color || '#555';
     const [y,mo,d] = e.date.split('-');
     return `
@@ -1675,6 +1675,8 @@ function selectThemeColor(color) {
 }
 
 /* ── INIT ── */
+// Initialiser le thème EN PREMIER
+initTheme();
 buildColorGrid();
 _shoeNextId = null;
 renderShoes();
@@ -1689,8 +1691,6 @@ document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('on'));
 document.getElementById('mtab_'+currentMetric).classList.add('on');
 // Restaurer l'onglet actif
 showTab(localStorage.getItem('lastTab') || 'calc');
-// Initialiser le thème
-initTheme();
 </script>
 </body>
 </html>
