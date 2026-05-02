@@ -72,6 +72,12 @@ input::placeholder { color:var(--accent-dark); }
 .shoe-delete-btn:active { background:#1a0000; }
 .shoe-color-btn { width:22px; height:22px; border-radius:50%; border:none; cursor:pointer; flex-shrink:0; }
 
+@keyframes flash-km {
+  0%   { transform:scale(1); }
+  30%  { transform:scale(1.15); filter:brightness(2); }
+  100% { transform:scale(1); filter:brightness(1); }
+}
+.km-total-flash { animation:flash-km 0.9s ease-out; }
 .km-total { font-size:22px; font-weight:800; text-align:center; line-height:1; margin-bottom:2px; }
 .km-total span { font-size:11px; font-weight:600; opacity:0.6; }
 .km-bar-wrap { margin-bottom:8px; }
@@ -452,13 +458,13 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 </div>
 
 <!-- Modal Sélection chaussure -->
-<div class="bk-modal" id="modal-shoe-picker" onclick="document.getElementById('modal-shoe-picker').classList.remove('on')">
+<div class="bk-modal" id="modal-shoe-picker" onclick="closeShoePickerModal()">
   <div class="bk-box" style="max-width:360px" onclick="event.stopPropagation()">
     <h3>Chaussures utilisées</h3>
     <p style="font-size:11px;color:#888;margin-bottom:10px">Course de <strong id="shoe-pick-dist" style="color:var(--accent)"></strong> — sélectionne la paire utilisée :</p>
     <div id="shoe-picker-list" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto"></div>
     <div class="bk-actions" style="margin-top:12px">
-      <button class="bk-ok" style="flex:1" onclick="document.getElementById('modal-shoe-picker').classList.remove('on')">Annuler</button>
+      <button class="bk-ok" style="flex:1" onclick="closeShoePickerModal()">Annuler</button>
     </div>
   </div>
 </div>
@@ -689,6 +695,73 @@ function saveRun() {
   openShoePickerModal();
 }
 
+let _shoePickerForRunId = null;
+
+function openShoePickerForRun(runId) {
+  _shoePickerForRunId = runId;
+  const shoes = loadShoes();
+  const runs = loadRuns();
+  const run = runs.find(r => r.id === runId);
+  const list = document.getElementById('shoe-picker-list');
+  list.innerHTML =
+    '<div class="shoe-pick-item" onclick="confirmShoeForRun(null)"><i class="fa-solid fa-ban" style="font-size:18px;flex-shrink:0;color:#888"></i><div class="shoe-pick-name">Sans chaussure</div></div>'
+    + shoes.map(s =>
+      '<div class="shoe-pick-item" onclick="confirmShoeForRun('+s.id+')">'
+      + '<div class="shoe-pick-swatch" style="background:'+(s.color||'#333')+'"></div>'
+      + '<div class="shoe-pick-name">'+(s.name||'Sans nom')+'</div>'
+      + '<div class="shoe-pick-km">'+rnd(s.total,1)+' km</div>'
+      + '</div>'
+    ).join('');
+  document.getElementById('shoe-pick-dist').textContent = run ? rnd(run.dist,3)+' km' : '';
+  document.getElementById('modal-shoe-picker').classList.add('on');
+}
+
+function confirmShoeForRun(newShoeId) {
+  const runs = loadRuns();
+  const run = runs.find(r => r.id === _shoePickerForRunId);
+  if (!run) { document.getElementById('modal-shoe-picker').classList.remove('on'); return; }
+
+  const shoes = loadShoes();
+  const hist = loadShoeHistory();
+
+  // Annuler l'ancienne association
+  if (run.shoeId && run.histHid) {
+    const oldShoe = shoes.find(s => s.id === +run.shoeId);
+    if (oldShoe) {
+      oldShoe.total = rnd(Math.max(0, oldShoe.total - run.dist), 2);
+    }
+    const histIdx = hist.findIndex(e => e.hid === run.histHid);
+    if (histIdx !== -1) hist.splice(histIdx, 1);
+  }
+
+  // Nouvelle association
+  const hid = newShoeId ? Date.now()+'_'+Math.random().toString(36).slice(2,6) : null;
+  run.shoeId = newShoeId || null;
+  run.histHid = hid;
+
+  if (newShoeId) {
+    const shoe = shoes.find(s => s.id === +newShoeId);
+    if (shoe) {
+      shoe.total = rnd(shoe.total + run.dist, 2);
+      shoe.lastDate = run.date;
+      hist.push({ hid, shoeId: newShoeId, date: run.date, km: run.dist, sign: 1 });
+    }
+  }
+
+  saveRuns(runs);
+  saveShoes(shoes);
+  saveShoeHistory(hist);
+
+  document.getElementById('modal-shoe-picker').classList.remove('on');
+  _shoePickerForRunId = null;
+  renderRunsList();
+}
+
+function closeShoePickerModal() {
+  document.getElementById('modal-shoe-picker').classList.remove('on');
+  _shoePickerForRunId = null;
+}
+
 function openShoePickerModal() {
   const shoes = loadShoes();
   const dist = rnd(lastResult.dist, 3);
@@ -853,7 +926,12 @@ function renderRunsList() {
     if (currentRunSort === 'vit')    cmp = b.vit - a.vit;
     return runOrderAsc ? -cmp : cmp;
   });
-  list.innerHTML = sorted.map(r => `
+  list.innerHTML = sorted.map(r => {
+    const shoes = loadShoes();
+    const shoe = r.shoeId ? shoes.find(s => s.id === +r.shoeId) : null;
+    const shoeColor = shoe?.color || 'var(--accent-dark)';
+    const shoeLabel = shoe ? (shoe.name || 'Sans nom') : '';
+    return `
     <div class="run-item">
       <div class="run-date">${fmtDate(r.date)}</div>
       <div class="run-info">${r.dist} km</div>
@@ -862,8 +940,14 @@ function renderRunsList() {
       <div class="run-allure">${fmtAllure(r.allsec)}/km</div>
       <button class="run-edit" onclick="openEditRun(${r.id})"><i class="fa-solid fa-pen"></i></button>
       <button class="run-del" onclick="deleteRun(${r.id})"><i class="fa-solid fa-xmark"></i></button>
-      ${r.note ? `<div style="grid-column:1/-1;font-size:10px;color:#888;font-style:italic;padding:0 0 4px 24px;margin-top:-2px">${r.note}</div>` : ''}
-    </div>`).join('');
+      <div style="grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:2px 0 4px 2px">
+        ${r.note ? `<span style="font-size:10px;color:#888;font-style:italic;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.note}</span>` : '<span style="flex:1"></span>'}
+        <i class="fa-solid fa-shoe-prints" style="font-size:10px;color:${shoeColor};opacity:0.7;flex-shrink:0"></i>
+        <span style="font-size:10px;color:${shoeColor};flex-shrink:0;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shoeLabel || '<span style="color:#555;font-style:italic">—</span>'}</span>
+        <button onclick="openShoePickerForRun(${r.id})" style="background:transparent;border:none;color:#888;font-size:10px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;flex-shrink:0">Associer</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 let _editRunId = null;
@@ -1149,17 +1233,6 @@ function newShoeId() {
   return _shoeNextId++;
 }
 
-function addShoe() {
-  const shoes = loadShoes();
-  shoes.push({ id: newShoeId(), name: '', total: 0 });
-  saveShoes(shoes);
-  renderShoes();
-  setTimeout(() => {
-    const container = document.getElementById('sc_shoes');
-    container.scrollTop = container.scrollHeight;
-  }, 50);
-}
-
 function deleteShoe(id) {
   const shoes = loadShoes();
   if (shoes.length <= 1) { alert('Tu dois garder au moins une paire !'); return; }
@@ -1280,6 +1353,14 @@ function opShoeKm(id, sign) {
     saveShoes(shoes);
     inp.value = '';
     renderShoes();
+    // Flash confirmation
+    const el = document.getElementById('km-total-'+id);
+    if (el) {
+      el.classList.remove('km-total-flash');
+      void el.offsetWidth; // force reflow
+      el.classList.add('km-total-flash');
+      setTimeout(() => el.classList.remove('km-total-flash'), 950);
+    }
   }
 }
 
@@ -1326,7 +1407,7 @@ function renderShoes() {
         <button class="run-edit" onclick="openMaxModal(${shoe.id}, ${MAX})" title="Limite km" style="width:26px;height:26px"><i class="fa-solid fa-pen"></i></button>
         <button class="shoe-delete-btn" onclick="deleteShoe(${shoe.id})" title="Supprimer"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="km-total" ${accentStyle?`style="${accentStyle}"`:''}>${totalFmt} <span>km</span></div>
+      <div class="km-total" id="km-total-${shoe.id}" ${accentStyle?`style="${accentStyle}"`:''}>${totalFmt} <span>km</span></div>
       <div class="km-bar-wrap">
         <div class="km-bar-bg">
           <div class="km-bar-fill" style="${barStyle}"></div>
