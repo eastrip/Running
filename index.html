@@ -228,7 +228,6 @@ input::placeholder { color:var(--accent-dark); }
 canvas#chart { display:block; height:180px; border-radius:12px; }
 .chart-scroll-hint { text-align:center; font-size:9px; color:#888; margin-top:2px; flex-shrink:0; }
 .run-item { display:grid; grid-template-columns:0.7fr 1fr 1fr 1fr 1fr auto auto; align-items:center; gap:4px; padding:6px 4px; background:transparent; border-radius:0; border:none; border-bottom:1px solid #444; margin-bottom:0; }
-.run-extra { width:100%; font-size:10px; color:#888; font-weight:600; padding-left:16px; margin-top:-2px; }
 .run-date { font-size:11px; color:#888; font-weight:600; text-align:right; }
 .run-info { font-size:12px; font-weight:700; color:#fff; text-align:right; }
 .run-chrono { font-size:12px; color:var(--accent-dark); font-weight:700; text-align:right; }
@@ -238,8 +237,6 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 .run-edit:active { background:var(--accent-bg); }
 .run-del { width:26px; height:26px; background:transparent; border:1px solid #330000; border-radius:6px; color:#cc2200; font-size:14px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .run-del:active { background:#1a0000; }
-.empty-state { text-align:center; padding:30px 20px; color:#888; font-size:13px; }
-.empty-icon { font-size:36px; margin-bottom:8px; }
 
 .shoe-pick-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:#0a0a0a; border:1px solid #1a1a1a; border-radius:10px; cursor:pointer; }
 .shoe-pick-item:active { background:var(--accent-bg); border-color:var(--accent-dark); }
@@ -265,7 +262,6 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 .bk-copy:active { background:var(--accent-bg); }
 .bk-ok { flex:1; height:36px; background:transparent; border:1px solid #666; border-radius:10px; color:#888; font-size:12px; font-weight:700; cursor:pointer; }
 .note-textarea::placeholder { color:var(--accent-dark); opacity:1; }
-.bk-hint { font-size:10px; color:#888; margin-top:8px; line-height:1.4; }
 </style>
 </head>
 <body>
@@ -274,7 +270,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
   <div class="tabs">
     <div class="tab on" id="tab_calc" onclick="showTab('calc')"><i class="fa-solid fa-calculator"></i><span>Calcul</span></div>
     <div class="tab" id="tab_graph" onclick="showTab('graph')"><i class="fa-solid fa-chart-line"></i><span>Suivi</span></div>
-    <div class="tab" id="tab_shoes" onclick="showTab('shoes')"><i class="fa-solid fa-shoe-prints"></i><span>Chaussures</span></div>
+    <div class="tab" id="tab_shoes" onclick="showTab('shoes')"><i class="fa-solid fa-shoe-prints"></i><span>Paires</span></div>
   </div>
 
   <!-- ══ CALCULATEUR ══ -->
@@ -413,13 +409,14 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       <div class="hist-title" style="display:flex;align-items:center;gap:6px"><i class="fa-solid fa-list-ul"></i> Historique des courses</div>
       <button class="hist-close" onclick="closeRunsHistory()"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;flex-shrink:0">
-      <button class="sort-btn on" id="sort_date"    onclick="setRunSort('date')">Date</button>
-      <button class="sort-btn"   id="sort_dist"    onclick="setRunSort('dist')">Distance</button>
-      <button class="sort-btn"   id="sort_chrono"  onclick="setRunSort('chrono')">Chrono</button>
-      <button class="sort-btn"   id="sort_vit"     onclick="setRunSort('vit')">Vitesse</button>
-      <button class="sort-btn"   id="sort_allure"  onclick="setRunSort('allure')">Allure</button>
-      <button class="sort-btn" id="sort_reverse" onclick="toggleRunOrder()"><i class="fa-solid fa-trophy"></i></button>
+    <div style="display:flex;gap:4px;flex-wrap:nowrap;margin-bottom:8px;flex-shrink:0">
+      <button class="sort-btn on" id="sort_date"    onclick="setRunSort('date')"   style="flex:1">Date</button>
+      <button class="sort-btn"   id="sort_dist"    onclick="setRunSort('dist')"   style="flex:1">Dist.</button>
+      <button class="sort-btn"   id="sort_chrono"  onclick="setRunSort('chrono')" style="flex:1">Chrono</button>
+      <button class="sort-btn"   id="sort_vit"     onclick="setRunSort('vit')"    style="flex:1">Vit.</button>
+      <button class="sort-btn"   id="sort_allure"  onclick="setRunSort('allure')" style="flex:1">Allure</button>
+      <button class="sort-btn" id="sort_reverse" onclick="toggleRunOrder()" style="flex-shrink:0"><i class="fa-solid fa-trophy"></i></button>
+      <button class="sort-btn" id="sort_info" onclick="toggleRunInfo()" style="flex-shrink:0"><i class="fa-solid fa-circle-info"></i></button>
     </div>
     <div class="hist-list" id="modal-runs-list"></div>
   </div>
@@ -884,8 +881,11 @@ function renderGraph() {
 function openRunsHistory() {
   currentRunSort = 'date';
   runOrderAsc = false;
+  runInfoVisible = false;
   document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('on'));
   document.getElementById('sort_date').classList.add('on');
+  const infoBtn = document.getElementById('sort_info');
+  if (infoBtn) infoBtn.classList.remove('on');
   renderGraph();
   document.getElementById('modal-runs').classList.add('on');
 }
@@ -904,6 +904,8 @@ function setRunSort(s) {
   renderRunsList();
 }
 
+let runInfoVisible = false;
+
 function toggleRunOrder() {
   runOrderAsc = !runOrderAsc;
   const btn = document.getElementById('sort_reverse');
@@ -914,6 +916,11 @@ function toggleRunOrder() {
   renderRunsList();
 }
 
+function toggleRunInfo() {
+  runInfoVisible = !runInfoVisible;
+  document.getElementById('sort_info').classList.toggle('on', runInfoVisible);
+  renderRunsList();
+}
 function renderRunsList() {
   const runs = loadRuns();
   const list = document.getElementById('modal-runs-list');
@@ -940,12 +947,14 @@ function renderRunsList() {
       <div class="run-allure">${fmtAllure(r.allsec)}/km</div>
       <button class="run-edit" onclick="openEditRun(${r.id})"><i class="fa-solid fa-pen"></i></button>
       <button class="run-del" onclick="deleteRun(${r.id})"><i class="fa-solid fa-xmark"></i></button>
-      <div style="grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:2px 0 4px 2px">
-        ${r.note ? `<span style="font-size:10px;color:#888;font-style:italic;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.note}</span>` : '<span style="flex:1"></span>'}
-        <i class="fa-solid fa-shoe-prints" style="font-size:10px;color:${shoeColor};opacity:0.7;flex-shrink:0"></i>
-        <span style="font-size:10px;color:${shoeColor};flex-shrink:0;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shoeLabel || '<span style="color:#555;font-style:italic">—</span>'}</span>
-        <button onclick="openShoePickerForRun(${r.id})" style="background:transparent;border:none;color:#888;font-size:10px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;flex-shrink:0">Associer</button>
-      </div>
+      ${runInfoVisible ? (
+        '<div style="grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:2px 0 4px 2px">'
+        + (r.note ? '<span style="font-size:10px;color:#888;font-style:italic;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.note+'</span>' : '<span style="flex:1"></span>')
+        + '<i class="fa-solid fa-shoe-prints" style="font-size:10px;color:'+shoeColor+';opacity:0.7;flex-shrink:0"></i>'
+        + '<span style="font-size:10px;color:'+shoeColor+';flex-shrink:0;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(shoeLabel || '<span style="color:#555;font-style:italic">—</span>')+'</span>'
+        + '<button onclick="openShoePickerForRun('+r.id+')" style="background:transparent;border:none;color:#888;font-size:10px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;flex-shrink:0">Associer</button>'
+        + '</div>'
+      ) : ''}
     </div>`;
   }).join('');
 }
@@ -1398,7 +1407,7 @@ function renderShoes() {
 
     return `
     <div style="background:#000;border-radius:12px;flex-shrink:0">
-    <div class="${accent ? 'shoe-card' : `shoe-card shoe-palette-${palette}`}" ${accent ? `style="${bgStyle};${borderStyle}"` : ''}>
+    <div class="${accent ? 'shoe-card' : 'shoe-card shoe-palette-'+palette}" ${accent ? 'style="'+bgStyle+';'+borderStyle+'"' : ''}>
       <div class="shoe-header">
         <button class="shoe-color-btn" onclick="openColorModal(${shoe.id})"
           style="background:${shoe.color||'#555'}"
@@ -1407,7 +1416,7 @@ function renderShoes() {
         <button class="run-edit" onclick="openMaxModal(${shoe.id}, ${MAX})" title="Limite km" style="width:26px;height:26px"><i class="fa-solid fa-pen"></i></button>
         <button class="shoe-delete-btn" onclick="deleteShoe(${shoe.id})" title="Supprimer"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="km-total" id="km-total-${shoe.id}" ${accentStyle?`style="${accentStyle}"`:''}>${totalFmt} <span>km</span></div>
+      <div class="km-total" id="km-total-${shoe.id}" ${accentStyle ? 'style="'+accentStyle+'"' : ''}>${totalFmt} <span>km</span></div>
       <div class="km-bar-wrap">
         <div class="km-bar-bg">
           <div class="km-bar-fill" style="${barStyle}"></div>
@@ -1417,9 +1426,9 @@ function renderShoes() {
       <div class="km-ops">
         <button class="op-btn op-sub" onclick="opShoeKm(${shoe.id},-1)">−</button>
         <input class="km-input" type="number" id="shoe_val_${shoe.id}" placeholder="km" min="0" step="0.1" inputmode="decimal"
-          style="${accent ? `color:${accent};border-color:${accent}55;` : ''}--ph-color:#666">
+          style="${accent ? 'color:'+accent+';border-color:'+accent+'55;' : ''}--ph-color:#666">
         <button class="op-btn op-add" onclick="opShoeKm(${shoe.id},+1)"
-          ${accent ? `style="color:${accent};border:1px solid ${accent}88;background:transparent;"` : ''}>+</button>
+          ${accent ? 'style="color:'+accent+';border:1px solid '+accent+'88;background:transparent;"' : ''}>+</button>
         <button class="raz-btn" onclick="resetShoeKm(${shoe.id})">RAZ</button>
       </div>
     </div>
