@@ -521,6 +521,11 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
         <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Note</div>
         <textarea id="edit-note" placeholder="Ressenti, météo, terrain…" style="width:100%;background:#000;border:1px solid var(--accent-bg);border-radius:8px;color:var(--accent);font-size:15px;padding:8px 10px;outline:none;resize:none;height:70px;font-family:-apple-system,sans-serif;box-sizing:border-box" class="note-textarea"></textarea>
       </div>
+      <div>
+        <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Chaussure</div>
+        <div id="edit-shoe-list" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>
+        <div id="edit-shoe-label" style="font-size:11px;color:var(--accent-dark);margin-top:6px;height:14px"></div>
+      </div>
     </div>
     <div class="bk-actions" style="margin-top:14px">
       <button class="bk-ok" style="flex:1" onclick="closeEditRun()">Annuler</button>
@@ -952,7 +957,6 @@ function renderRunsList() {
         + (r.note ? '<span style="font-size:10px;color:#888;font-style:italic;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.note+'</span>' : '<span style="flex:1"></span>')
         + '<i class="fa-solid fa-shoe-prints" style="font-size:10px;color:'+shoeColor+';opacity:0.7;flex-shrink:0"></i>'
         + '<span style="font-size:10px;color:'+shoeColor+';flex-shrink:0;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(shoeLabel || '<span style="color:#555;font-style:italic">—</span>')+'</span>'
-        + '<button onclick="openShoePickerForRun('+r.id+')" style="background:transparent;border:none;color:#888;font-size:10px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;flex-shrink:0">Associer</button>'
         + '</div>'
       ) : ''}
     </div>`;
@@ -975,7 +979,35 @@ function openEditRun(id) {
   document.getElementById('edit-m').value = m || '';
   document.getElementById('edit-s').value = s || '';
   document.getElementById('edit-note').value = r.note || '';
+
+  // Sélecteur de chaussure compact (pastilles)
+  const shoes = loadShoes();
+  const currentShoeId = r.shoeId ? String(r.shoeId) : null;
+  const shoeList = document.getElementById('edit-shoe-list');
+  const items = [{ id: null, name: 'Aucune', color: '#444' }, ...shoes.map(s => ({ id: String(s.id), name: s.name || 'Sans nom', color: s.color || '#555' }))];
+  shoeList.innerHTML = items.map(s => {
+    const sel = String(s.id) === String(currentShoeId);
+    return '<div onclick="selectEditShoe(this,\''+s.id+'\')" data-shoe-id="'+(s.id||'')+'" data-shoe-name="'+s.name+'" title="'+s.name+'" style="width:28px;height:28px;border-radius:50%;background:'+s.color+';cursor:pointer;flex-shrink:0;box-shadow:'+(sel?'0 0 0 2.5px #fff':'none')+';transition:box-shadow 0.15s"></div>';
+  }).join('');
+  const curItem = items.find(s => String(s.id) === String(currentShoeId));
+  document.getElementById('edit-shoe-label').textContent = curItem ? curItem.name : '';
+
   document.getElementById('modal-edit-run').classList.add('on');
+}
+
+function selectEditShoe(el, shoeId) {
+  document.querySelectorAll('#edit-shoe-list > div').forEach(d => {
+    d.style.boxShadow = d.dataset.shoeId === shoeId ? '0 0 0 2.5px #fff' : 'none';
+  });
+  document.getElementById('edit-shoe-label').textContent = el.dataset.shoeName || '';
+}
+
+function getEditSelectedShoeId() {
+  const selected = [...document.querySelectorAll('#edit-shoe-list > div')].find(d =>
+    d.style.boxShadow && d.style.boxShadow !== 'none'
+  );
+  const val = selected?.dataset.shoeId;
+  return val && val !== 'null' && val !== '' ? val : null;
 }
 
 function closeEditRun() {
@@ -993,6 +1025,7 @@ function saveEditRun() {
   const date = document.getElementById('edit-date').value;
   if (!dist || dist <= 0 || tsec <= 0 || !date) return;
   const note = document.getElementById('edit-note').value.trim();
+  const newShoeId = getEditSelectedShoeId();
   const vit = rnd(dist / (tsec / 3600), 2);
   const allsec = rnd(tsec / dist, 1);
 
@@ -1000,43 +1033,50 @@ function saveEditRun() {
   const oldRun = runs.find(r => r.id === _editRunId);
   const oldDist = oldRun ? oldRun.dist : 0;
   const diff = rnd(dist - oldDist, 2);
+  const shoeChanged = String(newShoeId) !== String(oldRun?.shoeId || null);
+
+  const shoes = loadShoes();
+  const hist = loadShoeHistory();
+
+  // Annuler l'ancienne association si chaussure changée
+  if (shoeChanged && oldRun?.shoeId) {
+    const oldShoe = shoes.find(s => s.id === +oldRun.shoeId);
+    if (oldShoe) oldShoe.total = Math.max(0, rnd(oldShoe.total - oldDist, 2));
+    if (oldRun.histHid) {
+      const idx = hist.findIndex(e => e.hid === oldRun.histHid);
+      if (idx !== -1) hist.splice(idx, 1);
+    }
+  }
+
+  // Mettre à jour les km si même chaussure mais distance changée
+  const hid = oldRun?.histHid || (newShoeId ? Date.now()+'_'+Math.random().toString(36).slice(2,6) : null);
+  if (!shoeChanged && oldRun?.shoeId && diff !== 0) {
+    const shoe = shoes.find(s => s.id === +oldRun.shoeId);
+    if (shoe) shoe.total = Math.max(0, rnd(shoe.total + diff, 2));
+    const entry = hist.find(e => e.hid === hid);
+    if (entry) entry.km = rnd(dist, 3);
+  }
+
+  // Appliquer la nouvelle association
+  if (shoeChanged && newShoeId) {
+    const newShoe = shoes.find(s => s.id === +newShoeId);
+    if (newShoe) {
+      newShoe.total = rnd(newShoe.total + dist, 2);
+      newShoe.lastDate = date;
+      const newHid = Date.now()+'_'+Math.random().toString(36).slice(2,6);
+      hist.push({ hid: newHid, shoeId: newShoeId, date, km: rnd(dist, 3), sign: 1 });
+    }
+  }
+
+  saveShoeHistory(hist);
+  saveShoes(shoes);
 
   // Mettre à jour la course
   const newRuns = runs.map(r => r.id === _editRunId
-    ? { ...r, date, dist: rnd(dist, 3), tsec: Math.round(tsec), vit, allsec, note }
+    ? { ...r, date, dist: rnd(dist, 3), tsec: Math.round(tsec), vit, allsec, note, shoeId: newShoeId || null }
     : r
   );
   saveRuns(newRuns);
-
-  // Mettre à jour les km de la chaussure si elle est liée
-  if (oldRun?.shoeId) {
-    const shoes = loadShoes();
-    const shoe = shoes.find(s => s.id === +oldRun.shoeId);
-    if (shoe) {
-      if (diff !== 0) shoe.total = Math.max(0, rnd(shoe.total + diff, 2));
-      // Mettre à jour l'entrée dans l'historique via histHid si disponible
-      const hist = loadShoeHistory();
-      let entry = oldRun.histHid ? hist.find(e => e.hid === oldRun.histHid) : null;
-      // Fallback : recherche par shoeId + date + km
-      if (!entry) entry = hist.find(e =>
-        String(e.shoeId) === String(oldRun.shoeId) &&
-        e.date === oldRun.date &&
-        Math.abs(parseFloat(e.km) - parseFloat(oldDist)) < 0.01 &&
-        e.sign > 0
-      );
-      if (entry) {
-        entry.km = rnd(dist, 3);
-        entry.date = date;
-      }
-      // Recalculer lastDate depuis toutes les courses liées à cette chaussure
-      const shoeRuns = newRuns.filter(r => String(r.shoeId) === String(oldRun.shoeId));
-      if (shoeRuns.length > 0) {
-        shoe.lastDate = shoeRuns.map(r => r.date).sort().reverse()[0];
-      }
-      saveShoeHistory(hist);
-      saveShoes(shoes);
-    }
-  }
 
   closeEditRun();
   renderGraph();
@@ -1510,7 +1550,7 @@ function renderShoeHistory() {
 
 /* ── SAUVEGARDE / RESTAURATION ── */
 function openExport() {
-  const data = { shoes_v2: loadShoes(), runs: loadRuns(), shoe_history: loadShoeHistory() };
+  const data = { shoes_v2: loadShoes(), runs: loadRuns(), shoe_history: loadShoeHistory(), themeColor: localStorage.getItem('themeColor') || '#00c8ff' };
   const text = JSON.stringify(data);
   const btn = document.querySelector('.bk-export');
   const date = new Date().toISOString().split('T')[0];
@@ -1609,6 +1649,7 @@ function doRestore() {
     }
     if (data.runs && Array.isArray(data.runs)) saveRuns(data.runs);
     if (data.shoe_history && Array.isArray(data.shoe_history)) saveShoeHistory(data.shoe_history);
+    if (data.themeColor) { localStorage.setItem('themeColor', data.themeColor); applyThemeColor(data.themeColor); }
     closeModals();
     renderShoes();
     const btn = document.querySelector('#modal-import .bk-copy');
