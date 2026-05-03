@@ -386,7 +386,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <div class="hist-sheet" onclick="event.stopPropagation()">
       <div class="hist-header">
         <div class="hist-title" style="display:flex;align-items:center;gap:6px"><i class="fa-solid fa-list-ul"></i> Historique des km</div>
-        <button class="hist-close" onclick="closeShoeHistory()"><i class="fa-solid fa-xmark"></i></button>
+        <button class="hist-close" onclick="closeShoeHistory()">✕</button>
       </div>
       <div style="display:flex;gap:4px;margin-bottom:8px;flex-shrink:0">
         <button class="sort-btn on" id="hist-filter-all" onclick="setHistFilter('all')">Tout</button>
@@ -431,7 +431,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
   <div class="hist-sheet" onclick="event.stopPropagation()">
     <div class="hist-header">
       <div class="hist-title" style="display:flex;align-items:center;gap:6px"><i class="fa-solid fa-list-ul"></i> Historique des courses</div>
-      <button class="hist-close" onclick="closeRunsHistory()"><i class="fa-solid fa-xmark"></i></button>
+      <button class="hist-close" onclick="closeRunsHistory()">✕</button>
     </div>
     <div style="display:flex;gap:4px;flex-wrap:nowrap;margin-bottom:8px;flex-shrink:0">
       <button class="sort-btn on" id="sort_date"    onclick="setRunSort('date')"   style="flex:1">Date</button>
@@ -513,7 +513,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     </div><!-- fin scroll -->
     <div style="display:flex;gap:8px;padding:12px 16px 28px;border-top:1px solid #111;flex-shrink:0">
       <button id="goal-cancel-btn" onclick="closeGoalModal()" style="flex:1;height:40px;background:transparent;border:1px solid #666;border-radius:10px;color:#888;font-size:13px;font-weight:700;cursor:pointer">Annuler</button>
-      <button id="goal-save-btn" onclick="saveGoal()" style="flex:2;height:40px;background:#001a2e;border:1px solid #009fcc;border-radius:10px;color:#00c8ff;font-size:13px;font-weight:800;cursor:pointer">Enregistrer</button>
+      <button id="goal-save-btn" onclick="saveGoal()" style="flex:2;height:40px;background:var(--accent-bg);border:1px solid var(--accent-dark);border-radius:10px;color:var(--accent);font-size:13px;font-weight:800;cursor:pointer">Enregistrer</button>
     </div>
   </div>
 </div>
@@ -524,7 +524,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <div class="color-sheet-header">
       <div style="width:30px"></div>
       <div class="color-sheet-title">Couleur du thème</div>
-      <button class="color-sheet-close" onclick="closeThemeColorModal()"><i class="fa-solid fa-xmark"></i></button>
+      <button class="color-sheet-close" onclick="closeThemeColorModal()">✕</button>
     </div>
     <div class="color-grid" id="theme-color-grid"></div>
     <div class="color-preview-bar">
@@ -540,7 +540,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <div class="color-sheet-header">
       <div style="width:30px"></div>
       <div class="color-sheet-title">Couleur</div>
-      <button class="color-sheet-close" onclick="closeColorModal()"><i class="fa-solid fa-xmark"></i></button>
+      <button class="color-sheet-close" onclick="closeColorModal()">✕</button>
     </div>
     <div class="color-grid" id="color-grid"></div>
     <div class="color-preview-bar">
@@ -667,7 +667,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <p id="confirm-msg" style="font-size:12px;color:#666;margin-bottom:16px;line-height:1.5"></p>
     <div class="bk-actions">
       <button class="bk-ok" style="flex:1" onclick="closeConfirm()">Annuler</button>
-      <button id="confirm-ok" style="flex:2;height:36px;background:transparent;border:1px solid #4a0000;border-radius:10px;color:#ff3333;font-size:12px;font-weight:800;cursor:pointer" onclick="execConfirm()"><i class="fa-solid fa-xmark"></i> Supprimer</button>
+      <button id="confirm-ok" style="flex:2;height:36px;background:transparent;border:1px solid #4a0000;border-radius:10px;color:#ff3333;font-size:12px;font-weight:800;cursor:pointer" onclick="execConfirm()">✕ Supprimer</button>
     </div>
   </div>
 </div>
@@ -1050,7 +1050,7 @@ function renderRunsList() {
       <div class="run-vit">${rnd(r.vit,1)} km/h</div>
       <div class="run-allure">${fmtAllure(r.allsec)}/km</div>
       <button class="run-edit" onclick="openEditRun(${r.id})"><i class="fa-solid fa-pen"></i></button>
-      <button class="run-del" onclick="deleteRun(${r.id})"><i class="fa-solid fa-xmark"></i></button>
+      <button class="run-del" onclick="deleteRun(${r.id})">✕</button>
       ${runInfoVisible ? (
         '<div style="grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:2px 0 4px 2px">'
         + (r.note ? '<span style="font-size:10px;color:#888;font-style:italic;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.note+'</span>' : '<span style="flex:1"></span>')
@@ -1553,7 +1553,7 @@ function renderShoes() {
           title="Changer la couleur"></button>
         <div style="flex:1;font-size:15px;font-weight:700;color:#fff;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shoe.name||'Sans nom'}</div>
         <button class="run-edit" onclick="openMaxModal(${shoe.id}, ${MAX})" title="Limite km" style="width:26px;height:26px"><i class="fa-solid fa-pen"></i></button>
-        <button class="shoe-delete-btn" onclick="deleteShoe(${shoe.id})" title="Supprimer"><i class="fa-solid fa-xmark"></i></button>
+        <button class="shoe-delete-btn" onclick="deleteShoe(${shoe.id})" title="Supprimer">✕</button>
       </div>
       <div class="km-total" id="km-total-${shoe.id}" ${accentStyle ? 'style="'+accentStyle+'"' : ''}>${totalFmt} <span>km</span></div>
       <div class="km-bar-wrap">
@@ -1642,7 +1642,7 @@ function renderShoeHistory() {
       <div class="hist-entry">
         <div class="hist-entry-date">${d}/${mo}/${y.slice(2)}</div>
         <div class="hist-entry-km" style="color:${e.sign > 0 ? shoeColor : '#cc4400'}">${shoeName ? shoeName+' · ' : ''}${e.sign > 0 ? '+' : '−'}${e.km} km</div>
-        ${currentHistFilter === 'all' ? '<button class="hist-entry-del" onclick="deleteHistEntry(\''+e.hid+'\')"><i class="fa-solid fa-xmark"></i></button>' : ''}
+        ${currentHistFilter === 'all' ? '<button class="hist-entry-del" onclick="deleteHistEntry(\''+e.hid+'\')">✕</button>' : ''}
       </div>`;
   }).join('');
 }
@@ -1848,6 +1848,24 @@ function getAccentBg() { return getComputedStyle(document.documentElement).getPr
 
 function goalInputColor(el) { el.style.color = el.value ? getAccent() : '#888'; }
 
+function importBestRun() {
+  const dist = parseFloat(document.getElementById('goal-ref-dist').value) || 0;
+  const best = getBestRun(_goalRefCrit, dist > 0 ? dist : 0.1);
+  if (!best) { alert('Aucune course trouvée.'); return; }
+
+  const refDistEl = document.getElementById('goal-ref-dist');
+  if (refDistEl) { refDistEl.value = best.dist; goalInputColor(refDistEl); }
+
+  const val = _goalRefCrit === 'vit' ? best.vit : _goalRefCrit === 'chrono' ? best.tsec : best.allsec;
+  setCritInputValues('goal-ref-val', _goalRefCrit, val);
+
+  const preview = document.getElementById('goal-ref-best-preview');
+  if (preview) {
+    preview.style.display = 'block';
+    preview.innerHTML = '<i class="fa-solid fa-bolt" style="color:'+getAccent()+'"></i> <span style="color:'+getAccent()+';font-weight:700">'+formatGoalVal(val, _goalRefCrit)+'</span> · '+best.dist+' km · '+fmtDate(best.date);
+  }
+}
+
 /* ── OBJECTIFS ── */
 const loadGoals = () => { try { const g = localStorage.getItem('goals'); return g ? JSON.parse(g) : []; } catch(e) { return []; } };
 const saveGoals = arr => localStorage.setItem('goals', JSON.stringify(arr));
@@ -1897,15 +1915,22 @@ function getCritValue(prefix, crit) {
 }
 
 function setCritInputValues(prefix, crit, val) {
+  if (!val) return;
   if (crit === 'chrono') {
-    document.getElementById(prefix+'-h').value = Math.floor(val/3600)||'';
-    document.getElementById(prefix+'-m').value = Math.floor((val%3600)/60)||'';
-    document.getElementById(prefix+'-s').value = Math.round(val%60)||'';
+    const h = document.getElementById(prefix+'-h');
+    const m = document.getElementById(prefix+'-m');
+    const s = document.getElementById(prefix+'-s');
+    if (h) { h.value = Math.floor(val/3600)||''; goalInputColor(h); }
+    if (m) { m.value = Math.floor((val%3600)/60)||''; goalInputColor(m); }
+    if (s) { s.value = Math.round(val%60)||''; goalInputColor(s); }
   } else if (crit === 'vit') {
-    document.getElementById(prefix+'-vit').value = val||'';
+    const v = document.getElementById(prefix+'-vit');
+    if (v) { v.value = val||''; goalInputColor(v); }
   } else if (crit === 'allure') {
-    document.getElementById(prefix+'-am').value = Math.floor(val/60)||'';
-    document.getElementById(prefix+'-as').value = Math.round(val%60)||'';
+    const am = document.getElementById(prefix+'-am');
+    const as_ = document.getElementById(prefix+'-as');
+    if (am) { am.value = Math.floor(val/60)||''; goalInputColor(am); }
+    if (as_) { as_.value = Math.round(val%60)||''; goalInputColor(as_); }
   }
 }
 
@@ -1973,9 +1998,18 @@ function selectGoalCrit(crit) {
   ['chrono','vit','allure'].forEach(c => document.getElementById('goal-crit-'+c).classList.toggle('on', c===crit));
   document.getElementById('goal-crit-inputs').innerHTML = critInputsHTML('goal-val', crit);
   if (oldVal > 0) { const cv = convertCritValue(oldVal, oldCrit, crit); if(cv > 0) setCritInputValues('goal-val', crit, cv); }
-  // Label distance optionnel si pas chrono
-  const lbl = document.getElementById('goal-dist-label');
-  if (lbl) lbl.textContent = crit === 'chrono' ? 'DISTANCE (KM)' : 'DISTANCE (KM) — OPTIONNEL';
+  // Mettre à jour label distance
+  const distLbl = document.getElementById('goal-dist-label');
+  if (distLbl) distLbl.textContent = crit === 'chrono' ? 'Distance (km)' : 'Distance (km) — optionnel';
+  // Synchroniser le critère de référence
+  const oldRefVal = getCritValue('goal-ref-val', _goalRefCrit);
+  const oldRefCrit = _goalRefCrit;
+  _goalRefCrit = crit;
+  ['chrono','vit','allure'].forEach(c => { const el = document.getElementById('goal-ref-crit-'+c); if(el) el.classList.toggle('on', c===crit); });
+  document.getElementById('goal-ref-crit-inputs').innerHTML = critInputsHTML('goal-ref-val', crit);
+  if (oldRefVal > 0) { const cv = convertCritValue(oldRefVal, oldRefCrit, crit); if(cv > 0) setCritInputValues('goal-ref-val', crit, cv); }
+  const refLbl = document.getElementById('goal-ref-dist-label');
+  if (refLbl) refLbl.textContent = crit === 'chrono' ? 'Distance (km)' : 'Distance (km) — optionnel';
 }
 
 function openGoalModal(editId) {
@@ -2240,23 +2274,46 @@ function renderGoalCard(g) {
   return '<div class="goal-card">'
     // Header cliquable
     + '<div onclick="toggleGoalCard('+g.id+')" style="cursor:pointer">'
-    + '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">'
-    + '<div style="flex:1;min-width:0">'
-    + '<div class="goal-card-title" style="color:'+(g.name?'#fff':'#888')+'">'+(g.name || g.dist+' km · '+critLabel)+'</div>'
-    + '<div class="goal-card-dates">'+startFmt+' → '+endFmt+'</div>'
+
+    // Ligne 1 : Nom + chevron + boutons
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+    + '<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'
+    + '<div class="goal-card-title" style="color:'+(g.name?'#fff':'#555')+'">'+(g.name || critLabel)+'</div>'
+    + '<span style="font-size:11px;color:'+accentColor+';display:inline-block;transform:'+(isExpanded?'rotate(180deg)':'rotate(0deg)')+'"><i class="fa-solid fa-chevron-down"></i></span>'
     + '</div>'
-    + '<div style="display:flex;gap:6px;align-items:center">'
-    + '<span style="font-size:12px;color:#888;transition:transform 0.2s;display:inline-block;transform:'+(isExpanded?'rotate(180deg)':'rotate(0deg)')+';flex-shrink:0"><i class="fa-solid fa-chevron-down"></i></span>'
+    + '<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
     + '<button class="run-edit" onclick="event.stopPropagation();openGoalModal('+g.id+')" style="width:28px;height:28px"><i class="fa-solid fa-pen"></i></button>'
     + '<button class="goal-del-btn" onclick="event.stopPropagation();deleteGoal('+g.id+')"><i class="fa-solid fa-xmark"></i></button>'
     + '</div>'
     + '</div>'
-    // Badges départ → objectif
-    + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
-    + (g.refVal ? '<div class="goal-crit-badge" style="background:#111;border-color:#333;color:#666">'+formatGoalVal(g.refVal, g.crit)+'</div>' : '')
-    + (g.refVal ? '<i class="fa-solid fa-arrow-right" style="font-size:9px;color:#555"></i>' : '')
-    + '<div class="goal-crit-badge"><i class="fa-solid fa-flag-checkered"></i> '+formatGoalVal(g.goalVal, g.crit)+'</div>'
+
+    // Ligne 2 : Objectif principal bien visible
+    + '<div style="background:#0a0a0a;border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid #1a1a1a">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between">'
+    // Colonne gauche : point de départ si défini
+    + (g.refVal ? '<div>'
+      + '<div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Départ</div>'
+      + '<div style="font-size:14px;font-weight:700;color:#555">'+formatGoalVal(g.refVal, g.crit)+'</div>'
+      + '</div>' : '<div></div>')
+    // Flèche centrale
+    + (g.refVal ? '<i class="fa-solid fa-arrow-right" style="font-size:12px;color:#333"></i>' : '')
+    // Colonne droite : objectif
+    + '<div style="text-align:right">'
+    + '<div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">'+critLabel+(g.dist ? ' · '+g.dist+' km' : '')+'</div>'
+    + '<div style="font-size:22px;font-weight:800;color:'+accentColor+';line-height:1">'+formatGoalVal(g.goalVal, g.crit)+'</div>'
     + '</div>'
+    + '</div>'
+    + '</div>'
+
+    // Ligne 3 : Dates
+    + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
+    + '<i class="fa-regular fa-calendar" style="font-size:11px;color:#666"></i>'
+    + '<span style="font-size:13px;font-weight:700;color:#bbb">'+startFmt+'</span>'
+    + '<span style="font-size:11px;color:#444">→</span>'
+    + '<span style="font-size:13px;font-weight:700;color:#bbb">'+endFmt+'</span>'
+    + '<span style="font-size:10px;color:#444;margin-left:2px">('+weeks.length+' sem.)</span>'
+    + '</div>'
+
     + '</div>'
     // Barre de progression globale (toujours visible)
     + '<div style="margin-top:8px">'
@@ -2379,6 +2436,7 @@ function selectThemeColor(color) {
   document.getElementById('theme-color-btn').style.background = color;
   renderGraph();
   renderShoes();
+  renderGoals();
 }
 
 /* ── INIT ── */
