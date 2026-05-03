@@ -262,6 +262,23 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 .bk-copy:active { background:var(--accent-bg); }
 .bk-ok { flex:1; height:36px; background:transparent; border:1px solid #666; border-radius:10px; color:#888; font-size:12px; font-weight:700; cursor:pointer; }
 .note-textarea::placeholder { color:var(--accent-dark); opacity:1; }
+/* ── OBJECTIF ── */
+.goal-card { background:#010101; border:1px solid #222; border-radius:14px; padding:12px; margin-bottom:8px; flex-shrink:0; position:relative; }
+.goal-card-title { font-size:15px; font-weight:800; color:#fff; margin-bottom:2px; }
+.goal-card-dates { font-size:10px; color:#888; margin-bottom:10px; }
+.goal-crit-badge { display:inline-flex; align-items:center; gap:4px; background:var(--accent-bg); border:1px solid var(--accent-dark); border-radius:6px; padding:2px 8px; font-size:10px; font-weight:700; color:var(--accent); margin-bottom:8px; }
+.goal-week-row { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid #111; }
+.goal-week-row:last-child { border-bottom:none; }
+.goal-week-num { font-size:10px; color:#888; width:24px; flex-shrink:0; }
+.goal-week-target { font-size:11px; font-weight:700; color:#fff; flex:1; }
+.goal-week-bar-wrap { width:80px; flex-shrink:0; }
+.goal-week-bar-bg { background:#111; border-radius:4px; height:6px; overflow:hidden; }
+.goal-week-bar-fill { height:100%; border-radius:4px; }
+.goal-week-status { font-size:10px; font-weight:700; width:28px; text-align:right; flex-shrink:0; }
+.goal-actions { display:flex; gap:6px; margin-top:10px; }
+.goal-edit-btn { flex:1; height:30px; background:transparent; border:1px solid var(--accent-dark); border-radius:8px; color:var(--accent-dark); font-size:11px; font-weight:700; cursor:pointer; }
+.goal-name-input::placeholder { color:#444; opacity:1; }
+.goal-del-btn { width:30px; height:30px; background:transparent; border:1px solid #330000; border-radius:8px; color:#cc2200; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 </style>
 </head>
 <body>
@@ -270,6 +287,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
   <div class="tabs">
     <div class="tab on" id="tab_calc" onclick="showTab('calc')"><i class="fa-solid fa-calculator"></i><span>Calcul</span></div>
     <div class="tab" id="tab_graph" onclick="showTab('graph')"><i class="fa-solid fa-chart-line"></i><span>Suivi</span></div>
+    <div class="tab" id="tab_goal" onclick="showTab('goal')"><i class="fa-solid fa-bullseye"></i><span>Objectifs</span></div>
     <div class="tab" id="tab_shoes" onclick="showTab('shoes')"><i class="fa-solid fa-shoe-prints"></i><span>Paires</span></div>
   </div>
 
@@ -347,6 +365,12 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     </div>
   </div>
 
+  <!-- ══ OBJECTIF ══ -->
+  <div class="screen" id="sc_goal" style="overflow-y:auto">
+    <div id="goal-container" style="flex:1"></div>
+    <button class="add-shoe-btn" onclick="openGoalModal()">+ Ajouter un objectif</button>
+  </div>
+
   <!-- ══ CHAUSSURES ══ -->
   <div class="screen" id="sc_shoes">
     <div class="graph-header">
@@ -419,6 +443,78 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       <button class="sort-btn" id="sort_info" onclick="toggleRunInfo()" style="flex-shrink:0"><i class="fa-solid fa-circle-info"></i></button>
     </div>
     <div class="hist-list" id="modal-runs-list"></div>
+  </div>
+</div>
+
+<!-- Modal Objectif -->
+<div id="modal-goal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:850;flex-direction:column;align-items:center;justify-content:flex-end">
+  <div style="background:#050505;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:90dvh;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px;flex-shrink:0">
+      <div id="goal-modal-title" style="font-size:14px;font-weight:800;color:#fff">Nouvel objectif</div>
+      <button style="width:30px;height:30px;background:#1a1a1a;border:none;border-radius:50%;color:#888;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="closeGoalModal()">✕</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;padding:0 16px 8px">
+
+    <!-- Nom de l'objectif -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Nom de l'objectif</div>
+      <input type="text" id="goal-name" placeholder="Ex : Sub 1h sur 12 km" maxlength="40"
+        class="goal-name-input"
+        style="width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:15px;font-weight:700;padding:8px 10px;outline:none;height:40px;box-sizing:border-box"
+        oninput="goalInputColor(this)">
+    </div>
+
+    <!-- Référence de départ -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Référence de départ</div>
+      <div id="goal-ref-custom-fields" style="padding:8px;background:#000;border-radius:8px;border:1px solid #222">
+        <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Critère de référence</div>
+        <div style="display:flex;gap:4px;margin-bottom:8px">
+          <button id="goal-ref-crit-chrono" onclick="selectGoalRefCrit('chrono')" class="sort-btn on" style="flex:1">Chrono</button>
+          <button id="goal-ref-crit-vit" onclick="selectGoalRefCrit('vit')" class="sort-btn" style="flex:1">Vitesse</button>
+          <button id="goal-ref-crit-allure" onclick="selectGoalRefCrit('allure')" class="sort-btn" style="flex:1">Allure</button>
+        </div>
+        <div id="goal-ref-dist-wrap">
+        <div id="goal-ref-dist-label" style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Distance (km)</div>
+        <input type="number" id="goal-ref-dist" placeholder="" min="0" step="0.1" inputmode="decimal" oninput="goalInputColor(this)" style="width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:16px;font-weight:700;text-align:center;padding:6px;outline:none;height:38px;box-sizing:border-box;margin-bottom:8px">
+        </div>
+        <div id="goal-ref-crit-inputs"></div>
+      </div>
+    </div>
+
+    <!-- Objectif -->
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Objectif visé</div>
+      <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Critère</div>
+      <div style="display:flex;gap:4px;margin-bottom:8px">
+        <button id="goal-crit-chrono" onclick="selectGoalCrit('chrono')" class="sort-btn on" style="flex:1">Chrono</button>
+        <button id="goal-crit-vit" onclick="selectGoalCrit('vit')" class="sort-btn" style="flex:1">Vitesse</button>
+        <button id="goal-crit-allure" onclick="selectGoalCrit('allure')" class="sort-btn" style="flex:1">Allure</button>
+      </div>
+      <div id="goal-dist-wrap">
+      <div id="goal-dist-label" style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Distance (km)</div>
+      <input type="number" id="goal-dist" placeholder="" min="0" step="0.1" inputmode="decimal" oninput="goalInputColor(this);updateBestPerfDisplay()" style="width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:16px;font-weight:700;text-align:center;padding:6px;outline:none;height:38px;box-sizing:border-box;margin-bottom:8px">
+      </div>
+      <div id="goal-crit-inputs"></div>
+    </div>
+
+    <!-- Dates -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Début</div>
+        <input type="date" id="goal-date-start" style="width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:14px;font-weight:700;padding:6px;outline:none;height:38px;box-sizing:border-box;color-scheme:dark;-webkit-appearance:none">
+      </div>
+      <div>
+        <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Fin</div>
+        <input type="date" id="goal-date-end" style="width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:14px;font-weight:700;padding:6px;outline:none;height:38px;box-sizing:border-box;color-scheme:dark;-webkit-appearance:none">
+      </div>
+    </div>
+
+    </div><!-- fin scroll -->
+    <div style="display:flex;gap:8px;padding:12px 16px 28px;border-top:1px solid #111;flex-shrink:0">
+      <button id="goal-cancel-btn" onclick="closeGoalModal()" style="flex:1;height:40px;background:transparent;border:1px solid #666;border-radius:10px;color:#888;font-size:13px;font-weight:700;cursor:pointer">Annuler</button>
+      <button id="goal-save-btn" onclick="saveGoal()" style="flex:2;height:40px;background:#001a2e;border:1px solid #009fcc;border-radius:10px;color:#00c8ff;font-size:13px;font-weight:800;cursor:pointer">Enregistrer</button>
+    </div>
   </div>
 </div>
 
@@ -599,12 +695,13 @@ function closeConfirm() {
 /* ── TABS ── */
 function showTab(t) {
   localStorage.setItem('lastTab', t);
-  ['calc','shoes','graph'].forEach(id => {
+  ['calc','shoes','graph','goal'].forEach(id => {
     document.getElementById('sc_'+id).classList.toggle('on', id===t);
     document.getElementById('tab_'+id).classList.toggle('on', id===t);
   });
   if (t==='shoes') renderShoes();
   if (t==='graph') renderGraph();
+  if (t==='goal') renderGoals();
 }
 
 /* ── CALCULATEUR ── */
@@ -805,6 +902,8 @@ function confirmSaveRun(shoeId) {
   const orig = btn.innerHTML;
   btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Enregistré !';
   setTimeout(() => btn.innerHTML = orig, 2000);
+  // Mettre à jour l'onglet objectif si visible
+  if (document.getElementById('sc_goal').classList.contains('on')) renderGoals();
 }
 
 /* ── COURSES STORAGE ── */
@@ -941,12 +1040,12 @@ function renderRunsList() {
   list.innerHTML = sorted.map(r => {
     const shoes = loadShoes();
     const shoe = r.shoeId ? shoes.find(s => s.id === +r.shoeId) : null;
-    const shoeColor = shoe?.color || 'var(--accent-dark)';
+    const shoeColor = shoe?.color || getAccentDark();
     const shoeLabel = shoe ? (shoe.name || 'Sans nom') : '';
     return `
     <div class="run-item">
       <div class="run-date">${fmtDate(r.date)}</div>
-      <div class="run-info">${r.dist} km</div>
+      <div class="run-info">${rnd(r.dist,1)} km</div>
       <div class="run-chrono">${fmtChrono(r.tsec)}</div>
       <div class="run-vit">${rnd(r.vit,1)} km/h</div>
       <div class="run-allure">${fmtAllure(r.allsec)}/km</div>
@@ -1330,7 +1429,7 @@ function openNewShoeModal() {
   document.getElementById('max-km-input').value = DEFAULT_MAX;
   document.getElementById('new-shoe-color-preview').style.background = _newShoeColor;
   const grid = document.getElementById('new-shoe-color-grid');
-  grid.innerHTML = COLOR_PALETTE.map(c => `<div style="aspect-ratio:1;background:${c};cursor:pointer;border-radius:3px;border:${c===_newShoeColor?'2px solid #fff':'2px solid transparent'}" onclick="pickNewShoeColor('${c}', this)"></div>`).join('');
+  grid.innerHTML = COLOR_PALETTE.map(c => '<div style="aspect-ratio:1;background:'+c+';cursor:pointer;border-radius:3px;border:'+(c===_newShoeColor?'2px solid #fff':'2px solid transparent')+'" onclick="pickNewShoeColor(\''+c+'\', this)"></div>').join('');
   document.getElementById('modal-max-km').classList.add('on');
 }
 
@@ -1543,14 +1642,14 @@ function renderShoeHistory() {
       <div class="hist-entry">
         <div class="hist-entry-date">${d}/${mo}/${y.slice(2)}</div>
         <div class="hist-entry-km" style="color:${e.sign > 0 ? shoeColor : '#cc4400'}">${shoeName ? shoeName+' · ' : ''}${e.sign > 0 ? '+' : '−'}${e.km} km</div>
-        ${currentHistFilter === 'all' ? `<button class="hist-entry-del" onclick="deleteHistEntry('${e.hid}')"><i class="fa-solid fa-xmark"></i></button>` : ''}
+        ${currentHistFilter === 'all' ? '<button class="hist-entry-del" onclick="deleteHistEntry(\''+e.hid+'\')"><i class="fa-solid fa-xmark"></i></button>' : ''}
       </div>`;
   }).join('');
 }
 
 /* ── SAUVEGARDE / RESTAURATION ── */
 function openExport() {
-  const data = { shoes_v2: loadShoes(), runs: loadRuns(), shoe_history: loadShoeHistory(), themeColor: localStorage.getItem('themeColor') || '#00c8ff' };
+  const data = { shoes_v2: loadShoes(), runs: loadRuns(), shoe_history: loadShoeHistory(), themeColor: localStorage.getItem('themeColor') || '#00c8ff', goals: loadGoals() };
   const text = JSON.stringify(data);
   const btn = document.querySelector('.bk-export');
   const date = new Date().toISOString().split('T')[0];
@@ -1650,6 +1749,7 @@ function doRestore() {
     if (data.runs && Array.isArray(data.runs)) saveRuns(data.runs);
     if (data.shoe_history && Array.isArray(data.shoe_history)) saveShoeHistory(data.shoe_history);
     if (data.themeColor) { localStorage.setItem('themeColor', data.themeColor); applyThemeColor(data.themeColor); }
+    if (data.goals && Array.isArray(data.goals)) saveGoals(data.goals);
     closeModals();
     renderShoes();
     const btn = document.querySelector('#modal-import .bk-copy');
@@ -1698,7 +1798,7 @@ function isLightColor(hex) {
 function buildColorGrid() {
   const grid = document.getElementById('color-grid');
   grid.innerHTML = COLOR_PALETTE.map((c,i) =>
-    `<div class="color-cell" style="background:${c}" data-color="${c}" onclick="selectColor('${c}')"></div>`
+    '<div class="color-cell" style="background:'+c+'" data-color="'+c+'" onclick="selectColor(\''+c+'\')"></div>'
   ).join('');
 }
 
@@ -1746,6 +1846,487 @@ function getAccentRgb() {
 function getAccentDark() { return getComputedStyle(document.documentElement).getPropertyValue('--accent-dark').trim() || '#009fcc'; }
 function getAccentBg() { return getComputedStyle(document.documentElement).getPropertyValue('--accent-bg').trim() || '#001a2e'; }
 
+function goalInputColor(el) { el.style.color = el.value ? getAccent() : '#888'; }
+
+/* ── OBJECTIFS ── */
+const loadGoals = () => { try { const g = localStorage.getItem('goals'); return g ? JSON.parse(g) : []; } catch(e) { return []; } };
+const saveGoals = arr => localStorage.setItem('goals', JSON.stringify(arr));
+
+let _bestPerfTimer = null;
+let _goalEditId = null;
+let _goalRefMode = 'best';
+let _goalRefCrit = 'chrono';
+let _goalCrit = 'chrono';
+
+function critInputsHTML(prefix, crit) {
+  const inputStyle = 'width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:16px;font-weight:700;text-align:center;padding:6px;outline:none;height:38px;box-sizing:border-box';
+  const onInput = 'oninput="goalInputColor(this)"';
+  if (crit === 'chrono') return `
+    <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Chrono</div>
+    <div style="display:flex;gap:6px">
+      <div style="flex:1"><div style="font-size:8px;color:#888;text-align:center;margin-bottom:2px">H</div><input type="number" id="${prefix}-h" min="0" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
+      <div style="flex:1"><div style="font-size:8px;color:#888;text-align:center;margin-bottom:2px">Min</div><input type="number" id="${prefix}-m" min="0" max="59" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
+      <div style="flex:1"><div style="font-size:8px;color:#888;text-align:center;margin-bottom:2px">Sec</div><input type="number" id="${prefix}-s" min="0" max="59" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
+    </div>`;
+  if (crit === 'vit') return `
+    <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Vitesse (km/h)</div>
+    <input type="number" id="${prefix}-vit" min="0" step="0.1" inputmode="decimal" placeholder="" ${onInput} style="${inputStyle}">`;
+  if (crit === 'allure') return `
+    <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Allure (min/km)</div>
+    <div style="display:flex;gap:6px">
+      <div style="flex:1"><div style="font-size:8px;color:#888;text-align:center;margin-bottom:2px">Min</div><input type="number" id="${prefix}-am" min="0" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
+      <div style="flex:1"><div style="font-size:8px;color:#888;text-align:center;margin-bottom:2px">Sec</div><input type="number" id="${prefix}-as" min="0" max="59" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
+    </div>`;
+  return '';
+}
+
+function getCritValue(prefix, crit) {
+  if (crit === 'chrono') {
+    const h = parseInt(document.getElementById(prefix+'-h')?.value||0)||0;
+    const m = parseInt(document.getElementById(prefix+'-m')?.value||0)||0;
+    const s = parseInt(document.getElementById(prefix+'-s')?.value||0)||0;
+    return h*3600 + m*60 + s;
+  }
+  if (crit === 'vit') return parseFloat(document.getElementById(prefix+'-vit')?.value||0)||0;
+  if (crit === 'allure') {
+    const am = parseInt(document.getElementById(prefix+'-am')?.value||0)||0;
+    const as_ = parseInt(document.getElementById(prefix+'-as')?.value||0)||0;
+    return am*60 + as_;
+  }
+  return 0;
+}
+
+function setCritInputValues(prefix, crit, val) {
+  if (crit === 'chrono') {
+    document.getElementById(prefix+'-h').value = Math.floor(val/3600)||'';
+    document.getElementById(prefix+'-m').value = Math.floor((val%3600)/60)||'';
+    document.getElementById(prefix+'-s').value = Math.round(val%60)||'';
+  } else if (crit === 'vit') {
+    document.getElementById(prefix+'-vit').value = val||'';
+  } else if (crit === 'allure') {
+    document.getElementById(prefix+'-am').value = Math.floor(val/60)||'';
+    document.getElementById(prefix+'-as').value = Math.round(val%60)||'';
+  }
+}
+
+function updateBestPerfDisplay() {
+  const display = document.getElementById('goal-ref-best-display');
+  if (!display || _goalRefMode !== 'best') return;
+  const dist = parseFloat(document.getElementById('goal-dist')?.value) || 0;
+  const best = getBestRun(_goalCrit, dist > 0 ? dist : 0.1);
+  display.style.display = 'block';
+  const valEl = document.getElementById('goal-ref-best-val');
+  const subEl = document.getElementById('goal-ref-best-sub');
+  if (!valEl || !subEl) return;
+  if (!best) {
+    valEl.textContent = '—';
+    subEl.textContent = dist > 0 ? 'Aucune course trouvée' : 'Aucune course enregistrée';
+    return;
+  }
+  const val = _goalCrit === 'vit' ? best.vit : _goalCrit === 'chrono' ? best.tsec : best.allsec;
+  valEl.textContent = formatGoalVal(val, _goalCrit);
+  const extraParts = [];
+  if (_goalCrit !== 'vit') extraParts.push(rnd(best.vit,1)+' km/h');
+  if (_goalCrit !== 'allure') extraParts.push(fmtAllure(best.allsec)+'/km');
+  subEl.innerHTML = best.dist+' km · '+fmtDate(best.date)+'<br><span style="font-size:10px;color:'+getAccentDark()+'">'+extraParts.join(' · ')+'</span>';
+}
+
+function selectGoalRef(mode) {
+  _goalRefMode = mode;
+  ['best','custom'].forEach(m => document.getElementById('goal-ref-'+m).classList.toggle('on', m===mode));
+  document.getElementById('goal-ref-custom-fields').style.display = mode==='custom' ? 'block' : 'none';
+  if (mode === 'best') updateBestPerfDisplay();
+  else document.getElementById('goal-ref-best-display').style.display = 'none';
+}
+
+// Convertit une valeur d'un critère vers un autre (via vitesse comme intermédiaire)
+function convertCritValue(val, fromCrit, toCrit) {
+  if (fromCrit === toCrit || val <= 0) return val;
+  const dist = parseFloat(document.getElementById('goal-dist')?.value) || 0;
+  let vit = 0;
+  if (fromCrit === 'vit') vit = val;
+  else if (fromCrit === 'allure') vit = val > 0 ? 3600 / val : 0;
+  else if (fromCrit === 'chrono') vit = (dist > 0 && val > 0) ? dist / (val / 3600) : 0;
+  if (vit <= 0) return 0;
+  if (toCrit === 'vit') return Math.round(vit * 10) / 10;
+  if (toCrit === 'allure') return Math.round(3600 / vit);
+  if (toCrit === 'chrono') return dist > 0 ? Math.round(dist / vit * 3600) : 0;
+  return 0;
+}
+
+function selectGoalRefCrit(crit) {
+  const oldVal = getCritValue('goal-ref-val', _goalRefCrit);
+  const oldCrit = _goalRefCrit;
+  _goalRefCrit = crit;
+  ['chrono','vit','allure'].forEach(c => { const el = document.getElementById('goal-ref-crit-'+c); if(el) el.classList.toggle('on', c===crit); });
+  document.getElementById('goal-ref-crit-inputs').innerHTML = critInputsHTML('goal-ref-val', crit);
+  if (oldVal > 0) { const cv = convertCritValue(oldVal, oldCrit, crit); if(cv > 0) setCritInputValues('goal-ref-val', crit, cv); }
+  const lbl = document.getElementById('goal-ref-dist-label');
+  if (lbl) lbl.textContent = crit === 'chrono' ? 'Distance (km)' : 'Distance (km) — optionnel';
+  selectGoalCrit(crit);
+}
+
+function selectGoalCrit(crit) {
+  const oldVal = getCritValue('goal-val', _goalCrit);
+  const oldCrit = _goalCrit;
+  _goalCrit = crit;
+  ['chrono','vit','allure'].forEach(c => document.getElementById('goal-crit-'+c).classList.toggle('on', c===crit));
+  document.getElementById('goal-crit-inputs').innerHTML = critInputsHTML('goal-val', crit);
+  if (oldVal > 0) { const cv = convertCritValue(oldVal, oldCrit, crit); if(cv > 0) setCritInputValues('goal-val', crit, cv); }
+  // Label distance optionnel si pas chrono
+  const lbl = document.getElementById('goal-dist-label');
+  if (lbl) lbl.textContent = crit === 'chrono' ? 'DISTANCE (KM)' : 'DISTANCE (KM) — OPTIONNEL';
+}
+
+function openGoalModal(editId) {
+  _goalEditId = editId || null;
+  _goalRefMode = 'custom';
+  _goalRefCrit = 'chrono';
+  _goalCrit = 'chrono';
+
+  document.getElementById('modal-goal').style.display = 'flex';
+  document.getElementById('goal-modal-title').textContent = editId ? 'Modifier l\'objectif' : 'Nouvel objectif';
+
+  document.getElementById('goal-crit-inputs').innerHTML = critInputsHTML('goal-val', 'chrono');
+  document.getElementById('goal-ref-crit-inputs').innerHTML = critInputsHTML('goal-ref-val', 'chrono');
+
+  ['chrono','vit','allure'].forEach(c => { const el = document.getElementById('goal-ref-crit-'+c); if(el) el.classList.toggle('on', c==='chrono'); });
+  ['chrono','vit','allure'].forEach(c => document.getElementById('goal-crit-'+c).classList.toggle('on', c==='chrono'));
+
+  document.getElementById('goal-name').value = '';
+  document.getElementById('goal-name').style.color = '#888';
+  document.getElementById('goal-dist').value = '';
+  document.getElementById('goal-dist').style.color = '#888';
+  document.getElementById('goal-ref-dist').value = '';
+  document.getElementById('goal-ref-dist').style.color = '#888';
+  const today = new Date().toISOString().split('T')[0];
+  const inFourWeeks = new Date(Date.now() + 28*24*60*60*1000).toISOString().split('T')[0];
+  document.getElementById('goal-date-start').value = today;
+  document.getElementById('goal-date-end').value = inFourWeeks;
+
+  // Reset labels distance
+  const dl = document.getElementById('goal-dist-label');
+  if (dl) dl.textContent = 'Distance (km)';
+  const rl = document.getElementById('goal-ref-dist-label');
+  if (rl) rl.textContent = 'Distance (km)';
+
+  if (editId) {
+    const goal = loadGoals().find(g => g.id === editId);
+    if (goal) {
+      document.getElementById('goal-name').value = goal.name || '';
+      document.getElementById('goal-name').style.color = goal.name ? getAccent() : '#888';
+      _goalCrit = goal.crit || 'chrono';
+      _goalRefCrit = goal.refCrit || 'chrono';
+      ['chrono','vit','allure'].forEach(c => document.getElementById('goal-crit-'+c).classList.toggle('on', c===_goalCrit));
+      document.getElementById('goal-crit-inputs').innerHTML = critInputsHTML('goal-val', _goalCrit);
+      ['chrono','vit','allure'].forEach(c => { const el = document.getElementById('goal-ref-crit-'+c); if(el) el.classList.toggle('on', c===_goalRefCrit); });
+      document.getElementById('goal-ref-crit-inputs').innerHTML = critInputsHTML('goal-ref-val', _goalRefCrit);
+      document.getElementById('goal-ref-dist').value = goal.refDist || '';
+      if (goal.refDist) document.getElementById('goal-ref-dist').style.color = getAccent();
+      setTimeout(() => setCritInputValues('goal-ref-val', _goalRefCrit, goal.refVal), 50);
+      document.getElementById('goal-dist').value = goal.dist || '';
+      document.getElementById('goal-dist').style.color = goal.dist ? getAccent() : '#888';
+      setTimeout(() => setCritInputValues('goal-val', _goalCrit, goal.goalVal), 50);
+      document.getElementById('goal-date-start').value = goal.dateStart;
+      document.getElementById('goal-date-end').value = goal.dateEnd;
+      // Mettre à jour labels optionnel
+      if (_goalCrit !== 'chrono' && dl) dl.textContent = 'Distance (km) — optionnel';
+      if (_goalRefCrit !== 'chrono' && rl) rl.textContent = 'Distance (km) — optionnel';
+    }
+  }
+}
+
+function closeGoalModal() {
+  if (typeof _bestPerfTimer !== 'undefined' && _bestPerfTimer) {
+    clearTimeout(_bestPerfTimer);
+    _bestPerfTimer = null;
+  }
+  document.getElementById('modal-goal').style.display = 'none';
+  _goalEditId = null;
+}
+
+function saveGoal() {
+  const dist = parseFloat(document.getElementById('goal-dist').value) || 0;
+  const critLabelSave = _goalCrit === 'chrono' ? 'Chrono' : _goalCrit === 'vit' ? 'Vitesse' : 'Allure';
+  const name = document.getElementById('goal-name').value.trim() || ((dist ? dist + ' km · ' : '') + critLabelSave);
+  const goalVal = getCritValue('goal-val', _goalCrit);
+  const dateStart = document.getElementById('goal-date-start').value;
+  const dateEnd = document.getElementById('goal-date-end').value;
+
+  if (_goalCrit === 'chrono' && !dist) { alert('Remplis la distance (nécessaire pour le chrono).'); return; }
+  if (!goalVal) {
+    const hint = _goalCrit === 'chrono' ? 'le chrono' : _goalCrit === 'vit' ? 'la vitesse' : 'l\'allure';
+    alert('Remplis ' + hint + ' de l\'objectif visé.');
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const inFourWeeks = new Date(Date.now() + 28*24*60*60*1000).toISOString().split('T')[0];
+  const start = dateStart || today;
+  const end = dateEnd || inFourWeeks;
+  if (end <= start) { alert('La date de fin doit être après le début.'); return; }
+
+  let refVal = null, refDist = null, refCrit = _goalCrit;
+  refDist = parseFloat(document.getElementById('goal-ref-dist').value) || 0;
+  refVal = getCritValue('goal-ref-val', _goalRefCrit);
+  refCrit = _goalRefCrit;
+
+  const goals = loadGoals();
+  if (_goalEditId) {
+    const idx = goals.findIndex(g => g.id === _goalEditId);
+    if (idx !== -1) goals[idx] = { ...goals[idx], name, dist, goalVal, dateStart:start, dateEnd:end, crit:_goalCrit, refMode:_goalRefMode, refCrit, refVal, refDist };
+  } else {
+    goals.push({ id: Date.now(), name, dist, goalVal, dateStart:start, dateEnd:end, crit:_goalCrit, refMode:_goalRefMode, refCrit, refVal, refDist });
+  }
+  saveGoals(goals);
+  closeGoalModal();
+  renderGoals();
+}
+
+let _goalExpanded = {};
+try { _goalExpanded = JSON.parse(localStorage.getItem('goalExpanded') || '{}') || {}; } catch(e) { _goalExpanded = {}; }
+
+function toggleGoalCard(id) {
+  _goalExpanded[id] = !_goalExpanded[id];
+  localStorage.setItem('goalExpanded', JSON.stringify(_goalExpanded));
+  renderGoals();
+}
+
+function getBestRun(crit, dist) {
+  if (!runs.length) return null;
+  return runs.reduce((best, r) => {
+    if (!best) return r;
+    if (crit === 'vit') return r.vit > best.vit ? r : best;
+    if (crit === 'chrono') return r.tsec < best.tsec ? r : best;
+    return r.allsec < best.allsec ? r : best;
+  }, null);
+}
+
+function deleteGoal(id) {
+  askConfirm('Supprimer cet objectif ?', () => {
+    saveGoals(loadGoals().filter(g => g.id !== id));
+    renderGoals();
+  });
+}
+
+function renderGoals() {
+  const goals = loadGoals();
+  const container = document.getElementById('goal-container');
+  if (!goals.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#333;font-size:13px"><div style="font-size:36px;margin-bottom:8px">🎯</div>Aucun objectif.<br>Ajoute-en un pour commencer !</div>';
+    return;
+  }
+  const now = new Date().toISOString().split('T')[0];
+  const sorted = [...goals].sort((a, b) => {
+    // Objectifs en cours d'abord, triés par date de fin la plus proche
+    const aActive = now >= a.dateStart && now <= a.dateEnd;
+    const bActive = now >= b.dateStart && now <= b.dateEnd;
+    if (aActive && !bActive) return -1;
+    if (!aActive && bActive) return 1;
+    return a.dateEnd.localeCompare(b.dateEnd);
+  });
+  container.innerHTML = sorted.map(g => renderGoalCard(g)).join('');
+}
+
+function renderGoalCard(g) {
+  const accentColor = getAccent();
+  const accentDark = getAccentDark();
+  const accentBg = getAccentBg();
+  const [ys,ms,ds] = g.dateStart.split('-');
+  const [ye,me,de] = g.dateEnd.split('-');
+  const startFmt = ds+'/'+ms+'/'+ys.slice(2);
+  const endFmt = de+'/'+me+'/'+ye.slice(2);
+  const critLabel = g.crit === 'chrono' ? 'Chrono' : g.crit === 'vit' ? 'Vitesse' : 'Allure';
+
+  const weeks = computeWeeks(g);
+  const runs = loadRuns();
+  const now = new Date().toISOString().split('T')[0];
+
+  // Progression globale : meilleure course toutes semaines confondues
+  const allRuns = runs.filter(r => r.date >= g.dateStart && r.date <= g.dateEnd && r.dist >= g.dist * 0.9);
+  const globalBest = allRuns.length ? allRuns.reduce((best, r) => {
+    if (!best) return r;
+    if (g.crit === 'vit') return r.vit > best.vit ? r : best;
+    if (g.crit === 'chrono') return r.tsec < best.tsec ? r : best;
+    return r.allsec < best.allsec ? r : best;
+  }, null) : null;
+
+  let globalPct = 0;
+  if (globalBest && g.refVal && g.goalVal !== g.refVal) {
+    const bestVal = g.crit === 'vit' ? globalBest.vit : g.crit === 'chrono' ? globalBest.tsec : globalBest.allsec;
+    const range = Math.abs(g.goalVal - g.refVal);
+    const progress = g.crit === 'vit' ? (bestVal - g.refVal) / range : (g.refVal - bestVal) / range;
+    globalPct = Math.min(100, Math.max(0, Math.round(progress * 100)));
+  }
+  const globalBarColor = globalPct >= 100 ? '#00cc66' : globalPct >= 60 ? accentColor : '#ffaa00';
+
+  // Semaines
+  const weeksHTML = weeks.map((w, i) => {
+    const isPast = now >= w.dateEnd;
+    const isCurrent = now >= w.dateStart && now < w.dateEnd;
+    const isFuture = now < w.dateStart;
+    const isLast = i === weeks.length - 1;
+
+    const weekRuns = runs.filter(r => r.date >= w.dateStart && r.date < w.dateEnd && r.dist >= g.dist * 0.9);
+    const bestRun = weekRuns.length ? weekRuns.reduce((best, r) => {
+      if (!best) return r;
+      if (g.crit === 'vit') return r.vit > best.vit ? r : best;
+      return r.allsec < best.allsec ? r : best;
+    }, null) : null;
+
+    const bestVal = bestRun ? (g.crit === 'vit' ? bestRun.vit : g.crit === 'chrono' ? bestRun.tsec : bestRun.allsec) : null;
+    const achieved = bestVal !== null && (g.crit === 'vit' ? bestVal >= w.target : bestVal <= w.target);
+
+    // % progression de cette semaine
+    let pct = 0;
+    if (bestVal !== null && g.refVal && g.goalVal !== g.refVal) {
+      const range = Math.abs(g.goalVal - g.refVal);
+      const progress = g.crit === 'vit' ? (bestVal - g.refVal)/range : (g.refVal - bestVal)/range;
+      pct = Math.min(100, Math.max(0, Math.round(progress * 100)));
+    }
+
+    // Couleurs
+    const barColor = achieved ? '#00cc66' : isCurrent ? accentColor : isPast ? '#cc3300' : '#333';
+    const rowBg = isCurrent ? getAccentBg() : 'transparent';
+    const weekLabel = isLast ? '🎯' : 'S'+(i+1);
+    const [ws_y,ws_m,ws_d] = w.dateStart.split('-');
+    const [we_y,we_m,we_d] = w.dateEnd.split('-');
+    const wDates = ws_d+'/'+ws_m+' → '+we_d+'/'+we_m;
+
+    // Indicateur statut
+    let statusHTML = '';
+    if (isFuture) {
+      statusHTML = '<div style="width:20px;height:20px;border-radius:50%;border:1.5px solid #333;flex-shrink:0"></div>';
+    } else if (achieved) {
+      statusHTML = '<div style="width:20px;height:20px;border-radius:50%;background:#00cc66;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px">✓</div>';
+    } else if (isPast) {
+      statusHTML = '<div style="width:20px;height:20px;border-radius:50%;background:#330000;border:1.5px solid #cc3300;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:#cc3300">✗</div>';
+    } else {
+      // En cours : anneau partiel
+      statusHTML = '<div style="width:20px;height:20px;border-radius:50%;border:2px solid '+accentDark+';flex-shrink:0;display:flex;align-items:center;justify-content:center"><span style="font-size:7px;color:'+accentColor+'">…</span></div>';
+    }
+
+    // Meilleure course de la semaine
+    let bestRunHTML = '';
+    if (bestRun) {
+      bestRunHTML = '<div style="font-size:9px;color:'+(achieved?'#00cc66':accentDark)+';margin-top:2px">'
+        + bestRun.dist+' km · '+fmtChrono(bestRun.tsec)+' · '+formatGoalVal(bestVal, g.crit)
+        + '</div>';
+    } else if (!isFuture) {
+      bestRunHTML = '<div style="font-size:9px;color:#444;margin-top:2px">Aucune course cette semaine</div>';
+    }
+
+    // Message motivant
+    const msg = getMotivationMsg(pct, achieved, isCurrent, isPast, g.crit, bestVal, w.target);
+    const msgHTML = msg ? '<div style="font-size:9px;color:'+msg.color+';margin-top:3px;font-style:italic">'+msg.text+'</div>' : '';
+
+    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:8px;background:'+rowBg+';border-radius:8px;margin-bottom:2px">'
+      + statusHTML
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="display:flex;align-items:baseline;gap:6px">'
+      + '<span style="font-size:11px;font-weight:800;color:'+(isCurrent?accentColor:isFuture?'#555':'#fff')+'">'+weekLabel+'</span>'
+      + '<span style="font-size:9px;color:#555">'+wDates+'</span>'
+      + '<span style="font-size:11px;font-weight:700;color:'+(isFuture?'#444':'#888')+';margin-left:auto">'+formatGoalVal(w.target, g.crit)+'</span>'
+      + '</div>'
+      + bestRunHTML
+      + msgHTML
+      + (bestVal !== null ? '<div style="margin-top:4px"><div style="background:#111;border-radius:3px;height:4px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:3px"></div></div></div>' : '')
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  const isExpanded = !!_goalExpanded[g.id];
+
+  return '<div class="goal-card">'
+    // Header cliquable
+    + '<div onclick="toggleGoalCard('+g.id+')" style="cursor:pointer">'
+    + '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">'
+    + '<div style="flex:1;min-width:0">'
+    + '<div class="goal-card-title" style="color:'+(g.name?'#fff':'#888')+'">'+(g.name || g.dist+' km · '+critLabel)+'</div>'
+    + '<div class="goal-card-dates">'+startFmt+' → '+endFmt+'</div>'
+    + '</div>'
+    + '<div style="display:flex;gap:6px;align-items:center">'
+    + '<span style="font-size:12px;color:#888;transition:transform 0.2s;display:inline-block;transform:'+(isExpanded?'rotate(180deg)':'rotate(0deg)')+';flex-shrink:0"><i class="fa-solid fa-chevron-down"></i></span>'
+    + '<button class="run-edit" onclick="event.stopPropagation();openGoalModal('+g.id+')" style="width:28px;height:28px"><i class="fa-solid fa-pen"></i></button>'
+    + '<button class="goal-del-btn" onclick="event.stopPropagation();deleteGoal('+g.id+')"><i class="fa-solid fa-xmark"></i></button>'
+    + '</div>'
+    + '</div>'
+    // Badges départ → objectif
+    + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
+    + (g.refVal ? '<div class="goal-crit-badge" style="background:#111;border-color:#333;color:#666">'+formatGoalVal(g.refVal, g.crit)+'</div>' : '')
+    + (g.refVal ? '<i class="fa-solid fa-arrow-right" style="font-size:9px;color:#555"></i>' : '')
+    + '<div class="goal-crit-badge"><i class="fa-solid fa-flag-checkered"></i> '+formatGoalVal(g.goalVal, g.crit)+'</div>'
+    + '</div>'
+    + '</div>'
+    // Barre de progression globale (toujours visible)
+    + '<div style="margin-top:8px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'
+    + '<span style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px">Progression globale</span>'
+    + '<span style="font-size:12px;font-weight:800;color:'+globalBarColor+'">'+globalPct+'%</span>'
+    + '</div>'
+    + '<div style="background:#111;border-radius:6px;height:8px;overflow:hidden">'
+    + '<div style="width:'+globalPct+'%;height:100%;background:'+globalBarColor+';border-radius:6px;transition:width 0.4s"></div>'
+    + '</div>'
+    + (globalBest ? '<div style="font-size:9px;color:#555;margin-top:3px">Meilleure : '+formatGoalVal(g.crit==='vit'?globalBest.vit:g.crit==='chrono'?globalBest.tsec:globalBest.allsec, g.crit)+' · '+fmtDate(globalBest.date)+'</div>' : '')
+    + '</div>'
+    // Détails semaines (accordéon)
+    + (isExpanded ? '<div style="border-top:1px solid #111;padding-top:6px;margin-top:8px">' + weeksHTML + '</div>' : '')
+    + '</div>';
+}
+
+function getMotivationMsg(pct, achieved, isCurrent, isPast, crit, bestVal, target) {
+  if (!isCurrent && !isPast) return null;
+  if (achieved) return { text: 'Objectif de la semaine atteint ! 🎉', color: '#00cc66' };
+  if (isPast && !achieved && bestVal === null) return { text: 'Aucune course cette semaine.', color: '#555' };
+  if (isPast && !achieved) {
+    const diff = crit === 'vit' ? rnd(target - bestVal, 1) : Math.round(Math.abs(target - bestVal));
+    const diffFmt = crit === 'vit' ? diff+' km/h' : crit === 'allure' ? fmtAllure(diff) : fmtChrono(diff);
+    return { text: 'Manqué de '+diffFmt+' cette semaine.', color: '#cc3300' };
+  }
+  if (isCurrent && bestVal === null) return { text: 'Lance-toi, aucune course encore !', color: '#888' };
+  if (isCurrent && !achieved) {
+    const diff = crit === 'vit' ? rnd(target - bestVal, 1) : Math.round(Math.abs(target - bestVal));
+    const diffFmt = crit === 'vit' ? diff+' km/h de plus' : crit === 'allure' ? fmtAllure(diff)+' à gagner' : fmtChrono(diff)+' à gagner';
+    return { text: 'Il manque '+diffFmt+' pour valider.', color: getAccent() };
+  }
+  return null;
+}
+
+function computeWeeks(g) {
+  const start = new Date(g.dateStart);
+  const end = new Date(g.dateEnd);
+  const totalDays = (end - start) / (1000*60*60*24);
+  const numWeeks = Math.max(1, Math.ceil(totalDays / 7));
+  const weeks = [];
+  for (let i = 0; i < numWeeks; i++) {
+    const wStart = new Date(start.getTime() + i * 7 * 24*60*60*1000);
+    const wEnd = new Date(Math.min(end.getTime(), wStart.getTime() + 7*24*60*60*1000));
+    // Interpolation linéaire du ref vers l'objectif
+    const t = numWeeks === 1 ? 1 : i / (numWeeks - 1);
+    const ref = (g.refVal !== null && g.refVal !== undefined) ? g.refVal : g.goalVal;
+    const target = g.crit === 'vit'
+      ? ref + t * (g.goalVal - ref)
+      : ref - t * (ref - g.goalVal);
+    const safeTarget = isNaN(target) ? g.goalVal : target;
+    weeks.push({
+      dateStart: wStart.toISOString().split('T')[0],
+      dateEnd: wEnd.toISOString().split('T')[0],
+      target: Math.round(safeTarget * 10) / 10
+    });
+  }
+  // Dernière semaine = objectif exact
+  if (weeks.length) weeks[weeks.length-1].target = g.goalVal;
+  return weeks;
+}
+
+function formatGoalVal(val, crit) {
+  if (val === null || val === undefined || isNaN(val)) return '—';
+  if (crit === 'chrono') return fmtChrono(Math.round(val));
+  if (crit === 'vit') return rnd(val,1)+' km/h';
+  if (crit === 'allure') return fmtAllure(Math.round(val))+'/km';
+  return val;
+}
+
 /* ── THÈME COULEUR ── */
 function hexToRgb(hex) {
   const r = parseInt(hex.slice(1,3),16);
@@ -1780,7 +2361,7 @@ function initTheme() {
 function openThemeColorModal() {
   const current = localStorage.getItem('themeColor') || '#00c8ff';
   const grid = document.getElementById('theme-color-grid');
-  grid.innerHTML = COLOR_PALETTE.map(c => `<div class="color-cell${c===current?' sel':''}" style="background:${c}" data-color="${c}" onclick="selectThemeColor('${c}')"></div>`).join('');
+  grid.innerHTML = COLOR_PALETTE.map(c => '<div class="color-cell'+(c===current?' sel':'')+'" style="background:'+c+'" data-color="'+c+'" onclick="selectThemeColor(\''+c+'\')"></div>').join('');
   document.getElementById('theme-color-preview-swatch').style.background = current;
   document.getElementById('modal-theme-color').classList.add('on');
 }
@@ -1801,21 +2382,17 @@ function selectThemeColor(color) {
 }
 
 /* ── INIT ── */
-// Initialiser le thème EN PREMIER
 initTheme();
 buildColorGrid();
 _shoeNextId = null;
 renderShoes();
-// Restaurer le mode calculateur actif
 document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('sel'));
 document.getElementById('btn_'+mode).classList.add('sel');
 const _mc = modeMap[mode];
 _mc.show.forEach(id=>document.getElementById(id).style.display='flex');
 _mc.hide.forEach(id=>document.getElementById(id).style.display='none');
-// Restaurer le bouton métrique actif
 document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('on'));
 document.getElementById('mtab_'+currentMetric).classList.add('on');
-// Restaurer l'onglet actif
 showTab(localStorage.getItem('lastTab') || 'calc');
 </script>
 </body>
