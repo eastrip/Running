@@ -525,7 +525,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 <div class="hist-modal" id="modal-goal-program" onclick="closeGoalProgram()">
   <div class="hist-sheet" style="max-height:85dvh;display:flex;flex-direction:column;padding:16px 16px 0" onclick="event.stopPropagation()">
     <div class="hist-header" style="flex-shrink:0">
-      <div class="hist-title"><i class="fa-solid fa-list-check" style="margin-right:6px"></i>Programme</div>
+      <div class="hist-title"><i class="fa-solid fa-list-check" style="margin-right:6px"></i>Programme<span id="goal-program-title" style="font-weight:500;color:#888;margin-left:6px;font-size:12px"></span></div>
       <button class="hist-close" onclick="closeGoalProgram()">✕</button>
     </div>
     <div style="flex:1;overflow-y:auto;padding-bottom:8px">
@@ -1232,7 +1232,8 @@ function deleteRun(id) {
 function drawEmptyChart() {
   const wrap = document.getElementById('canvas-wrap');
   const canvas = document.getElementById('chart');
-  const W = wrap.clientWidth;
+  const W = wrap.clientWidth || (window.innerWidth - 24);
+  if (W <= 0) { setTimeout(drawEmptyChart, 100); return; }
   const H = 180;
   canvas.width = W * devicePixelRatio;
   canvas.height = H * devicePixelRatio;
@@ -1252,7 +1253,8 @@ function drawChart(runs) {
   const canvas = document.getElementById('chart');
 
   const VISIBLE = 8;
-  const containerW = wrap.clientWidth;
+  const containerW = wrap.clientWidth || (window.innerWidth - 24);
+  if (containerW <= 0) { setTimeout(() => drawChart(runs), 100); return; }
   const H = 180;
   const PT_SPACING = containerW / VISIBLE;
 
@@ -1934,6 +1936,8 @@ function openGoalProgram(id) {
   _goalProgramId = id;
   const goals = loadGoals();
   const goal = goals.find(g => g.id === id);
+  const titleEl = document.getElementById('goal-program-title');
+  if (titleEl) titleEl.textContent = goal?.name ? '— ' + goal.name : '';
   const textarea = document.getElementById('goal-program-text');
   if (textarea) textarea.value = goal?.program || '';
   document.getElementById('modal-goal-program').classList.add('on');
@@ -2539,6 +2543,10 @@ function selectThemeColor(color) {
 }
 
 /* ── INIT ── */
+window.addEventListener('resize', () => {
+  const runs = loadRuns();
+  if (runs.length > 0) drawChart(runs); else drawEmptyChart();
+});
 initTheme();
 buildColorGrid();
 _shoeNextId = null;
