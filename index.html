@@ -2319,7 +2319,7 @@ function renderGoalCard(g) {
     }
 
     // Couleurs
-    const barColor = achieved ? '#888' : isCurrent ? '#888' : isPast ? '#888' : '#333';
+    const barColor = achieved ? '#bbb' : isCurrent ? '#bbb' : isPast ? '#bbb' : '#333';
     const rowBg = isCurrent ? accentBg : 'transparent';
     const weekLabel = isLast ? '🎯' : 'S'+(i+1);
     const [ws_y,ws_m,ws_d] = w.dateStart.split('-');
@@ -2342,7 +2342,7 @@ function renderGoalCard(g) {
     // Meilleure course de la semaine
     let bestRunHTML = '';
     if (bestRun) {
-      bestRunHTML = '<div style="font-size:9px;color:#888;margin-top:2px">'
+      bestRunHTML = '<div style="font-size:9px;color:#bbb;margin-top:2px">'
         + bestRun.dist+' km · '+formatGoalVal(bestVal, g.crit)
         + '</div>';
     } else if (!isFuture) {
@@ -2357,9 +2357,9 @@ function renderGoalCard(g) {
       + statusHTML
       + '<div style="flex:1;min-width:0">'
       + '<div style="display:flex;align-items:baseline;gap:6px">'
-      + '<span style="font-size:11px;font-weight:800;color:'+(isFuture?'#555':'#888')+'">'+weekLabel+'</span>'
+      + '<span style="font-size:11px;font-weight:800;color:'+(isFuture?'#555':'#bbb')+'">'+weekLabel+'</span>'
       + '<span style="font-size:9px;color:#555">'+wDates+'</span>'
-      + '<span style="font-size:11px;font-weight:700;color:'+(isFuture?'#444':'#888')+';margin-left:auto">'+formatGoalVal(w.target, g.crit)+'</span>'
+      + '<span style="font-size:11px;font-weight:700;color:'+(isFuture?'#444':'#bbb')+';margin-left:auto">'+formatGoalVal(w.target, g.crit)+'</span>'
       + '</div>'
       + bestRunHTML
       + msgHTML
@@ -2436,18 +2436,18 @@ function renderGoalCard(g) {
 
 function getMotivationMsg(pct, achieved, isCurrent, isPast, crit, bestVal, target) {
   if (!isCurrent && !isPast) return null;
-  if (achieved) return { text: 'Objectif de la semaine atteint ! 🎉', color: '#888' };
+  if (achieved) return { text: 'Objectif de la semaine atteint ! 🎉', color: '#bbb' };
   if (isPast && !achieved && bestVal === null) return { text: 'Aucune course cette semaine.', color: '#555' };
   if (isPast && !achieved) {
     const diff = crit === 'vit' ? rnd(target - bestVal, 1) : Math.round(Math.abs(target - bestVal));
     const diffFmt = crit === 'vit' ? diff+' km/h' : crit === 'allure' ? fmtAllure(diff) : fmtChrono(diff);
-    return { text: 'Manqué de '+diffFmt+' cette semaine.', color: '#888' };
+    return { text: 'Manqué de '+diffFmt+' cette semaine.', color: '#bbb' };
   }
   if (isCurrent && bestVal === null) return { text: 'Lance-toi, aucune course encore !', color: '#888' };
   if (isCurrent && !achieved) {
     const diff = crit === 'vit' ? rnd(target - bestVal, 1) : Math.round(Math.abs(target - bestVal));
     const diffFmt = crit === 'vit' ? diff+' km/h de plus' : crit === 'allure' ? fmtAllure(diff)+' à gagner' : fmtChrono(diff)+' à gagner';
-    return { text: 'Il manque '+diffFmt+' pour valider.', color: '#888' };
+    return { text: 'Il manque '+diffFmt+' pour valider.', color: '#bbb' };
   }
   return null;
 }
