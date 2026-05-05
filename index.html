@@ -1591,7 +1591,7 @@ function renderShoes() {
           style="background:${shoe.color||'#555'}"
           title="Changer la couleur"></button>
         <div style="flex:1;font-size:15px;font-weight:700;color:#fff;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shoe.name||'Sans nom'}</div>
-        <button class="run-edit" onclick="openMaxModal(${shoe.id}, ${MAX})" title="Limite km" style="width:26px;height:26px"><i class="fa-solid fa-pen"></i></button>
+        <button class="run-edit" onclick="openMaxModal(${shoe.id}, ${MAX})" title="Limite km" style="width:26px;height:26px;border-color:${shoe.color || '#009fcc'};color:${shoe.color || '#009fcc'}"><i class="fa-solid fa-pen"></i></button>
         <button class="shoe-delete-btn" onclick="deleteShoe(${shoe.id})" title="Supprimer">✕</button>
       </div>
       <div class="km-total" id="km-total-${shoe.id}" ${accentStyle ? 'style="'+accentStyle+'"' : ''}>${totalFmt} <span>km</span></div>
@@ -2319,7 +2319,7 @@ function renderGoalCard(g) {
     }
 
     // Couleurs
-    const barColor = achieved ? '#00cc66' : isCurrent ? accentColor : isPast ? '#cc3300' : '#333';
+    const barColor = achieved ? '#888' : isCurrent ? '#888' : isPast ? '#888' : '#333';
     const rowBg = isCurrent ? accentBg : 'transparent';
     const weekLabel = isLast ? '🎯' : 'S'+(i+1);
     const [ws_y,ws_m,ws_d] = w.dateStart.split('-');
@@ -2342,8 +2342,8 @@ function renderGoalCard(g) {
     // Meilleure course de la semaine
     let bestRunHTML = '';
     if (bestRun) {
-      bestRunHTML = '<div style="font-size:9px;color:'+(achieved?'#00cc66':accentDark)+';margin-top:2px">'
-        + bestRun.dist+' km · '+fmtChrono(bestRun.tsec)+' · '+formatGoalVal(bestVal, g.crit)
+      bestRunHTML = '<div style="font-size:9px;color:#888;margin-top:2px">'
+        + bestRun.dist+' km · '+formatGoalVal(bestVal, g.crit)
         + '</div>';
     } else if (!isFuture) {
       bestRunHTML = '<div style="font-size:9px;color:#444;margin-top:2px">Aucune course cette semaine</div>';
@@ -2357,7 +2357,7 @@ function renderGoalCard(g) {
       + statusHTML
       + '<div style="flex:1;min-width:0">'
       + '<div style="display:flex;align-items:baseline;gap:6px">'
-      + '<span style="font-size:11px;font-weight:800;color:'+(isCurrent?accentColor:isFuture?'#555':'#fff')+'">'+weekLabel+'</span>'
+      + '<span style="font-size:11px;font-weight:800;color:'+(isFuture?'#555':'#888')+'">'+weekLabel+'</span>'
       + '<span style="font-size:9px;color:#555">'+wDates+'</span>'
       + '<span style="font-size:11px;font-weight:700;color:'+(isFuture?'#444':'#888')+';margin-left:auto">'+formatGoalVal(w.target, g.crit)+'</span>'
       + '</div>'
@@ -2382,7 +2382,7 @@ function renderGoalCard(g) {
     + '</div>'
     + '<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
     + '<button onclick="event.stopPropagation();openGoalProgram('+g.id+')" style="height:26px;padding:0 8px;font-size:9px;font-weight:700;background:transparent;border:1px solid '+accentColor+'88;border-radius:6px;color:'+accentColor+';cursor:pointer;flex-shrink:0;white-space:nowrap">Prog.</button>'
-    + '<button class="run-edit" onclick="event.stopPropagation();openGoalModal('+g.id+')" style="width:28px;height:28px"><i class="fa-solid fa-pen"></i></button>'
+    + '<button class="run-edit" onclick="event.stopPropagation();openGoalModal('+g.id+')" style="width:28px;height:28px;border-color:'+accentColor+'88;color:'+accentColor+';"><i class="fa-solid fa-pen"></i></button>'
     + '<button class="goal-del-btn" onclick="event.stopPropagation();deleteGoal('+g.id+')"><i class="fa-solid fa-xmark"></i></button>'
     + '</div>'
     + '</div>'
@@ -2436,18 +2436,18 @@ function renderGoalCard(g) {
 
 function getMotivationMsg(pct, achieved, isCurrent, isPast, crit, bestVal, target) {
   if (!isCurrent && !isPast) return null;
-  if (achieved) return { text: 'Objectif de la semaine atteint ! 🎉', color: '#00cc66' };
+  if (achieved) return { text: 'Objectif de la semaine atteint ! 🎉', color: '#888' };
   if (isPast && !achieved && bestVal === null) return { text: 'Aucune course cette semaine.', color: '#555' };
   if (isPast && !achieved) {
     const diff = crit === 'vit' ? rnd(target - bestVal, 1) : Math.round(Math.abs(target - bestVal));
     const diffFmt = crit === 'vit' ? diff+' km/h' : crit === 'allure' ? fmtAllure(diff) : fmtChrono(diff);
-    return { text: 'Manqué de '+diffFmt+' cette semaine.', color: '#cc3300' };
+    return { text: 'Manqué de '+diffFmt+' cette semaine.', color: '#888' };
   }
   if (isCurrent && bestVal === null) return { text: 'Lance-toi, aucune course encore !', color: '#888' };
   if (isCurrent && !achieved) {
     const diff = crit === 'vit' ? rnd(target - bestVal, 1) : Math.round(Math.abs(target - bestVal));
     const diffFmt = crit === 'vit' ? diff+' km/h de plus' : crit === 'allure' ? fmtAllure(diff)+' à gagner' : fmtChrono(diff)+' à gagner';
-    return { text: 'Il manque '+diffFmt+' pour valider.', color: getAccent() };
+    return { text: 'Il manque '+diffFmt+' pour valider.', color: '#888' };
   }
   return null;
 }
