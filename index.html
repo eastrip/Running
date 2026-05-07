@@ -985,10 +985,11 @@ const saveRuns = arr => localStorage.setItem('runs', JSON.stringify(arr));
 /* ── GRAPHIQUE ── */
 let currentMetric = localStorage.getItem('lastMetric') || 'chrono';
 
-let prfFilterActive = false;
+let prfFilterActive = localStorage.getItem('prfFilter') === 'true';
 
 function togglePrfFilter() {
   prfFilterActive = !prfFilterActive;
+  localStorage.setItem('prfFilter', prfFilterActive);
   const btn = document.getElementById('prf-filter-btn');
   if (prfFilterActive) {
     btn.style.background = 'var(--accent-bg)';
@@ -2621,6 +2622,14 @@ _mc.hide.forEach(id=>document.getElementById(id).style.display='none');
 document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('on'));
 document.getElementById('mtab_'+currentMetric).classList.add('on');
 showTab(localStorage.getItem('lastTab') || 'calc');
+// Restaurer l'état visuel du bouton PRF
+const _prfBtn = document.getElementById('prf-filter-btn');
+if (_prfBtn && prfFilterActive) {
+  _prfBtn.style.background = 'var(--accent-bg)';
+  _prfBtn.style.borderColor = 'var(--accent-dark)';
+  _prfBtn.style.borderStyle = 'dotted';
+  _prfBtn.style.color = 'var(--accent)';
+}
 </script>
 </body>
 </html>
