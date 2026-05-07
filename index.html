@@ -1383,7 +1383,7 @@ function drawChart(runs) {
     ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
   }
 
-  // Courbe de tendance — moyenne mobile sur 8 sorties (vitesse seulement)
+  // Courbe de tendance — moyenne mobile sur 8 sorties (vitesse + allure)
   if (pts.length >= 3 && (currentMetric === 'vit' || currentMetric === 'all')) {
     const window = 8;
     const movAvg = pts.map((p, i) => {
@@ -1405,6 +1405,22 @@ function drawChart(runs) {
     }
     ctx.stroke();
     ctx.setLineDash([]);
+    // Label de la valeur de tendance au dernier point
+    const lastAvg = movAvg[movAvg.length - 1];
+    const lastAvgVal = minV + (1 - (lastAvg.y - PAD.top) / gH) * range;
+    const lastPt = pts[pts.length - 1];
+    // Y du label de la dernière course (valeur au-dessus du point)
+    const lastPtLabelY = lastPt.y - 11;
+    // Y du label de tendance par défaut
+    let trendLabelY = lastAvg.y - 5;
+    // Si les deux labels sont trop proches (< 12px), décaler la tendance
+    if (Math.abs(trendLabelY - lastPtLabelY) < 12) {
+      trendLabelY = lastPtLabelY > lastAvg.y ? lastAvg.y + 14 : lastAvg.y - 14;
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '600 8px -apple-system,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('~ ' + labelFn(lastAvgVal), lastAvg.x, trendLabelY);
   }
 
   // Courbe lissée (Bézier cubique)
