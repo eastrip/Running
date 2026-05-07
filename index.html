@@ -402,11 +402,13 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       <div class="graph-title" id="graph-count" style="color:#fff;font-weight:800">0 course(s)</div>
       <button class="shoe-history-btn" onclick="openRunsHistory()"><i class="fa-solid fa-list-ul"></i> Historique des courses</button>
     </div>
-    <div class="metric-tabs">
+    <div class="metric-tabs" style="align-items:center">
       <div class="mtab" id="mtab_dist"   onclick="setMetric('dist')"><i class="fa-solid fa-route"></i> Distance</div>
       <div class="mtab on" id="mtab_chrono" onclick="setMetric('chrono')"><i class="fa-solid fa-stopwatch"></i> Chrono</div>
       <div class="mtab" id="mtab_vit"    onclick="setMetric('vit')"><i class="fa-solid fa-gauge-high"></i> Vitesse</div>
       <div class="mtab" id="mtab_all"    onclick="setMetric('all')"><i class="fa-solid fa-person-running"></i> Allure</div>
+      <div style="width:1px;height:28px;background:#333;flex-shrink:0"></div>
+      <button id="prf-filter-btn" onclick="togglePrfFilter()" style="background:#030303;border:1px dotted #888;border-radius:8px;color:#666;font-size:9px;font-weight:700;padding:5px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1;flex-shrink:0"><i class="fa-solid fa-star" style="font-size:15px"></i> PRF</button>
     </div>
     <div class="canvas-wrap" id="canvas-wrap">
       <canvas id="chart"></canvas>
@@ -593,6 +595,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <h3>Chaussures utilisées</h3>
     <p style="font-size:11px;color:#888;margin-bottom:10px">Course de <strong id="shoe-pick-dist" style="color:var(--accent)"></strong> — sélectionne la paire utilisée :</p>
     <div id="shoe-picker-list" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto"></div>
+    <div style="display:flex;justify-content:center;margin-top:14px"><button id="shoe-pick-prf-btn" onclick="togglePickPrf()" style="padding:8px 20px;background:#2a2a2a;border:none;border-radius:8px;color:#111;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:1px">PRF</button></div>
     <div class="bk-actions" style="margin-top:12px">
       <button class="bk-ok" style="flex:1" onclick="closeShoePickerModal()">Annuler</button>
     </div>
@@ -656,7 +659,10 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       </div>
       <div>
         <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Chaussure</div>
-        <div id="edit-shoe-list" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div id="edit-shoe-list" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:1"></div>
+          <button id="edit-prf-btn" onclick="toggleEditPrf()" style="padding:6px 14px;background:#2a2a2a;border:none;border-radius:8px;color:#111;font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0;letter-spacing:1px">PRF</button>
+        </div>
         <div id="edit-shoe-label" style="font-size:11px;color:var(--accent-dark);margin-top:6px;height:14px"></div>
       </div>
     </div>
@@ -912,7 +918,35 @@ function openShoePickerModal() {
       + '</div>'
     ).join('');
   document.getElementById('shoe-pick-dist').textContent = dist + ' km';
+  const prfBtn = document.getElementById('shoe-pick-prf-btn');
+  if (prfBtn) { prfBtn.dataset.selected = 'false'; applyPrfBtnStyle(prfBtn, false); }
   document.getElementById('modal-shoe-picker').classList.add('on');
+}
+
+function applyPrfBtnStyle(btn, active) {
+  if (active) {
+    btn.style.background = 'var(--accent-dark)';
+    btn.style.border = 'none';
+    btn.style.color = '#111';
+  } else {
+    btn.style.background = '#2a2a2a';
+    btn.style.border = 'none';
+    btn.style.color = '#111';
+  }
+}
+
+function toggleEditPrf() {
+  const btn = document.getElementById('edit-prf-btn');
+  const active = btn.dataset.selected !== 'true';
+  btn.dataset.selected = active;
+  applyPrfBtnStyle(btn, active);
+}
+
+function togglePickPrf() {
+  const btn = document.getElementById('shoe-pick-prf-btn');
+  const active = btn.dataset.selected !== 'true';
+  btn.dataset.selected = active;
+  applyPrfBtnStyle(btn, active);
 }
 
 function confirmSaveRun(shoeId) {
@@ -920,7 +954,8 @@ function confirmSaveRun(shoeId) {
   const today = new Date().toISOString().split('T')[0];
   const dist = rnd(lastResult.dist, 3);
   const hid = shoeId ? Date.now()+'_'+Math.random().toString(36).slice(2,6) : null;
-  runs.push({ id: Date.now(), date: today, dist, tsec: Math.round(lastResult.tsec), vit: rnd(lastResult.vit,2), allsec: rnd(lastResult.allsec,1), shoeId: shoeId||null, histHid: hid });
+  const prf = document.getElementById('shoe-pick-prf-btn')?.dataset.selected === 'true';
+  runs.push({ id: Date.now(), date: today, dist, tsec: Math.round(lastResult.tsec), vit: rnd(lastResult.vit,2), allsec: rnd(lastResult.allsec,1), shoeId: shoeId||null, histHid: hid, prf });
   saveRuns(runs);
   if (shoeId) {
     const shoes = loadShoes();
@@ -950,6 +985,25 @@ const saveRuns = arr => localStorage.setItem('runs', JSON.stringify(arr));
 /* ── GRAPHIQUE ── */
 let currentMetric = localStorage.getItem('lastMetric') || 'chrono';
 
+let prfFilterActive = false;
+
+function togglePrfFilter() {
+  prfFilterActive = !prfFilterActive;
+  const btn = document.getElementById('prf-filter-btn');
+  if (prfFilterActive) {
+    btn.style.background = 'var(--accent-bg)';
+    btn.style.borderColor = 'var(--accent-dark)';
+    btn.style.borderStyle = 'dotted';
+    btn.style.color = 'var(--accent)';
+  } else {
+    btn.style.background = '#030303';
+    btn.style.borderColor = '#888';
+    btn.style.borderStyle = 'dotted';
+    btn.style.color = '#666';
+  }
+  renderGraph();
+}
+
 function setMetric(m) {
   currentMetric=m;
   localStorage.setItem('lastMetric', m);
@@ -967,8 +1021,9 @@ function fmtChrono(sec) {
 function fmtAllure(sec) { return Math.floor(sec/60)+'\''+pad(Math.round(sec%60))+'"'; }
 
 function renderGraph() {
-  const runs = loadRuns();
-  document.getElementById('graph-count').textContent = runs.length+' course(s)';
+  const allRuns = loadRuns();
+  const runs = prfFilterActive ? allRuns.filter(r => r.prf) : allRuns;
+  document.getElementById('graph-count').textContent = allRuns.length+' course(s)';
   const prWrap = document.getElementById('pr-box-wrap');
 
   if (runs.length===0) {
@@ -1086,7 +1141,7 @@ function renderRunsList() {
       <div class="run-chrono">${fmtChrono(r.tsec)}</div>
       <div class="run-vit">${rnd(r.vit,1)} km/h</div>
       <div class="run-allure">${fmtAllure(r.allsec)}/km</div>
-      <button class="run-edit" onclick="openEditRun(${r.id})"><i class="fa-solid fa-pen"></i></button>
+      <button class="run-edit" onclick="openEditRun(${r.id})" style="position:relative">${r.prf ? '<span style="position:absolute;top:-3px;right:-3px;width:7px;height:7px;border-radius:50%;background:'+getAccent()+'"></span>' : ''}<i class="fa-solid fa-pen"></i></button>
       <button class="run-del" onclick="deleteRun(${r.id})">✕</button>
       ${runInfoVisible ? (
         '<div style="grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:2px 0 4px 2px">'
@@ -1115,6 +1170,8 @@ function openEditRun(id) {
   document.getElementById('edit-m').value = m || '';
   document.getElementById('edit-s').value = s || '';
   document.getElementById('edit-note').value = r.note || '';
+  const editPrfBtn = document.getElementById('edit-prf-btn');
+  if (editPrfBtn) { editPrfBtn.dataset.selected = !!r.prf; applyPrfBtnStyle(editPrfBtn, !!r.prf); }
 
   // Sélecteur de chaussure compact (pastilles)
   const shoes = loadShoes();
@@ -1161,6 +1218,7 @@ function saveEditRun() {
   const date = document.getElementById('edit-date').value;
   if (!dist || dist <= 0 || tsec <= 0 || !date) return;
   const note = document.getElementById('edit-note').value.trim();
+  const prf = document.getElementById('edit-prf-btn')?.dataset.selected === 'true';
   const newShoeId = getEditSelectedShoeId();
   const vit = rnd(dist / (tsec / 3600), 2);
   const allsec = rnd(tsec / dist, 1);
@@ -1194,14 +1252,17 @@ function saveEditRun() {
   }
 
   // Appliquer la nouvelle association
+  let finalHid = oldRun?.histHid || null;
   if (shoeChanged && newShoeId) {
     const newShoe = shoes.find(s => s.id === +newShoeId);
     if (newShoe) {
       newShoe.total = rnd(newShoe.total + dist, 2);
       newShoe.lastDate = date;
-      const newHid = Date.now()+'_'+Math.random().toString(36).slice(2,6);
-      hist.push({ hid: newHid, shoeId: newShoeId, date, km: rnd(dist, 3), sign: 1 });
+      finalHid = Date.now()+'_'+Math.random().toString(36).slice(2,6);
+      hist.push({ hid: finalHid, shoeId: newShoeId, date, km: rnd(dist, 3), sign: 1 });
     }
+  } else if (shoeChanged && !newShoeId) {
+    finalHid = null;
   }
 
   saveShoeHistory(hist);
@@ -1209,7 +1270,7 @@ function saveEditRun() {
 
   // Mettre à jour la course
   const newRuns = runs.map(r => r.id === _editRunId
-    ? { ...r, date, dist: rnd(dist, 3), tsec: Math.round(tsec), vit, allsec, note, shoeId: newShoeId || null }
+    ? { ...r, date, dist: rnd(dist, 3), tsec: Math.round(tsec), vit, allsec, note, shoeId: newShoeId || null, histHid: finalHid, prf }
     : r
   );
   saveRuns(newRuns);
@@ -1323,7 +1384,7 @@ function drawChart(runs) {
   }
 
   // Courbe de tendance — moyenne mobile sur 8 sorties (vitesse seulement)
-  if (pts.length >= 3 && currentMetric === 'vit') {
+  if (pts.length >= 3 && (currentMetric === 'vit' || currentMetric === 'all')) {
     const window = 8;
     const movAvg = pts.map((p, i) => {
       const start = Math.max(0, i - Math.floor(window / 2));
@@ -1887,24 +1948,6 @@ function getAccentBg() { return getComputedStyle(document.documentElement).getPr
 
 function goalInputColor(el) { el.style.color = el.value ? getAccent() : '#888'; }
 
-function importBestRun() {
-  const dist = parseFloat(document.getElementById('goal-ref-dist').value) || 0;
-  const best = getBestRun(_goalRefCrit, dist > 0 ? dist : 0.1);
-  if (!best) { alert('Aucune course trouvée.'); return; }
-
-  const refDistEl = document.getElementById('goal-ref-dist');
-  if (refDistEl) { refDistEl.value = best.dist; goalInputColor(refDistEl); }
-
-  const val = _goalRefCrit === 'vit' ? best.vit : _goalRefCrit === 'chrono' ? best.tsec : best.allsec;
-  setCritInputValues('goal-ref-val', _goalRefCrit, val);
-
-  const preview = document.getElementById('goal-ref-best-preview');
-  if (preview) {
-    preview.style.display = 'block';
-    preview.innerHTML = '<i class="fa-solid fa-bolt" style="color:'+getAccent()+'"></i> <span style="color:'+getAccent()+';font-weight:700">'+formatGoalVal(val, _goalRefCrit)+'</span> · '+best.dist+' km · '+fmtDate(best.date);
-  }
-}
-
 let _goalColor = null;
 
 function openGoalColorPicker() {
@@ -2226,6 +2269,7 @@ function toggleGoalCard(id) {
 }
 
 function getBestRun(crit, dist) {
+  const runs = loadRuns();
   if (!runs.length) return null;
   return runs.reduce((best, r) => {
     if (!best) return r;
@@ -2276,7 +2320,8 @@ function renderGoalCard(g) {
   const now = new Date().toISOString().split('T')[0];
 
   // Progression globale : meilleure course toutes semaines confondues
-  const allRuns = runs.filter(r => r.date >= g.dateStart && r.date <= g.dateEnd && r.dist >= g.dist * 0.9);
+  const distOk = r => !g.dist || (r.dist >= g.dist - 1 && r.dist <= g.dist + 1);
+  const allRuns = runs.filter(r => r.date >= g.dateStart && r.date <= g.dateEnd && distOk(r));
   const globalBest = allRuns.length ? allRuns.reduce((best, r) => {
     if (!best) return r;
     if (g.crit === 'vit') return r.vit > best.vit ? r : best;
@@ -2300,10 +2345,11 @@ function renderGoalCard(g) {
     const isFuture = now < w.dateStart;
     const isLast = i === weeks.length - 1;
 
-    const weekRuns = runs.filter(r => r.date >= w.dateStart && r.date < w.dateEnd && r.dist >= g.dist * 0.9);
+    const weekRuns = runs.filter(r => r.date >= w.dateStart && r.date < w.dateEnd && distOk(r));
     const bestRun = weekRuns.length ? weekRuns.reduce((best, r) => {
       if (!best) return r;
       if (g.crit === 'vit') return r.vit > best.vit ? r : best;
+      if (g.crit === 'chrono') return r.tsec < best.tsec ? r : best;
       return r.allsec < best.allsec ? r : best;
     }, null) : null;
 
