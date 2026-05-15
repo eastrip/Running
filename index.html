@@ -2358,11 +2358,11 @@ function renderGoalCard(g) {
   // Semaines
   const weeksHTML = weeks.map((w, i) => {
     const isPast = now >= w.dateEnd;
-    const isCurrent = now >= w.dateStart && now < w.dateEnd;
+    const isCurrent = now >= w.dateStart && now <= w.dateEnd;
     const isFuture = now < w.dateStart;
     const isLast = i === weeks.length - 1;
 
-    const weekRuns = runs.filter(r => r.date >= w.dateStart && r.date < w.dateEnd && distOk(r));
+    const weekRuns = runs.filter(r => r.date >= w.dateStart && r.date <= w.dateEnd && distOk(r));
     const bestRun = weekRuns.length ? weekRuns.reduce((best, r) => {
       if (!best) return r;
       if (g.crit === 'vit') return r.vit > best.vit ? r : best;
@@ -2518,25 +2518,33 @@ function getMotivationMsg(pct, achieved, isCurrent, isPast, crit, bestVal, targe
 function computeWeeks(g) {
   const start = new Date(g.dateStart);
   const end = new Date(g.dateEnd);
-  const totalDays = (end - start) / (1000*60*60*24);
-  const numWeeks = Math.max(1, Math.ceil(totalDays / 7));
+
+  // Trouver le lundi précédent ou égal à la date de début
+  const dayOfWeek = start.getDay(); // 0=dim, 1=lun, ..., 6=sam
+  const daysToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+  const firstMonday = new Date(start.getTime() + daysToMonday * 24*60*60*1000);
+
+  // Générer les semaines lundi→dimanche jusqu'à couvrir la date de fin
   const weeks = [];
-  for (let i = 0; i < numWeeks; i++) {
-    const wStart = new Date(start.getTime() + i * 7 * 24*60*60*1000);
-    const wEnd = new Date(Math.min(end.getTime(), wStart.getTime() + 7*24*60*60*1000));
-    // Interpolation linéaire du ref vers l'objectif
+  let wStart = new Date(firstMonday);
+  while (wStart <= end) {
+    const wEnd = new Date(wStart.getTime() + 6*24*60*60*1000); // dimanche
+    weeks.push({ dateStart: wStart.toISOString().split('T')[0], dateEnd: wEnd.toISOString().split('T')[0] });
+    wStart = new Date(wStart.getTime() + 7*24*60*60*1000);
+  }
+
+  const numWeeks = weeks.length;
+  const ref = (g.refVal !== null && g.refVal !== undefined) ? g.refVal : g.goalVal;
+
+  // Interpolation linéaire du ref vers l'objectif
+  weeks.forEach((w, i) => {
     const t = numWeeks === 1 ? 1 : i / (numWeeks - 1);
-    const ref = (g.refVal !== null && g.refVal !== undefined) ? g.refVal : g.goalVal;
     const target = g.crit === 'vit'
       ? ref + t * (g.goalVal - ref)
       : ref - t * (ref - g.goalVal);
-    const safeTarget = isNaN(target) ? g.goalVal : target;
-    weeks.push({
-      dateStart: wStart.toISOString().split('T')[0],
-      dateEnd: wEnd.toISOString().split('T')[0],
-      target: Math.round(safeTarget * 10) / 10
-    });
-  }
+    w.target = Math.round((isNaN(target) ? g.goalVal : target) * 10) / 10;
+  });
+
   // Dernière semaine = objectif exact
   if (weeks.length) weeks[weeks.length-1].target = g.goalVal;
   return weeks;
