@@ -408,7 +408,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       <div class="mtab" id="mtab_vit"    onclick="setMetric('vit')"><i class="fa-solid fa-gauge-high"></i> Vitesse</div>
       <div class="mtab" id="mtab_all"    onclick="setMetric('all')"><i class="fa-solid fa-person-running"></i> Allure</div>
       <div style="width:1px;height:28px;background:#333;flex-shrink:0"></div>
-      <button id="prf-filter-btn" onclick="togglePrfFilter()" style="background:#030303;border:1px dotted #888;border-radius:8px;color:#666;font-size:9px;font-weight:700;padding:5px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1;flex-shrink:0"><i class="fa-solid fa-star" style="font-size:15px"></i> PRF</button>
+      <button id="prf-filter-btn" onclick="togglePrfFilter()" style="background:#030303;border:1px dotted #888;border-radius:8px;color:#666;font-size:9px;font-weight:700;padding:5px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1;flex-shrink:0"><i class="fa-solid fa-star" style="font-size:15px"></i> PERF</button>
     </div>
     <div class="canvas-wrap" id="canvas-wrap">
       <canvas id="chart"></canvas>
@@ -595,9 +595,12 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <h3>Chaussures utilisées</h3>
     <p style="font-size:11px;color:#888;margin-bottom:10px">Course de <strong id="shoe-pick-dist" style="color:var(--accent)"></strong> — sélectionne la paire utilisée :</p>
     <div id="shoe-picker-list" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto"></div>
-    <div style="display:flex;justify-content:center;margin-top:14px"><button id="shoe-pick-prf-btn" onclick="togglePickPrf()" style="padding:8px 20px;background:#2a2a2a;border:none;border-radius:8px;color:#111;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:1px">PRF</button></div>
+    <div style="display:flex;justify-content:center;margin-top:14px">
+      <button id="shoe-pick-prf-btn" onclick="togglePickPrf()" style="padding:8px 20px;background:#2a2a2a;border:none;border-radius:8px;color:#111;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:1px">PERF</button>
+    </div>
     <div class="bk-actions" style="margin-top:12px">
-      <button class="bk-ok" style="flex:1" onclick="closeShoePickerModal()">Annuler</button>
+      <button class="bk-ok" onclick="closeShoePickerModal()">Annuler</button>
+      <button class="bk-copy" style="flex:2" onclick="confirmSaveRun(_pendingShoeId)"><i class="fa-solid fa-check"></i> Valider</button>
     </div>
   </div>
 </div>
@@ -661,7 +664,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
         <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Chaussure</div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <div id="edit-shoe-list" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:1"></div>
-          <button id="edit-prf-btn" onclick="toggleEditPrf()" style="padding:6px 14px;background:#2a2a2a;border:none;border-radius:8px;color:#111;font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0;letter-spacing:1px">PRF</button>
+          <button id="edit-prf-btn" onclick="toggleEditPrf()" style="padding:6px 14px;background:#2a2a2a;border:none;border-radius:8px;color:#111;font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0;letter-spacing:1px">PERF</button>
         </div>
         <div id="edit-shoe-label" style="font-size:11px;color:var(--accent-dark);margin-top:6px;height:14px"></div>
       </div>
@@ -904,19 +907,32 @@ function closeShoePickerModal() {
   _shoePickerForRunId = null;
 }
 
+let _pendingShoeId = null;
+
+function selectPickShoe(shoeId) {
+  _pendingShoeId = shoeId;
+  document.querySelectorAll('#shoe-picker-list .shoe-pick-item').forEach(el => {
+    el.style.borderColor = '#1a1a1a';
+    el.style.background = '#0a0a0a';
+  });
+  const sel = document.querySelector('#shoe-picker-list .shoe-pick-item[data-shoe-id="'+shoeId+'"]');
+  if (sel) { sel.style.borderColor = 'var(--accent-dark)'; sel.style.background = 'var(--accent-bg)'; }
+}
+
 function openShoePickerModal() {
   const shoes = loadShoes();
   const dist = rnd(lastResult.dist, 3);
   const list = document.getElementById('shoe-picker-list');
   list.innerHTML =
-    '<div class="shoe-pick-item" onclick="confirmSaveRun(null)"><i class="fa-solid fa-ban" style="font-size:18px;flex-shrink:0;color:#888"></i><div class="shoe-pick-name">Sans chaussure</div></div>'
+    '<div class="shoe-pick-item" data-shoe-id="null" onclick="selectPickShoe(null)"><i class="fa-solid fa-ban" style="font-size:18px;flex-shrink:0;color:#888"></i><div class="shoe-pick-name">Sans chaussure</div></div>'
     + shoes.map(s =>
-      '<div class="shoe-pick-item" onclick="confirmSaveRun('+s.id+')">'
+      '<div class="shoe-pick-item" data-shoe-id="'+s.id+'" onclick="selectPickShoe('+s.id+')">'
       + '<div class="shoe-pick-swatch" style="background:'+(s.color||'#333')+'"></div>'
       + '<div class="shoe-pick-name">'+(s.name||'Sans nom')+'</div>'
       + '<div class="shoe-pick-km">'+rnd(s.total,1)+' km</div>'
       + '</div>'
     ).join('');
+  _pendingShoeId = null;
   document.getElementById('shoe-pick-dist').textContent = dist + ' km';
   const prfBtn = document.getElementById('shoe-pick-prf-btn');
   if (prfBtn) { prfBtn.dataset.selected = 'false'; applyPrfBtnStyle(prfBtn, false); }
@@ -2630,7 +2646,7 @@ _mc.hide.forEach(id=>document.getElementById(id).style.display='none');
 document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('on'));
 document.getElementById('mtab_'+currentMetric).classList.add('on');
 showTab(localStorage.getItem('lastTab') || 'calc');
-// Restaurer l'état visuel du bouton PRF
+// Restaurer l'état visuel du bouton PERF
 const _prfBtn = document.getElementById('prf-filter-btn');
 if (_prfBtn && prfFilterActive) {
   _prfBtn.style.background = 'var(--accent-bg)';
