@@ -2059,7 +2059,22 @@ function openGoalLink(id) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         doc.querySelectorAll('script').forEach(el => el.remove());
-        container.innerHTML = doc.body ? doc.body.innerHTML : html;
+        // Récupérer les styles inline du head
+        let styles = '';
+        doc.querySelectorAll('style').forEach(el => { styles += el.outerHTML; });
+        // Convertir les liens CSS relatifs en absolus
+        doc.querySelectorAll('link[rel="stylesheet"]').forEach(el => {
+          try {
+            const href = new URL(el.getAttribute('href'), url).href;
+            styles += '<link rel="stylesheet" href="' + href + '">';
+          } catch(e) {}
+        });
+        // Convertir les src relatifs en absolus dans le body
+        let bodyHtml = doc.body ? doc.body.innerHTML : html;
+        bodyHtml = bodyHtml.replace(/(src|href)=["'](?!http|\/\/|data:|#|mailto)([^"']+)["']/gi, (m, attr, path) => {
+          try { return attr + '="' + new URL(path, url).href + '"'; } catch(e) { return m; }
+        });
+        container.innerHTML = styles + bodyHtml;
       })
       .catch(() => tryProxy(idx + 1));
   }
