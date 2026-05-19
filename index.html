@@ -1081,7 +1081,7 @@ function renderGraph() {
           <div class="pr-title"><i class="fa-solid fa-medal"></i> Meilleures performances</div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:16px;margin-bottom:4px;padding:0 4px">
-          <div style="flex:1;display:grid;grid-template-columns:20px 46px 1.2fr 1.4fr 1.2fr 1.2fr;gap:6px;font-size:8px;color:${getAccentDark()};font-weight:700;text-transform:uppercase;letter-spacing:0.5px;text-align:right">
+          <div style="flex:1;display:grid;grid-template-columns:20px 46px 1.2fr 1.4fr 1.2fr 1.2fr;gap:6px;font-size:10px;color:${getAccentDark()};font-weight:700;text-transform:uppercase;letter-spacing:0.5px;text-align:right">
             <div></div><div></div><div>km</div><div>chrono</div><div>km/h</div><div>allure</div>
           </div>
         </div>
@@ -1162,7 +1162,7 @@ function renderRunsList() {
       <div class="run-chrono">${fmtChrono(r.tsec)}</div>
       <div class="run-vit">${rnd(r.vit,1)} km/h</div>
       <div class="run-allure">${fmtAllure(r.allsec)}/km</div>
-      <button class="run-edit" onclick="openEditRun(${r.id})" style="position:relative">${r.prf ? '<i class="fa-solid fa-star" style="position:absolute;top:-5px;right:-5px;font-size:8px;color:'+getAccent()+'"></i>' : ''}<i class="fa-solid fa-pen"></i></button>
+      <button class="run-edit" onclick="openEditRun(${r.id})" style="position:relative">${r.prf ? '<i class="fa-solid fa-star" style="position:absolute;top:-5px;right:-5px;font-size:10px;color:'+getAccent()+'"></i>' : ''}<i class="fa-solid fa-pen"></i></button>
       <button class="run-del" onclick="deleteRun(${r.id})">✕</button>
       ${runInfoVisible ? (
         '<div style="grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:2px 0 4px 2px">'
@@ -2061,9 +2061,9 @@ function critInputsHTML(prefix, crit) {
   if (crit === 'chrono') return `
     <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Chrono</div>
     <div style="display:flex;gap:6px">
-      <div style="flex:1"><div style="font-size:8px;color:#888;text-align:center;margin-bottom:2px">H</div><input type="number" id="${prefix}-h" min="0" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
-      <div style="flex:1"><div style="font-size:8px;color:#888;text-align:center;margin-bottom:2px">Min</div><input type="number" id="${prefix}-m" min="0" max="59" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
-      <div style="flex:1"><div style="font-size:8px;color:#888;text-align:center;margin-bottom:2px">Sec</div><input type="number" id="${prefix}-s" min="0" max="59" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
+      <div style="flex:1"><div style="font-size:10px;color:#888;text-align:center;margin-bottom:2px">H</div><input type="number" id="${prefix}-h" min="0" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
+      <div style="flex:1"><div style="font-size:10px;color:#888;text-align:center;margin-bottom:2px">Min</div><input type="number" id="${prefix}-m" min="0" max="59" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
+      <div style="flex:1"><div style="font-size:10px;color:#888;text-align:center;margin-bottom:2px">Sec</div><input type="number" id="${prefix}-s" min="0" max="59" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
     </div>`;
   if (crit === 'vit') return `
     <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Vitesse (km/h)</div>
@@ -2071,8 +2071,8 @@ function critInputsHTML(prefix, crit) {
   if (crit === 'allure') return `
     <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Allure (min/km)</div>
     <div style="display:flex;gap:6px">
-      <div style="flex:1"><div style="font-size:8px;color:#888;text-align:center;margin-bottom:2px">Min</div><input type="number" id="${prefix}-am" min="0" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
-      <div style="flex:1"><div style="font-size:8px;color:#888;text-align:center;margin-bottom:2px">Sec</div><input type="number" id="${prefix}-as" min="0" max="59" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
+      <div style="flex:1"><div style="font-size:10px;color:#888;text-align:center;margin-bottom:2px">Min</div><input type="number" id="${prefix}-am" min="0" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
+      <div style="flex:1"><div style="font-size:10px;color:#888;text-align:center;margin-bottom:2px">Sec</div><input type="number" id="${prefix}-as" min="0" max="59" inputmode="numeric" placeholder="" ${onInput} style="${inputStyle}"></div>
     </div>`;
   return '';
 }
