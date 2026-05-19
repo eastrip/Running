@@ -1162,7 +1162,7 @@ function renderRunsList() {
       <div class="run-chrono">${fmtChrono(r.tsec)}</div>
       <div class="run-vit">${rnd(r.vit,1)} km/h</div>
       <div class="run-allure">${fmtAllure(r.allsec)}/km</div>
-      <button class="run-edit" onclick="openEditRun(${r.id})" style="position:relative">${r.prf ? '<span style="position:absolute;top:-3px;right:-3px;width:7px;height:7px;border-radius:50%;background:'+getAccent()+'"></span>' : ''}<i class="fa-solid fa-pen"></i></button>
+      <button class="run-edit" onclick="openEditRun(${r.id})" style="position:relative">${r.prf ? '<i class="fa-solid fa-star" style="position:absolute;top:-5px;right:-5px;font-size:8px;color:'+getAccent()+'"></i>' : ''}<i class="fa-solid fa-pen"></i></button>
       <button class="run-del" onclick="deleteRun(${r.id})">✕</button>
       ${runInfoVisible ? (
         '<div style="grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:2px 0 4px 2px">'
