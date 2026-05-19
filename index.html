@@ -2534,22 +2534,21 @@ function renderGoalCard(g) {
   const isExpanded = !!_goalExpanded[g.id];
 
   return '<div class="goal-card" style="'+(g.color ? 'border-color:'+g.color+'55;'+ (!isExpanded ? 'background:linear-gradient(135deg,'+g.color+'14,'+g.color+'06)' : '') : '')+'">'
-    // Header cliquable
-    + '<div onclick="toggleGoalCard('+g.id+')" style="cursor:pointer">'
-
-    // Ligne 1 : Nom + chevron + boutons
+    // Ligne 1 : boutons hors zone cliquable
     + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-    + '<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'
+    + '<div onclick="toggleGoalCard('+g.id+')" style="cursor:pointer;display:flex;align-items:center;gap:8px;flex:1;min-width:0">'
     + '<div class="goal-card-title" style="color:'+(g.name?'#fff':'#555')+'">'+(g.name || critLabel)+'</div>'
     + '<span style="font-size:11px;color:'+accentColor+';display:inline-block;transform:'+(isExpanded?'rotate(180deg)':'rotate(0deg)')+'"><i class="fa-solid fa-chevron-down"></i></span>'
     + '</div>'
     + '<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
-    + (g.link ? '<button onclick="event.stopPropagation();openGoalLink('+g.id+')" style="height:26px;padding:0 8px;font-size:9px;font-weight:700;background:transparent;border:1px solid '+accentColor+'88;border-radius:6px;color:'+accentColor+';cursor:pointer;flex-shrink:0"><i class="fa-solid fa-link"></i></button>' : '')
-    + '<button onclick="event.stopPropagation();openGoalProgram('+g.id+')" style="height:26px;padding:0 8px;font-size:9px;font-weight:700;background:transparent;border:1px solid '+accentColor+'88;border-radius:6px;color:'+accentColor+';cursor:pointer;flex-shrink:0;white-space:nowrap">Prog.</button>'
-    + '<button class="run-edit" onclick="event.stopPropagation();openGoalModal('+g.id+')" style="width:28px;height:28px;border-color:'+accentColor+'88;color:'+accentColor+';"><i class="fa-solid fa-pen"></i></button>'
-    + '<button class="goal-del-btn" onclick="event.stopPropagation();deleteGoal('+g.id+')"><i class="fa-solid fa-xmark"></i></button>'
+    + (g.link ? '<a href="'+g.link+'" target="_blank" style="height:26px;padding:0 8px;font-size:9px;font-weight:700;background:transparent;border:1px solid '+accentColor+'88;border-radius:6px;color:'+accentColor+';cursor:pointer;flex-shrink:0;display:flex;align-items:center;text-decoration:none"><i class="fa-solid fa-link"></i></a>' : '')
+    + '<button onclick="openGoalProgram('+g.id+')" style="height:26px;padding:0 8px;font-size:9px;font-weight:700;background:transparent;border:1px solid '+accentColor+'88;border-radius:6px;color:'+accentColor+';cursor:pointer;flex-shrink:0;white-space:nowrap">Prog.</button>'
+    + '<button class="run-edit" onclick="openGoalModal('+g.id+')" style="width:28px;height:28px;border-color:'+accentColor+'88;color:'+accentColor+';"><i class="fa-solid fa-pen"></i></button>'
+    + '<button class="goal-del-btn" onclick="deleteGoal('+g.id+')"><i class="fa-solid fa-xmark"></i></button>'
     + '</div>'
     + '</div>'
+    // Zone cliquable accordéon
+    + '<div onclick="toggleGoalCard('+g.id+')" style="cursor:pointer">'
 
     // Ligne 2 : Objectif principal bien visible
     + '<div style="background:#0a0a0a;border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid #1a1a1a">'
