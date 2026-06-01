@@ -2345,12 +2345,21 @@ function renderGoals() {
     return a.dateEnd.localeCompare(b.dateEnd);
   });
   container.innerHTML = sorted.map(g => renderGoalCard(g)).join('');
+  // Dessiner les graphiques après rendu DOM complet
+  requestAnimationFrame(() => {
+    sorted.forEach(g => {
+      const weeks = computeWeeks(g);
+      const runs = loadRuns();
+      const accentColor = g.color || getAccent();
+      drawGoalChart(g, weeks, runs, accentColor);
+    });
+  });
 }
 
 function renderGoalCard(g) {
   const accentColor = g.color || getAccent();
   const accentDark = g.color ? g.color+'aa' : getAccentDark();
-  const accentBg = g.color ? g.color+'18' : getAccentBg();
+  const accentBg = g.color ? g.color+'18' : (getComputedStyle(document.documentElement).getPropertyValue('--accent-bg').trim() || '#001a2e');
   const [ys,ms,ds] = g.dateStart.split('-');
   const [ye,me,de] = g.dateEnd.split('-');
   const startFmt = ds+'/'+ms+'/'+ys.slice(2);
@@ -2506,20 +2515,128 @@ function renderGoalCard(g) {
     + '</div>'
 
     + '</div>'
-    // Barre de progression globale (toujours visible)
-    + '<div style="margin-top:8px">'
-    + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'
-    + '<span style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px">Progression globale</span>'
-    + '<span style="font-size:12px;font-weight:800;color:'+globalBarColor+'">'+globalPct+'%</span>'
-    + '</div>'
-    + '<div style="background:#111;border-radius:6px;height:8px;overflow:hidden">'
-    + '<div style="width:'+globalPct+'%;height:100%;background:'+globalBarColor+';border-radius:6px;transition:width 0.4s"></div>'
-    + '</div>'
-    + (globalBest ? '<div style="font-size:9px;color:#555;margin-top:3px">Meilleure : '+formatGoalVal(g.crit==='vit'?globalBest.vit:g.crit==='chrono'?globalBest.tsec:globalBest.allsec, g.crit)+' · '+fmtDate(globalBest.date)+'</div>' : '')
-    + '</div>'
-    // Détails semaines (accordéon)
-    + (isExpanded ? '<div style="border-top:1px solid #111;padding-top:6px;margin-top:8px">' + weeksHTML + '</div>' : '')
-    + '</div>';
+    // Graphique objectif + barre de progression
+    + '<div style="margin-top:8px">'    + '<canvas id="goal-chart-'+g.id+'" width="300" height="160" style="width:100%;height:160px;border-radius:8px;display:block;background:#000"></canvas>'    + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;margin-bottom:4px">'    + '<span style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px">Progression globale</span>'    + '<span style="font-size:12px;font-weight:800;color:'+globalBarColor+'">'+globalPct+'%</span>'    + '</div>'    + '<div style="background:#111;border-radius:6px;height:8px;overflow:hidden">'    + '<div style="width:'+globalPct+'%;height:100%;background:'+globalBarColor+';border-radius:6px;transition:width 0.4s"></div>'    + '</div>'    + (globalBest ? '<div style="font-size:9px;color:#555;margin-top:3px">Meilleure : '+formatGoalVal(g.crit==='vit'?globalBest.vit:g.crit==='chrono'?globalBest.tsec:globalBest.allsec, g.crit)+' · '+fmtDate(globalBest.date)+'</div>' : '')    + '</div>'    // Détails semaines (accordéon)
+    + (isExpanded ? '<div style="border-top:1px solid #111;padding-top:6px;margin-top:8px">' + weeksHTML + '</div>' : '')    + '</div>';
+
+}
+
+function drawGoalChart(g, weeks, runs, accentColor) {
+  const canvas = document.getElementById('goal-chart-' + g.id);
+  if (!canvas) return;
+  const W = canvas.getBoundingClientRect().width || canvas.offsetWidth || canvas.parentElement?.offsetWidth || 300;
+  const H = 160;
+  const DPR = window.devicePixelRatio || 1;
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(DPR, DPR);
+
+  const PAD = { top: 20, right: 16, bottom: 20, left: 16 };
+  const gW = W - PAD.left - PAD.right;
+  const gH = H - PAD.top - PAD.bottom;
+
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+
+  const n = weeks.length;
+  if (n === 0) return;
+
+  const targets = weeks.map(w => w.target);
+  const distOk = r => !g.dist || (r.dist >= g.dist - 1 && r.dist <= g.dist + 1);
+  const perfs = weeks.map(w => {
+    const wr = runs.filter(r => r.date >= w.dateStart && r.date <= w.dateEnd && distOk(r));
+    if (!wr.length) return null;
+    return wr.reduce((best, r) => {
+      if (!best) return r;
+      if (g.crit === 'vit') return r.vit > best.vit ? r : best;
+      if (g.crit === 'chrono') return r.tsec < best.tsec ? r : best;
+      return r.allsec < best.allsec ? r : best;
+    }, null);
+  });
+  const perfVals = perfs.map(r => r ? (g.crit === 'vit' ? r.vit : g.crit === 'chrono' ? r.tsec : r.allsec) : null);
+
+  // Plage basée uniquement sur cibles + perfs (sans goalVal pour maximiser la plage visible)
+  const allVals = [...targets, ...perfVals.filter(v => v !== null)];
+  if (allVals.length === 0) return;
+  const padding = (Math.max(...allVals) - Math.min(...allVals)) * 0.2 || 10;
+  const minV = Math.min(...allVals) - padding;
+  const maxV = Math.max(...allVals) + padding;
+  const range = maxV - minV || 1;
+
+  const isInverted = g.crit !== 'vit';
+  const toY = v => {
+    const norm = (v - minV) / range;
+    return PAD.top + (isInverted ? norm : 1 - norm) * gH;
+  };
+  const xOf = i => PAD.left + (n === 1 ? gW / 2 : i / (n - 1) * gW);
+
+  // Grille horizontale subtile
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let t = 0; t <= 4; t++) {
+    const y = PAD.top + t * gH / 4;
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + gW, y); ctx.stroke();
+  }
+
+  // Ligne cibles hebdomadaires (grise pointillée fine)
+  ctx.strokeStyle = 'rgba(180,180,180,0.4)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  targets.forEach((t, i) => {
+    const x = xOf(i), y = toY(t);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Ligne performances réalisées
+  const perfPts = perfVals.map((v, i) => v !== null ? {
+    x: xOf(i), y: toY(v), v, i,
+    achieved: g.crit === 'vit' ? v >= targets[i] : v <= targets[i]
+  } : null).filter(Boolean);
+
+  if (perfPts.length > 0) {
+    // Ligne fine
+    ctx.strokeStyle = accentColor;
+    ctx.lineWidth = 1;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    perfPts.forEach((p, idx) => idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.stroke();
+
+    // Petits points
+    perfPts.forEach(p => {
+      ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+      ctx.fillStyle = accentColor; ctx.fill();
+    });
+
+    // Labels décalés loin des points pour ne pas chevaucher la courbe
+    perfPts.forEach((p, idx) => {
+      ctx.fillStyle = accentColor;
+      ctx.font = '700 8px -apple-system,sans-serif';
+      if (idx === 0) ctx.textAlign = 'left';
+      else if (idx === perfPts.length - 1) ctx.textAlign = 'right';
+      else ctx.textAlign = 'center';
+      // Décaler suffisamment au-dessus ou en-dessous
+      const above = p.y - PAD.top > gH / 2; // point dans la moitié basse → label en haut
+      const labelY = above ? p.y - 10 : p.y + 14;
+      ctx.fillText(formatGoalVal(p.v, g.crit), p.x, labelY);
+    });
+  }
+
+  // Labels dates
+  ctx.fillStyle = '#555';
+  ctx.font = '8px -apple-system,sans-serif';
+  ctx.textAlign = 'left';
+  const [,ms,ds] = weeks[0].dateStart.split('-');
+  ctx.fillText(ds+'/'+ms, PAD.left, H - 4);
+  const [,me,de] = weeks[weeks.length-1].dateStart.split('-');
+  ctx.textAlign = 'right';
+  ctx.fillText(de+'/'+me, PAD.left + gW, H - 4);
 }
 
 function getMotivationMsg(pct, achieved, isCurrent, isPast, crit, bestVal, target) {
