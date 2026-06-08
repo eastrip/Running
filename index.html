@@ -2581,31 +2581,63 @@ function drawGoalChart(g, weeks, runs, accentColor) {
     ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + gW, y); ctx.stroke();
   }
 
-  // Ligne cibles hebdomadaires (grise pointillée fine)
+  // Courbe cibles hebdomadaires (grise pointillée fine, Bézier)
   ctx.strokeStyle = 'rgba(180,180,180,0.4)';
   ctx.lineWidth = 1;
   ctx.setLineDash([3, 3]);
   ctx.beginPath();
   targets.forEach((t, i) => {
     const x = xOf(i), y = toY(t);
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    if (i === 0) { ctx.moveTo(x, y); }
+    else {
+      const px = xOf(i-1), py = toY(targets[i-1]);
+      const cpX = (px + x) / 2;
+      ctx.bezierCurveTo(cpX, py, cpX, y, x, y);
+    }
   });
   ctx.stroke();
   ctx.setLineDash([]);
 
-  // Ligne performances réalisées
+  // Courbe performances réalisées (Bézier lissée)
   const perfPts = perfVals.map((v, i) => v !== null ? {
     x: xOf(i), y: toY(v), v, i,
     achieved: g.crit === 'vit' ? v >= targets[i] : v <= targets[i]
   } : null).filter(Boolean);
 
   if (perfPts.length > 0) {
-    // Ligne fine
+    // Aire sous la courbe
+    if (perfPts.length > 1) {
+      const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + gH);
+      const hex = accentColor.replace('#','');
+      const r = parseInt(hex.slice(0,2),16), gc = parseInt(hex.slice(2,4),16), b = parseInt(hex.slice(4,6),16);
+      grad.addColorStop(0, `rgba(${r},${gc},${b},0.12)`);
+      grad.addColorStop(1, `rgba(${r},${gc},${b},0)`);
+      ctx.beginPath();
+      ctx.moveTo(perfPts[0].x, PAD.top + gH);
+      ctx.lineTo(perfPts[0].x, perfPts[0].y);
+      for (let i = 0; i < perfPts.length - 1; i++) {
+        const cpX = (perfPts[i].x + perfPts[i+1].x) / 2;
+        ctx.bezierCurveTo(cpX, perfPts[i].y, cpX, perfPts[i+1].y, perfPts[i+1].x, perfPts[i+1].y);
+      }
+      ctx.lineTo(perfPts[perfPts.length-1].x, PAD.top + gH);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+    // Courbe lissée
     ctx.strokeStyle = accentColor;
     ctx.lineWidth = 1;
     ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
     ctx.beginPath();
-    perfPts.forEach((p, idx) => idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    perfPts.forEach((p, idx) => {
+      if (idx === 0) { ctx.moveTo(p.x, p.y); }
+      else {
+        const prev = perfPts[idx-1];
+        const cpX = (prev.x + p.x) / 2;
+        ctx.bezierCurveTo(cpX, prev.y, cpX, p.y, p.x, p.y);
+      }
+    });
     ctx.stroke();
 
     // Petits points
