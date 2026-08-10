@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programme Réaliste 9 Novembre</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10; --card: #111318; --border: #1e2230;
+    --accent: #3b82f6; --accent2: #22d3ee;
+    --green: #4ade80; --red: #f87171; --yellow: #facc15;
+    --text: #e2e8f0; --muted: #64748b; --dim: #94a3b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; padding: 20px 16px 60px; max-width: 480px; margin: auto; }
+  .header { text-align: center; padding: 32px 0 20px; }
+  .header-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
+  .header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 52px; letter-spacing: 2px; line-height: 1; background: linear-gradient(135deg, #fff 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .header-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .target-box { background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(59,130,246,0.08)); border: 1px solid rgba(34,211,238,0.3); border-radius: 16px; padding: 18px 20px; margin-bottom: 24px; display: flex; justify-content: space-around; align-items: center; }
+  .t-item { text-align: center; }
+  .t-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .t-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; line-height: 1; }
+  .t-val.old { color: var(--red); } .t-val.new { color: var(--accent2); }
+  .t-arrow { font-size: 18px; color: var(--muted); }
+  .week-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 10px; }
+  .week-header { padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+  .wh-left { display: flex; align-items: center; gap: 10px; }
+  .wh-num { font-family: 'Bebas Neue', sans-serif; font-size: 28px; line-height: 1; min-width: 40px; }
+  .wh-title { font-size: 12px; font-weight: 600; color: var(--text); }
+  .wh-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .wh-right { text-align: right; }
+  .wh-time { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1px; }
+  .wh-gain { font-family: 'DM Mono', monospace; font-size: 10px; margin-top: 1px; color: var(--muted); }
+  .km-wrap { padding: 8px 14px 10px; }
+  table { width: 100%; border-collapse: collapse; font-family: 'DM Mono', monospace; font-size: 11px; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding: 3px 3px 5px; text-align: right; font-weight: 400; }
+  th:first-child { text-align: left; }
+  td { padding: 4px 3px; text-align: right; color: var(--dim); border-bottom: 1px solid rgba(30,34,48,0.35); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { text-align: left; color: var(--muted); font-size: 10px; }
+  .p { color: var(--text) !important; font-weight: 500; }
+  .bw { height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+  .b { height: 100%; border-radius: 2px; }
+  .note { font-size: 11px; color: var(--muted); font-style: italic; padding: 6px 14px 10px; border-top: 1px solid rgba(30,34,48,0.5); line-height: 1.4; }
+  .race-card { background: linear-gradient(135deg, rgba(34,211,238,0.05), rgba(59,130,246,0.05)); border: 2px solid rgba(34,211,238,0.5); border-radius: 14px; overflow: hidden; margin-bottom: 10px; }
+  .race-header { padding: 14px 16px; border-bottom: 1px solid rgba(34,211,238,0.2); text-align: center; }
+  .race-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 3px; color: var(--accent2); }
+  .race-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .footer { text-align: center; padding: 28px 0 10px; color: var(--muted); font-size: 10px; font-family: 'DM Mono', monospace; letter-spacing: 2px; line-height: 2.2; }
+  .c1{color:#4ade80} .c2{color:#a8a29e} .c3{color:#b8a074} .c4{color:#ca8a04}
+  .c5{color:#d97706} .c6{color:#ea580c} .c7{color:#dc2626} .c8{color:#e11d48}
+  .c9{color:#c026d3} .c10{color:#9333ea} .c11{color:#7c3aed} .c12{color:#0891b2}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">13 Semaines · 12 km · Temps écoulé</div>
+  <h1>PROGRAMME<br>RÉALISTE</h1>
+  <div class="header-sub">17 Août → 9 Novembre · Basé sur tes temps réels</div>
+</div>
+
+<div class="target-box">
+  <div class="t-item"><div class="t-label">Base réelle</div><div class="t-val old">59:30</div></div>
+  <div class="t-arrow">→</div>
+  <div class="t-item"><div class="t-label">Objectif 9 nov</div><div class="t-val new">57:06</div></div>
+  <div class="t-arrow">·</div>
+  <div class="t-item"><div class="t-label">Gain visé</div><div class="t-val" style="color:var(--green)">−2:24</div></div>
+</div>
+
+<!-- S1 -->
+<div class="week-card" id="S1">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c1">S1</div><div><div class="wh-title">Repartir · zéro arrêt</div><div class="wh-date">17–23 Août</div></div></div>
+    <div class="wh-right"><div class="wh-time c1">59:30</div><div class="wh-gain">Base médiane réelle</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">5:07</td><td><div class="bw"><div class="b" style="width:56%;background:#4ade80"></div></div></td><td>5:07</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">5:05</td><td><div class="bw"><div class="b" style="width:57%;background:#4ade80"></div></div></td><td>10:12</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">5:03</td><td><div class="bw"><div class="b" style="width:57%;background:#4ade80"></div></div></td><td>15:15</td></tr>
+      <tr><td>4</td><td class="p">5:00</td><td><div class="bw"><div class="b" style="width:58%;background:#3b82f6"></div></div></td><td>20:15</td></tr>
+      <tr><td>5</td><td class="p">5:00</td><td><div class="bw"><div class="b" style="width:58%;background:#3b82f6"></div></div></td><td>25:15</td></tr>
+      <tr><td>6</td><td class="p">4:59</td><td><div class="bw"><div class="b" style="width:58%;background:#3b82f6"></div></div></td><td>30:14</td></tr>
+      <tr><td>7</td><td class="p">4:59</td><td><div class="bw"><div class="b" style="width:58%;background:#3b82f6"></div></div></td><td>35:13</td></tr>
+      <tr><td>8</td><td class="p">4:58</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>40:11</td></tr>
+      <tr><td>9</td><td class="p">4:52</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>45:03</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:52</td><td><div class="bw"><div class="b" style="width:60%;background:#f87171"></div></div></td><td>49:55</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:49</td><td><div class="bw"><div class="b" style="width:61%;background:#f87171"></div></div></td><td>54:44</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:46</td><td><div class="bw"><div class="b" style="width:61%;background:#f87171"></div></div></td><td>59:30</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 Objectif simple : finir sans t'arrêter. C'est tout. La régularité avant la vitesse.</div>
+</div>
+
+<!-- S2 -->
+<div class="week-card" id="S2">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c2">S2</div><div><div class="wh-title">Confirmer zéro arrêt</div><div class="wh-date">24–30 Août</div></div></div>
+    <div class="wh-right"><div class="wh-time c2">59:18</div><div class="wh-gain">−0:12 vs S1</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">5:05</td><td><div class="bw"><div class="b" style="width:57%;background:#4ade80"></div></div></td><td>5:05</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">5:03</td><td><div class="bw"><div class="b" style="width:57%;background:#4ade80"></div></div></td><td>10:08</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">5:01</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>15:09</td></tr>
+      <tr><td>4</td><td class="p">4:58</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>20:07</td></tr>
+      <tr><td>5</td><td class="p">4:58</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>25:05</td></tr>
+      <tr><td>6</td><td class="p">4:57</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>30:02</td></tr>
+      <tr><td>7</td><td class="p">4:57</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>34:59</td></tr>
+      <tr><td>8</td><td class="p">4:56</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>39:55</td></tr>
+      <tr><td>9</td><td class="p">5:02</td><td><div class="bw"><div class="b" style="width:58%;background:#3b82f6"></div></div></td><td>44:57</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:50</td><td><div class="bw"><div class="b" style="width:60%;background:#f87171"></div></div></td><td>49:47</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:47</td><td><div class="bw"><div class="b" style="width:61%;background:#f87171"></div></div></td><td>54:34</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:44</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>59:18</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 12 secondes de moins. La seule règle : pas d'arrêt, même pour marcher 10 secondes.</div>
+</div>
+
+<!-- S3 -->
+<div class="week-card" id="S3">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c3">S3</div><div><div class="wh-title">Passer sous 59:00</div><div class="wh-date">31 Août – 06 Sept</div></div></div>
+    <div class="wh-right"><div class="wh-time c3">59:06</div><div class="wh-gain" style="color:var(--yellow)">−0:12 · sub 59 !</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">5:05</td><td><div class="bw"><div class="b" style="width:57%;background:#4ade80"></div></div></td><td>5:05</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">5:03</td><td><div class="bw"><div class="b" style="width:57%;background:#4ade80"></div></div></td><td>10:08</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">5:01</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>15:09</td></tr>
+      <tr><td>4</td><td class="p">4:58</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>20:07</td></tr>
+      <tr><td>5</td><td class="p">4:58</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>25:05</td></tr>
+      <tr><td>6</td><td class="p">4:57</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>30:02</td></tr>
+      <tr><td>7</td><td class="p">4:57</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>34:59</td></tr>
+      <tr><td>8</td><td class="p">4:56</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>39:55</td></tr>
+      <tr><td>9</td><td class="p">4:50</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>44:45</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:50</td><td><div class="bw"><div class="b" style="width:60%;background:#f87171"></div></div></td><td>49:35</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:47</td><td><div class="bw"><div class="b" style="width:61%;background:#f87171"></div></div></td><td>54:22</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:44</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>59:06</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 Premier milestone : sous 59:00. Le zéro arrêt commence à payer.</div>
+</div>
+
+<!-- S4 -->
+<div class="week-card" id="S4">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c4">S4</div><div><div class="wh-title">Battre ton record</div><div class="wh-date">07–13 Sept</div></div></div>
+    <div class="wh-right"><div class="wh-time c4">58:54</div><div class="wh-gain" style="color:var(--yellow)">−0:12 · sub-record !</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">5:03</td><td><div class="bw"><div class="b" style="width:57%;background:#4ade80"></div></div></td><td>5:03</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">5:01</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>10:04</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">4:59</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>15:03</td></tr>
+      <tr><td>4</td><td class="p">4:56</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>19:59</td></tr>
+      <tr><td>5</td><td class="p">4:56</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>24:55</td></tr>
+      <tr><td>6</td><td class="p">4:55</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>29:50</td></tr>
+      <tr><td>7</td><td class="p">4:55</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>34:45</td></tr>
+      <tr><td>8</td><td class="p">4:54</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>39:39</td></tr>
+      <tr><td>9</td><td class="p">5:00</td><td><div class="bw"><div class="b" style="width:58%;background:#3b82f6"></div></div></td><td>44:39</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:48</td><td><div class="bw"><div class="b" style="width:61%;background:#f87171"></div></div></td><td>49:27</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:45</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>54:12</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:42</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>58:54</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 Milestone majeur : sous 58:54, ton ancien record. Ce que tu n'avais pas réussi avant.</div>
+</div>
+
+<!-- S5 -->
+<div class="week-card" id="S5">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c5">S5</div><div><div class="wh-title">Enfoncer le record</div><div class="wh-date">14–20 Sept</div></div></div>
+    <div class="wh-right"><div class="wh-time c5">58:42</div><div class="wh-gain">−0:12 vs S4</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">5:03</td><td><div class="bw"><div class="b" style="width:57%;background:#4ade80"></div></div></td><td>5:03</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">5:01</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>10:04</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">4:59</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>15:03</td></tr>
+      <tr><td>4</td><td class="p">4:56</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>19:59</td></tr>
+      <tr><td>5</td><td class="p">4:56</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>24:55</td></tr>
+      <tr><td>6</td><td class="p">4:55</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>29:50</td></tr>
+      <tr><td>7</td><td class="p">4:55</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>34:45</td></tr>
+      <tr><td>8</td><td class="p">4:54</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>39:39</td></tr>
+      <tr><td>9</td><td class="p">4:48</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>44:27</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:48</td><td><div class="bw"><div class="b" style="width:61%;background:#f87171"></div></div></td><td>49:15</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:45</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>54:00</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:42</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>58:42</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 Le record s'éloigne. Chaque semaine propre compte double.</div>
+</div>
+
+<!-- S6 -->
+<div class="week-card" id="S6">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c6">S6</div><div><div class="wh-title">Passer sous 58:30</div><div class="wh-date">21–27 Sept</div></div></div>
+    <div class="wh-right"><div class="wh-time c6">58:30</div><div class="wh-gain">−0:12 vs S5</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">5:01</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>5:01</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">4:59</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>10:00</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">4:57</td><td><div class="bw"><div class="b" style="width:59%;background:#4ade80"></div></div></td><td>14:57</td></tr>
+      <tr><td>4</td><td class="p">4:54</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>19:51</td></tr>
+      <tr><td>5</td><td class="p">4:54</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>24:45</td></tr>
+      <tr><td>6</td><td class="p">4:53</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>29:38</td></tr>
+      <tr><td>7</td><td class="p">4:53</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>34:31</td></tr>
+      <tr><td>8</td><td class="p">4:52</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>39:23</td></tr>
+      <tr><td>9</td><td class="p">4:58</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>44:21</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:46</td><td><div class="bw"><div class="b" style="width:61%;background:#f87171"></div></div></td><td>49:07</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:43</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>53:50</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:40</td><td><div class="bw"><div class="b" style="width:63%;background:#f87171"></div></div></td><td>58:30</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 Nouveau territoire. L'attaque km 10–12 commence à faire la différence.</div>
+</div>
+
+<!-- S7 -->
+<div class="week-card" id="S7">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c7">S7</div><div><div class="wh-title">Viser 58:18</div><div class="wh-date">28 Sept – 04 Oct</div></div></div>
+    <div class="wh-right"><div class="wh-time c7">58:18</div><div class="wh-gain">−0:12 vs S6</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">5:01</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>5:01</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">4:59</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>10:00</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">4:57</td><td><div class="bw"><div class="b" style="width:59%;background:#4ade80"></div></div></td><td>14:57</td></tr>
+      <tr><td>4</td><td class="p">4:54</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>19:51</td></tr>
+      <tr><td>5</td><td class="p">4:54</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>24:45</td></tr>
+      <tr><td>6</td><td class="p">4:53</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>29:38</td></tr>
+      <tr><td>7</td><td class="p">4:53</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>34:31</td></tr>
+      <tr><td>8</td><td class="p">4:52</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>39:23</td></tr>
+      <tr><td>9</td><td class="p">4:46</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>44:09</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:46</td><td><div class="bw"><div class="b" style="width:61%;background:#f87171"></div></div></td><td>48:55</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:43</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>53:38</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:40</td><td><div class="bw"><div class="b" style="width:63%;background:#f87171"></div></div></td><td>58:18</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 Le plan du 9 novembre prend forme. Mémorise les sensations de chaque phase.</div>
+</div>
+
+<!-- S8 -->
+<div class="week-card" id="S8">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c8">S8</div><div><div class="wh-title">Passer sous 58:00</div><div class="wh-date">05–11 Oct</div></div></div>
+    <div class="wh-right"><div class="wh-time c8">58:06</div><div class="wh-gain" style="color:var(--yellow)">−0:12 · sub 58 !</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">4:59</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>4:59</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">4:57</td><td><div class="bw"><div class="b" style="width:59%;background:#4ade80"></div></div></td><td>9:56</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">4:55</td><td><div class="bw"><div class="b" style="width:60%;background:#4ade80"></div></div></td><td>14:51</td></tr>
+      <tr><td>4</td><td class="p">4:52</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>19:43</td></tr>
+      <tr><td>5</td><td class="p">4:52</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>24:35</td></tr>
+      <tr><td>6</td><td class="p">4:51</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>29:26</td></tr>
+      <tr><td>7</td><td class="p">4:51</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>34:17</td></tr>
+      <tr><td>8</td><td class="p">4:50</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>39:07</td></tr>
+      <tr><td>9</td><td class="p">4:56</td><td><div class="bw"><div class="b" style="width:59%;background:#3b82f6"></div></div></td><td>44:03</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:44</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>48:47</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:41</td><td><div class="bw"><div class="b" style="width:63%;background:#f87171"></div></div></td><td>53:28</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:38</td><td><div class="bw"><div class="b" style="width:63%;background:#f87171"></div></div></td><td>58:06</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 Sous 58:00 — milestone fort. Les arrêts supprimés valent à eux seuls 1–2 minutes.</div>
+</div>
+
+<!-- S9 -->
+<div class="week-card" id="S9">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c9">S9</div><div><div class="wh-title">Viser 57:54</div><div class="wh-date">12–18 Oct</div></div></div>
+    <div class="wh-right"><div class="wh-time c9">57:54</div><div class="wh-gain">−0:12 vs S8</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">4:59</td><td><div class="bw"><div class="b" style="width:58%;background:#4ade80"></div></div></td><td>4:59</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">4:57</td><td><div class="bw"><div class="b" style="width:59%;background:#4ade80"></div></div></td><td>9:56</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">4:55</td><td><div class="bw"><div class="b" style="width:60%;background:#4ade80"></div></div></td><td>14:51</td></tr>
+      <tr><td>4</td><td class="p">4:52</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>19:43</td></tr>
+      <tr><td>5</td><td class="p">4:52</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>24:35</td></tr>
+      <tr><td>6</td><td class="p">4:51</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>29:26</td></tr>
+      <tr><td>7</td><td class="p">4:51</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>34:17</td></tr>
+      <tr><td>8</td><td class="p">4:50</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>39:07</td></tr>
+      <tr><td>9</td><td class="p">4:44</td><td><div class="bw"><div class="b" style="width:62%;background:#3b82f6"></div></div></td><td>43:51</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:44</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>48:35</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:41</td><td><div class="bw"><div class="b" style="width:63%;background:#f87171"></div></div></td><td>53:16</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:38</td><td><div class="bw"><div class="b" style="width:63%;background:#f87171"></div></div></td><td>57:54</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 2:24 sous la base de départ. La progression est concrète et visible.</div>
+</div>
+
+<!-- S10 -->
+<div class="week-card" id="S10">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c10">S10</div><div><div class="wh-title">Répétition générale</div><div class="wh-date">19–25 Oct</div></div></div>
+    <div class="wh-right"><div class="wh-time c10">57:42</div><div class="wh-gain">−0:12 vs S9</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">4:57</td><td><div class="bw"><div class="b" style="width:59%;background:#4ade80"></div></div></td><td>4:57</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">4:55</td><td><div class="bw"><div class="b" style="width:59%;background:#4ade80"></div></div></td><td>9:52</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">4:53</td><td><div class="bw"><div class="b" style="width:60%;background:#4ade80"></div></div></td><td>14:45</td></tr>
+      <tr><td>4</td><td class="p">4:50</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>19:35</td></tr>
+      <tr><td>5</td><td class="p">4:50</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>24:25</td></tr>
+      <tr><td>6</td><td class="p">4:49</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>29:14</td></tr>
+      <tr><td>7</td><td class="p">4:49</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>34:03</td></tr>
+      <tr><td>8</td><td class="p">4:48</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>38:51</td></tr>
+      <tr><td>9</td><td class="p">4:54</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>43:45</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:42</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>48:27</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:39</td><td><div class="bw"><div class="b" style="width:63%;background:#f87171"></div></div></td><td>53:06</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:36</td><td><div class="bw"><div class="b" style="width:64%;background:#f87171"></div></div></td><td>57:42</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 Même heure, même parcours que le 9 novembre. Si tu le fais ici, c'est gagné.</div>
+</div>
+
+<!-- S11 -->
+<div class="week-card" id="S11">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c11">S11</div><div><div class="wh-title">Viser 57:30</div><div class="wh-date">26 Oct – 01 Nov</div></div></div>
+    <div class="wh-right"><div class="wh-time c11">57:30</div><div class="wh-gain">−0:12 vs S10</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">4:57</td><td><div class="bw"><div class="b" style="width:59%;background:#4ade80"></div></div></td><td>4:57</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">4:55</td><td><div class="bw"><div class="b" style="width:59%;background:#4ade80"></div></div></td><td>9:52</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">4:53</td><td><div class="bw"><div class="b" style="width:60%;background:#4ade80"></div></div></td><td>14:45</td></tr>
+      <tr><td>4</td><td class="p">4:50</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>19:35</td></tr>
+      <tr><td>5</td><td class="p">4:50</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>24:25</td></tr>
+      <tr><td>6</td><td class="p">4:49</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>29:14</td></tr>
+      <tr><td>7</td><td class="p">4:49</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>34:03</td></tr>
+      <tr><td>8</td><td class="p">4:48</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>38:51</td></tr>
+      <tr><td>9</td><td class="p">4:42</td><td><div class="bw"><div class="b" style="width:62%;background:#3b82f6"></div></div></td><td>43:33</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:42</td><td><div class="bw"><div class="b" style="width:62%;background:#f87171"></div></div></td><td>48:15</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:39</td><td><div class="bw"><div class="b" style="width:63%;background:#f87171"></div></div></td><td>52:54</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:36</td><td><div class="bw"><div class="b" style="width:64%;background:#f87171"></div></div></td><td>57:30</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 Dernière sortie longue avant le jour J. Confiance totale dans le plan.</div>
+</div>
+
+<!-- S12 -->
+<div class="week-card" id="S12">
+  <div class="week-header">
+    <div class="wh-left"><div class="wh-num c12">S12</div><div><div class="wh-title">Dernière sortie · plan parfait</div><div class="wh-date">02–08 Nov</div></div></div>
+    <div class="wh-right"><div class="wh-time c12">57:18</div><div class="wh-gain" style="color:var(--accent2)">−0:12 · prêt !</div></div>
+  </div>
+  <div class="km-wrap"><table>
+    <thead><tr><th>Km</th><th>Allure</th><th style="width:68px"></th><th>Cumulé</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="p" style="color:#4ade80">4:55</td><td><div class="bw"><div class="b" style="width:60%;background:#4ade80"></div></div></td><td>4:55</td></tr>
+      <tr><td>2</td><td class="p" style="color:#4ade80">4:53</td><td><div class="bw"><div class="b" style="width:60%;background:#4ade80"></div></div></td><td>9:48</td></tr>
+      <tr><td>3</td><td class="p" style="color:#4ade80">4:51</td><td><div class="bw"><div class="b" style="width:61%;background:#4ade80"></div></div></td><td>14:39</td></tr>
+      <tr><td>4</td><td class="p">4:48</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>19:27</td></tr>
+      <tr><td>5</td><td class="p">4:48</td><td><div class="bw"><div class="b" style="width:61%;background:#3b82f6"></div></div></td><td>24:15</td></tr>
+      <tr><td>6</td><td class="p">4:47</td><td><div class="bw"><div class="b" style="width:62%;background:#3b82f6"></div></div></td><td>29:02</td></tr>
+      <tr><td>7</td><td class="p">4:47</td><td><div class="bw"><div class="b" style="width:62%;background:#3b82f6"></div></div></td><td>33:49</td></tr>
+      <tr><td>8</td><td class="p">4:46</td><td><div class="bw"><div class="b" style="width:62%;background:#3b82f6"></div></div></td><td>38:35</td></tr>
+      <tr><td>9</td><td class="p">4:52</td><td><div class="bw"><div class="b" style="width:60%;background:#3b82f6"></div></div></td><td>43:27</td></tr>
+      <tr><td>10</td><td class="p" style="color:#f87171">4:40</td><td><div class="bw"><div class="b" style="width:63%;background:#f87171"></div></div></td><td>48:07</td></tr>
+      <tr><td>11</td><td class="p" style="color:#f87171">4:37</td><td><div class="bw"><div class="b" style="width:64%;background:#f87171"></div></div></td><td>52:44</td></tr>
+      <tr><td>12</td><td class="p" style="color:#f87171">4:34</td><td><div class="bw"><div class="b" style="width:65%;background:#f87171"></div></div></td><td>57:18</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">💬 Dernière sortie. Repos complet jusqu'au 9 novembre.</div>
+</div>
+
+<!-- JOUR J -->
+<div class="race-card" id="Race">
+  <div class="race-header">
+    <div class="race-title">🏁 9 NOVEMBRE — RECORD DAY</div>
+    <div class="race-sub">Plan identique à S12 · 0 arrêt · Objectif 57:06</div>
+  </div>
+  <div class="km-wrap" style="padding-top:10px;">
+    <table>
+      <thead><tr><th>Km</th><th>Allure</th><th>Phase</th><th>Cumulé</th></tr></thead>
+      <tbody>
+        <tr><td style="color:#4ade80">1</td><td class="p" style="color:#4ade80">4:55</td><td style="color:#4ade80;font-size:9px;text-align:right">RETENUE</td><td>4:55</td></tr>
+        <tr><td style="color:#4ade80">2</td><td class="p" style="color:#4ade80">4:53</td><td style="color:#4ade80;font-size:9px;text-align:right">RETENUE</td><td>9:48</td></tr>
+        <tr><td style="color:#4ade80">3</td><td class="p" style="color:#4ade80">4:51</td><td style="color:#4ade80;font-size:9px;text-align:right">RETENUE</td><td>14:39</td></tr>
+        <tr><td>4</td><td class="p">4:48</td><td style="color:#3b82f6;font-size:9px;text-align:right">CROISIÈRE</td><td>19:27</td></tr>
+        <tr><td>5</td><td class="p">4:48</td><td style="color:#3b82f6;font-size:9px;text-align:right">CROISIÈRE</td><td>24:15</td></tr>
+        <tr><td>6</td><td class="p">4:47</td><td style="color:#3b82f6;font-size:9px;text-align:right">CROISIÈRE</td><td>29:02</td></tr>
+        <tr><td>7</td><td class="p">4:47</td><td style="color:#3b82f6;font-size:9px;text-align:right">CROISIÈRE</td><td>33:49</td></tr>
+        <tr><td>8</td><td class="p">4:46</td><td style="color:#3b82f6;font-size:9px;text-align:right">CROISIÈRE</td><td>38:35</td></tr>
+        <tr><td>9</td><td class="p">4:40</td><td style="color:#3b82f6;font-size:9px;text-align:right">CROISIÈRE</td><td>43:15</td></tr>
+        <tr><td style="color:#f87171">10</td><td class="p" style="color:#f87171">4:40</td><td style="color:#f87171;font-size:9px;text-align:right">ATTAQUE</td><td>47:55</td></tr>
+        <tr><td style="color:#f87171">11</td><td class="p" style="color:#f87171">4:37</td><td style="color:#f87171;font-size:9px;text-align:right">ATTAQUE</td><td>52:32</td></tr>
+        <tr><td style="color:#f87171">12</td><td class="p" style="color:#f87171">4:34</td><td style="color:#f87171;font-size:9px;text-align:right">🔥 TOUT</td><td style="color:#22d3ee;font-weight:700;font-size:14px;">57:06</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="footer">
+  13 SEMAINES · 12 KM · 0 ARRÊT<br>
+  59:30 → 57:06 · −2 MIN 24 S<br>
+  BASÉ SUR TES TEMPS RÉELS · 9 NOVEMBRE
+</div>
+
+</body>
+</html>
