@@ -2337,12 +2337,12 @@ function renderGoals() {
   }
   const now = new Date().toISOString().split('T')[0];
   const sorted = [...goals].sort((a, b) => {
-    // Objectifs en cours d'abord, triés par date de fin la plus proche
+    // Objectifs en cours d'abord, puis par date de début la plus récente
     const aActive = now >= a.dateStart && now <= a.dateEnd;
     const bActive = now >= b.dateStart && now <= b.dateEnd;
     if (aActive && !bActive) return -1;
     if (!aActive && bActive) return 1;
-    return a.dateEnd.localeCompare(b.dateEnd);
+    return b.dateStart.localeCompare(a.dateStart);
   });
   container.innerHTML = sorted.map(g => renderGoalCard(g)).join('');
   // Dessiner les graphiques après rendu DOM complet
