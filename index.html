@@ -1052,18 +1052,18 @@ function renderGraph() {
     drawEmptyChart(); return;
   }
 
-  // ── Records : top 3 meilleures allures
+  // ── Records : top 5 meilleures allures
   const sorted = [...runs].sort((a, b) => a.allsec - b.allsec || b.dist - a.dist);
-  const top3 = sorted.slice(0, 3);
-  const pr = top3[0];
+  const top5 = sorted.slice(0, 5);
+  const pr = top5[0];
 
   if (pr) {
-    const medals = ['🥇', '🥈', '🥉'];
+    const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
     const fmtRow = (r, i) => {
       const [y,mo,d] = r.date.split('-');
       const isFirst = i === 0;
       return `
-        <div style="display:flex;align-items:center;gap:8px;padding:${isFirst?'6px 4px':'4px 4px'};border-bottom:${i<2?'1px solid rgba(255,255,255,0.04)':'none'}">
+        <div style="display:flex;align-items:center;gap:8px;padding:${isFirst?'6px 4px':'4px 4px'};border-bottom:${i<4?'1px solid rgba(255,255,255,0.04)':'none'}">
           <div style="font-size:${isFirst?'14px':'11px'};flex-shrink:0;width:20px;text-align:center">${medals[i]}</div>
           <div style="font-size:${isFirst?'10px':'9px'};color:${getAccentDark()};flex-shrink:0;width:46px">${d}/${mo}/${y.slice(2)}</div>
           <div style="flex:1;display:grid;grid-template-columns:1.2fr 1.4fr 1.2fr 1.2fr;gap:6px;text-align:right">
@@ -1085,7 +1085,7 @@ function renderGraph() {
             <div></div><div></div><div>km</div><div>chrono</div><div>km/h</div><div>allure</div>
           </div>
         </div>
-        ${top3.map((r, i) => fmtRow(r, i)).join('')}
+        ${top5.map((r, i) => fmtRow(r, i)).join('')}
       </div>`;
   } else {
     prWrap.innerHTML = '';
