@@ -498,7 +498,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       </div>
       <div id="goal-dist-wrap">
       <div id="goal-dist-label" style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Distance (km)</div>
-      <input type="number" id="goal-dist" placeholder="" min="0" step="0.1" inputmode="decimal" oninput="goalInputColor(this);updateBestPerfDisplay()" style="width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:16px;font-weight:700;text-align:center;padding:6px;outline:none;height:38px;box-sizing:border-box;margin-bottom:8px">
+      <input type="number" id="goal-dist" placeholder="" min="0" step="0.1" inputmode="decimal" oninput="goalInputColor(this)" style="width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:16px;font-weight:700;text-align:center;padding:6px;outline:none;height:38px;box-sizing:border-box;margin-bottom:8px">
       </div>
       <div id="goal-crit-inputs"></div>
     </div>
@@ -662,7 +662,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
       </div>
       <div>
         <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Note</div>
-        <textarea id="edit-note" placeholder="Ressenti, météo, terrain…" style="width:100%;background:#000;border:1px solid var(--accent-bg);border-radius:8px;color:var(--accent);font-size:15px;padding:8px 10px;outline:none;resize:none;height:70px;font-family:-apple-system,sans-serif;box-sizing:border-box" class="note-textarea"></textarea>
+        <textarea id="edit-note" placeholder="Ressenti, météo, terrain…" style="width:100%;background:#000;border:1px solid var(--accent-bg);border-radius:8px;color:var(--accent);font-size:16px;padding:8px 10px;outline:none;resize:none;height:70px;font-family:-apple-system,sans-serif;box-sizing:border-box" class="note-textarea"></textarea>
       </div>
       <div>
         <div style="font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Chaussure</div>
@@ -726,9 +726,11 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 /* ── CONFIRMATION ── */
 let _confirmCallback = null;
 
-function askConfirm(msg, cb) {
+function askConfirm(msg, cb, okLabel) {
   _confirmCallback = cb;
   document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-title').textContent = okLabel ? 'Confirmer' : 'Confirmer la suppression';
+  document.getElementById('confirm-ok').textContent = okLabel || '✕ Supprimer';
   document.getElementById('modal-confirm').classList.add('on');
 }
 
@@ -778,6 +780,12 @@ function sel(m) {
 const g   = id => { const v=parseFloat(document.getElementById(id).value); return isNaN(v)?0:v; };
 const pad = n  => n<10?'0'+n:''+n;
 const rnd = (v,d) => Math.round(v*10**d)/10**d;
+// Date du jour (heure locale, pas UTC), décalée de `addDays` jours
+function todayISO(addDays) {
+  const d = new Date();
+  if (addDays) d.setDate(d.getDate() + addDays);
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
 
 function showErr(msg){ const e=document.getElementById('err'); e.textContent=msg; e.style.display='block'; }
 function hideErr(){ document.getElementById('err').style.display='none'; }
@@ -789,16 +797,9 @@ function clearOut(){
 function setOut(dist,tsec,vit,allsec,known){
   const set=(id,val,hi)=>{const el=document.getElementById(id);el.textContent=val;el.className='rf'+(hi?' hi':'');};
   if(dist!==null) set('o_dist', rnd(dist,3)+' km', known.includes('d'));
-  if(tsec!==null){
-    const h=Math.floor(tsec/3600),m=Math.floor((tsec%3600)/60),s=Math.round(tsec%60);
-    const str=h>0 ? h+'h'+pad(m)+'\''+pad(s)+'"' : m+'\''+pad(s)+'"';
-    set('o_chr', str, known.includes('c'));
-  }
+  if(tsec!==null) set('o_chr', fmtChrono(tsec), known.includes('c'));
   if(vit!==null) set('o_vit', rnd(vit,2)+' km/h', known.includes('v'));
-  if(allsec!==null){
-    const am=Math.floor(allsec/60),as_=Math.round(allsec%60);
-    set('o_all', am+'\''+pad(as_)+'" /km', known.includes('a'));
-  }
+  if(allsec!==null) set('o_all', fmtAllure(allsec)+' /km', known.includes('a'));
 }
 function calc(){
   hideErr(); clearOut(); lastResult=null;
@@ -844,71 +845,8 @@ function saveRun() {
   openShoePickerModal();
 }
 
-let _shoePickerForRunId = null;
-
-function openShoePickerForRun(runId) {
-  _shoePickerForRunId = runId;
-  const shoes = loadShoes();
-  const runs = loadRuns();
-  const run = runs.find(r => r.id === runId);
-  const list = document.getElementById('shoe-picker-list');
-  list.innerHTML =
-    '<div class="shoe-pick-item" onclick="confirmShoeForRun(null)"><i class="fa-solid fa-ban" style="font-size:18px;flex-shrink:0;color:#888"></i><div class="shoe-pick-name">Sans chaussure</div></div>'
-    + shoes.map(s =>
-      '<div class="shoe-pick-item" onclick="confirmShoeForRun('+s.id+')">'
-      + '<div class="shoe-pick-swatch" style="background:'+(s.color||'#333')+'"></div>'
-      + '<div class="shoe-pick-name">'+(s.name||'Sans nom')+'</div>'
-      + '<div class="shoe-pick-km">'+rnd(s.total,1)+' km</div>'
-      + '</div>'
-    ).join('');
-  document.getElementById('shoe-pick-dist').textContent = run ? rnd(run.dist,3)+' km' : '';
-  document.getElementById('modal-shoe-picker').classList.add('on');
-}
-
-function confirmShoeForRun(newShoeId) {
-  const runs = loadRuns();
-  const run = runs.find(r => r.id === _shoePickerForRunId);
-  if (!run) { document.getElementById('modal-shoe-picker').classList.remove('on'); return; }
-
-  const shoes = loadShoes();
-  const hist = loadShoeHistory();
-
-  // Annuler l'ancienne association
-  if (run.shoeId && run.histHid) {
-    const oldShoe = shoes.find(s => s.id === +run.shoeId);
-    if (oldShoe) {
-      oldShoe.total = rnd(Math.max(0, oldShoe.total - run.dist), 2);
-    }
-    const histIdx = hist.findIndex(e => e.hid === run.histHid);
-    if (histIdx !== -1) hist.splice(histIdx, 1);
-  }
-
-  // Nouvelle association
-  const hid = newShoeId ? Date.now()+'_'+Math.random().toString(36).slice(2,6) : null;
-  run.shoeId = newShoeId || null;
-  run.histHid = hid;
-
-  if (newShoeId) {
-    const shoe = shoes.find(s => s.id === +newShoeId);
-    if (shoe) {
-      shoe.total = rnd(shoe.total + run.dist, 2);
-      shoe.lastDate = run.date;
-      hist.push({ hid, shoeId: newShoeId, date: run.date, km: run.dist, sign: 1 });
-    }
-  }
-
-  saveRuns(runs);
-  saveShoes(shoes);
-  saveShoeHistory(hist);
-
-  document.getElementById('modal-shoe-picker').classList.remove('on');
-  _shoePickerForRunId = null;
-  renderRunsList();
-}
-
 function closeShoePickerModal() {
   document.getElementById('modal-shoe-picker').classList.remove('on');
-  _shoePickerForRunId = null;
 }
 
 let _pendingShoeId = null;
@@ -971,7 +909,7 @@ function togglePickPrf() {
 
 function confirmSaveRun(shoeId) {
   const runs = loadRuns();
-  const today = new Date().toISOString().split('T')[0];
+  const today = todayISO();
   const dist = rnd(lastResult.dist, 3);
   const hid = shoeId ? Date.now()+'_'+Math.random().toString(36).slice(2,6) : null;
   const prf = document.getElementById('shoe-pick-prf-btn')?.dataset.selected === 'true';
@@ -982,9 +920,9 @@ function confirmSaveRun(shoeId) {
     const shoe = shoes.find(s => s.id === +shoeId);
     if (shoe) {
       shoe.total = rnd(shoe.total + dist, 2);
-      shoe.lastDate = today;
       const hist = loadShoeHistory();
-      hist.push({ hid, shoeId, date: today, km: dist, sign: 1 });
+      hist.push({ hid, shoeId: +shoeId, date: today, km: dist, sign: 1 });
+      refreshShoeLastDate(shoe, hist);
       saveShoeHistory(hist);
       saveShoes(shoes);
     }
@@ -1036,19 +974,26 @@ function setMetric(m) {
 function fmtDate(iso) { const [y,mo,d]=iso.split('-'); return d+'/'+mo+'/'+y.slice(2); }
 function fmtDateShort(iso) { const [,mo,d]=iso.split('-'); return d+'/'+mo; }
 function fmtChrono(sec) {
-  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=Math.round(sec%60);
+  sec = Math.round(sec); // arrondir avant de découper, sinon on peut obtenir 4'60"
+  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
   return h>0 ? h+'h'+pad(m)+'\''+pad(s)+'"' : m+'\''+pad(s)+'"';
 }
-function fmtAllure(sec) { return Math.floor(sec/60)+'\''+pad(Math.round(sec%60))+'"'; }
+function fmtAllure(sec) { sec = Math.round(sec); return Math.floor(sec/60)+'\''+pad(sec%60)+'"'; }
+
+function getGraphRuns() {
+  const allRuns = loadRuns();
+  return prfFilterActive ? allRuns.filter(r => r.prf) : allRuns;
+}
 
 function renderGraph() {
   const allRuns = loadRuns();
-  const runs = prfFilterActive ? allRuns.filter(r => r.prf) : allRuns;
+  const runs = getGraphRuns();
   document.getElementById('graph-count').textContent = allRuns.length+' course(s)';
   const prWrap = document.getElementById('pr-box-wrap');
 
   if (runs.length===0) {
     prWrap.innerHTML='';
+    renderRunsList();
     drawEmptyChart(); return;
   }
 
@@ -1095,12 +1040,16 @@ function renderGraph() {
   drawChart(runs);
 }
 
+const RUN_SORT_KEYS = ['date','dist','chrono','vit','allure'];
+
 function openRunsHistory() {
   currentRunSort = 'date';
   runOrderAsc = false;
   runInfoVisible = false;
-  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('on'));
-  document.getElementById('sort_date').classList.add('on');
+  RUN_SORT_KEYS.forEach(k => document.getElementById('sort_'+k).classList.toggle('on', k === 'date'));
+  const revBtn = document.getElementById('sort_reverse');
+  revBtn.innerHTML = '<i class="fa-solid fa-trophy"></i>';
+  revBtn.classList.remove('on');
   const infoBtn = document.getElementById('sort_info');
   if (infoBtn) infoBtn.classList.remove('on');
   renderGraph();
@@ -1116,8 +1065,8 @@ let runOrderAsc = false;
 
 function setRunSort(s) {
   currentRunSort = s;
-  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('on'));
-  document.getElementById('sort_'+s).classList.add('on');
+  // Ne toucher qu'aux boutons de tri (pas ⓘ, ordre, ni les autres écrans)
+  RUN_SORT_KEYS.forEach(k => document.getElementById('sort_'+k).classList.toggle('on', k === s));
   renderRunsList();
 }
 
@@ -1150,8 +1099,9 @@ function renderRunsList() {
     if (currentRunSort === 'vit')    cmp = b.vit - a.vit;
     return runOrderAsc ? -cmp : cmp;
   });
+  const shoes = loadShoes();
+  const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   list.innerHTML = sorted.map(r => {
-    const shoes = loadShoes();
     const shoe = r.shoeId ? shoes.find(s => s.id === +r.shoeId) : null;
     const shoeColor = shoe?.color || getAccentDark();
     const shoeLabel = shoe ? (shoe.name || 'Sans nom') : '';
@@ -1166,9 +1116,9 @@ function renderRunsList() {
       <button class="run-del" onclick="deleteRun(${r.id})">✕</button>
       ${runInfoVisible ? (
         '<div style="grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:2px 0 4px 2px">'
-        + (r.note ? '<span style="font-size:10px;color:#888;font-style:italic;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.note+'</span>' : '<span style="flex:1"></span>')
+        + (r.note ? '<span style="font-size:10px;color:#888;font-style:italic;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.note)+'</span>' : '<span style="flex:1"></span>')
         + '<i class="fa-solid fa-shoe-prints" style="font-size:10px;color:'+shoeColor+';opacity:0.7;flex-shrink:0"></i>'
-        + '<span style="font-size:10px;color:'+shoeColor+';flex-shrink:0;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(shoeLabel || '<span style="color:#555;font-style:italic">—</span>')+'</span>'
+        + '<span style="font-size:10px;color:'+shoeColor+';flex-shrink:0;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(shoeLabel ? esc(shoeLabel) : '<span style="color:#555;font-style:italic">—</span>')+'</span>'
         + '</div>'
       ) : ''}
     </div>`;
@@ -1201,7 +1151,8 @@ function openEditRun(id) {
   const items = [{ id: null, name: 'Aucune', color: '#444' }, ...shoes.map(s => ({ id: String(s.id), name: s.name || 'Sans nom', color: s.color || '#555' }))];
   shoeList.innerHTML = items.map(s => {
     const sel = String(s.id) === String(currentShoeId);
-    return '<div onclick="selectEditShoe(this,\''+s.id+'\')" data-shoe-id="'+(s.id||'')+'" data-shoe-name="'+s.name+'" title="'+s.name+'" style="width:28px;height:28px;border-radius:50%;background:'+s.color+';cursor:pointer;flex-shrink:0;box-shadow:'+(sel?'0 0 0 2.5px #fff':'none')+';transition:box-shadow 0.15s"></div>';
+    const safeName = String(s.name).replace(/"/g, '&quot;');
+    return '<div onclick="selectEditShoe(this)" data-shoe-id="'+(s.id||'')+'" data-shoe-name="'+safeName+'" title="'+safeName+'" style="width:28px;height:28px;border-radius:50%;background:'+s.color+';cursor:pointer;flex-shrink:0;box-shadow:'+(sel?'0 0 0 2.5px #fff':'none')+';transition:box-shadow 0.15s"></div>';
   }).join('');
   const curItem = items.find(s => String(s.id) === String(currentShoeId));
   document.getElementById('edit-shoe-label').textContent = curItem ? curItem.name : '';
@@ -1209,9 +1160,9 @@ function openEditRun(id) {
   document.getElementById('modal-edit-run').classList.add('on');
 }
 
-function selectEditShoe(el, shoeId) {
+function selectEditShoe(el) {
   document.querySelectorAll('#edit-shoe-list > div').forEach(d => {
-    d.style.boxShadow = d.dataset.shoeId === shoeId ? '0 0 0 2.5px #fff' : 'none';
+    d.style.boxShadow = d === el ? '0 0 0 2.5px #fff' : 'none';
   });
   document.getElementById('edit-shoe-label').textContent = el.dataset.shoeName || '';
 }
@@ -1246,44 +1197,51 @@ function saveEditRun() {
 
   const runs = loadRuns();
   const oldRun = runs.find(r => r.id === _editRunId);
-  const oldDist = oldRun ? oldRun.dist : 0;
-  const diff = rnd(dist - oldDist, 2);
-  const shoeChanged = String(newShoeId) !== String(oldRun?.shoeId || null);
+  if (!oldRun) { closeEditRun(); return; }
+  const oldDist = oldRun.dist;
+  const newDist = rnd(dist, 3);
+  const oldSid = oldRun.shoeId ? +oldRun.shoeId : null;
+  const newSid = newShoeId ? +newShoeId : null;
+  const shoeChanged = oldSid !== newSid;
 
   const shoes = loadShoes();
   const hist = loadShoeHistory();
+  const newHid = () => Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  let finalHid = oldRun.histHid || null;
 
-  // Annuler l'ancienne association si chaussure changée
-  if (shoeChanged && oldRun?.shoeId) {
-    const oldShoe = shoes.find(s => s.id === +oldRun.shoeId);
-    if (oldShoe) oldShoe.total = Math.max(0, rnd(oldShoe.total - oldDist, 2));
-    if (oldRun.histHid) {
-      const idx = hist.findIndex(e => e.hid === oldRun.histHid);
-      if (idx !== -1) hist.splice(idx, 1);
+  if (shoeChanged) {
+    // Retirer la course de l'ancienne paire
+    if (oldSid) {
+      const oldShoe = shoes.find(s => s.id === oldSid);
+      if (oldShoe) oldShoe.total = Math.max(0, rnd(oldShoe.total - oldDist, 2));
+      if (oldRun.histHid) {
+        const idx = hist.findIndex(e => e.hid === oldRun.histHid);
+        if (idx !== -1) hist.splice(idx, 1);
+      }
+      if (oldShoe) refreshShoeLastDate(oldShoe, hist);
     }
-  }
-
-  // Mettre à jour les km si même chaussure mais distance changée
-  const hid = oldRun?.histHid || (newShoeId ? Date.now()+'_'+Math.random().toString(36).slice(2,6) : null);
-  if (!shoeChanged && oldRun?.shoeId && diff !== 0) {
-    const shoe = shoes.find(s => s.id === +oldRun.shoeId);
-    if (shoe) shoe.total = Math.max(0, rnd(shoe.total + diff, 2));
-    const entry = hist.find(e => e.hid === hid);
-    if (entry) entry.km = rnd(dist, 3);
-  }
-
-  // Appliquer la nouvelle association
-  let finalHid = oldRun?.histHid || null;
-  if (shoeChanged && newShoeId) {
-    const newShoe = shoes.find(s => s.id === +newShoeId);
-    if (newShoe) {
-      newShoe.total = rnd(newShoe.total + dist, 2);
-      newShoe.lastDate = date;
-      finalHid = Date.now()+'_'+Math.random().toString(36).slice(2,6);
-      hist.push({ hid: finalHid, shoeId: newShoeId, date, km: rnd(dist, 3), sign: 1 });
-    }
-  } else if (shoeChanged && !newShoeId) {
     finalHid = null;
+    // L'ajouter à la nouvelle
+    if (newSid) {
+      const newShoe = shoes.find(s => s.id === newSid);
+      if (newShoe) {
+        newShoe.total = rnd(newShoe.total + newDist, 2);
+        finalHid = newHid();
+        hist.push({ hid: finalHid, shoeId: newSid, date, km: newDist, sign: 1 });
+        refreshShoeLastDate(newShoe, hist);
+      }
+    }
+  } else if (oldSid) {
+    // Même paire : répercuter la distance et la date
+    const shoe = shoes.find(s => s.id === oldSid);
+    if (shoe) shoe.total = Math.max(0, rnd(shoe.total + (newDist - oldDist), 2));
+    const entry = finalHid ? hist.find(e => e.hid === finalHid) : null;
+    if (entry) { entry.km = newDist; entry.date = date; }
+    else if (shoe) {
+      finalHid = newHid();
+      hist.push({ hid: finalHid, shoeId: oldSid, date, km: newDist, sign: 1 });
+    }
+    if (shoe) refreshShoeLastDate(shoe, hist);
   }
 
   saveShoeHistory(hist);
@@ -1291,7 +1249,7 @@ function saveEditRun() {
 
   // Mettre à jour la course
   const newRuns = runs.map(r => r.id === _editRunId
-    ? { ...r, date, dist: rnd(dist, 3), tsec: Math.round(tsec), vit, allsec, note, shoeId: newShoeId || null, histHid: finalHid, prf }
+    ? { ...r, date, dist: newDist, tsec: Math.round(tsec), vit, allsec, note, shoeId: newSid, histHid: finalHid, prf }
     : r
   );
   saveRuns(newRuns);
@@ -1302,10 +1260,27 @@ function saveEditRun() {
 }
 
 function deleteRun(id) {
-  askConfirm('Supprimer cette course définitivement ?', () => {
-    saveRuns(loadRuns().filter(r=>r.id!==id));
+  askConfirm('Supprimer cette course définitivement ? Ses km seront retirés de la paire associée.', () => {
+    const runs = loadRuns();
+    const run = runs.find(r => r.id === id);
+    if (run && run.shoeId) {
+      const shoes = loadShoes();
+      const hist = loadShoeHistory();
+      const shoe = shoes.find(s => s.id === +run.shoeId);
+      if (shoe) shoe.total = Math.max(0, rnd(shoe.total - run.dist, 2));
+      if (run.histHid) {
+        const idx = hist.findIndex(e => e.hid === run.histHid);
+        if (idx !== -1) hist.splice(idx, 1);
+      }
+      if (shoe) refreshShoeLastDate(shoe, hist);
+      saveShoeHistory(hist);
+      saveShoes(shoes);
+    }
+    saveRuns(runs.filter(r => r.id !== id));
     renderGraph();
     renderRunsList();
+    renderShoes();
+    if (document.getElementById('sc_goal').classList.contains('on')) renderGoals();
   });
 }
 
@@ -1509,13 +1484,24 @@ function saveShoes(shoes) {
   localStorage.setItem('shoes_v2', JSON.stringify(shoes));
 }
 
-let _shoeNextId = null;
+// Nouvel identifiant jamais utilisé : on regarde aussi les courses et l'historique,
+// pour qu'une nouvelle paire n'hérite pas des données d'une paire supprimée.
 function newShoeId() {
-  if (_shoeNextId === null) {
-    const shoes = JSON.parse(localStorage.getItem('shoes_v2') || '[]');
-    _shoeNextId = shoes.reduce((max, s) => Math.max(max, s.id||0), 0) + 1;
-  }
-  return _shoeNextId++;
+  const ids = [
+    ...loadShoes().map(s => +s.id || 0),
+    ...loadRuns().map(r => +r.shoeId || 0),
+    ...loadShoeHistory().map(e => +e.shoeId || 0),
+    +localStorage.getItem('shoeMaxId') || 0,
+  ];
+  const id = Math.max(0, ...ids) + 1;
+  localStorage.setItem('shoeMaxId', id);
+  return id;
+}
+
+// Date de dernière sortie = date la plus récente des ajouts de km de la paire
+function refreshShoeLastDate(shoe, hist) {
+  const dates = hist.filter(e => +e.shoeId === +shoe.id && e.sign > 0).map(e => e.date).sort();
+  shoe.lastDate = dates.length ? dates[dates.length - 1] : null;
 }
 
 function deleteShoe(id) {
@@ -1621,19 +1607,20 @@ function opShoeKm(id, sign) {
   const shoes = loadShoes();
   const shoe = shoes.find(s => s.id === id);
   if (shoe) {
-    shoe.total = Math.max(0, rnd(shoe.total + sign * km, 2));
-    if (sign > 0) {
-      shoe.lastDate = new Date().toISOString().split('T')[0];
-    }
+    // Ne pas retirer plus que le total (sinon l'historique ne correspond plus)
+    const applied = sign > 0 ? km : Math.min(km, shoe.total);
+    if (applied <= 0) { inp.value = ''; return; }
+    shoe.total = Math.max(0, rnd(shoe.total + sign * applied, 2));
     // Enregistrer dans l'historique (+ et -)
     const hist = loadShoeHistory();
     hist.push({
       hid: Date.now()+'_'+Math.random().toString(36).slice(2,6),
       shoeId: id,
-      date: new Date().toISOString().split('T')[0],
-      km: rnd(km, 2),
+      date: todayISO(),
+      km: rnd(applied, 2),
       sign: sign
     });
+    refreshShoeLastDate(shoe, hist);
     saveShoeHistory(hist);
     saveShoes(shoes);
     inp.value = '';
@@ -1651,10 +1638,19 @@ function opShoeKm(id, sign) {
 
 function resetShoeKm(id) {
   id = +id;
-  if (!confirm('Remettre à zéro les km ?')) return;
-  const shoes = loadShoes();
-  const shoe = shoes.find(s => s.id === id);
-  if (shoe) { shoe.total = 0; saveShoes(shoes); renderShoes(); }
+  const shoe0 = loadShoes().find(s => s.id === id);
+  if (!shoe0 || !shoe0.total) return;
+  askConfirm('Remettre à zéro les km de "'+(shoe0.name || 'cette paire')+'" ? Le retrait sera noté dans l\'historique.', () => {
+    const shoes = loadShoes();
+    const shoe = shoes.find(s => s.id === id);
+    if (!shoe || !shoe.total) return;
+    const hist = loadShoeHistory();
+    hist.push({ hid: Date.now()+'_'+Math.random().toString(36).slice(2,6), shoeId: id, date: todayISO(), km: rnd(shoe.total, 2), sign: -1, reset: true });
+    shoe.total = 0;
+    saveShoeHistory(hist);
+    saveShoes(shoes);
+    renderShoes();
+  }, 'Remettre à zéro');
 }
 
 function renderShoes() {
@@ -1738,10 +1734,31 @@ function setHistFilter(f) {
 }
 
 function deleteHistEntry(hid) {
-  askConfirm('Supprimer cette entrée de l\'historique ?', () => {
-    const hist = loadShoeHistory().filter(e => e.hid !== hid);
+  const entry0 = loadShoeHistory().find(e => e.hid === hid);
+  if (!entry0) return;
+  const linkedRun = loadRuns().find(r => r.histHid === hid);
+  const msg = 'Supprimer cette entrée de l\'historique ? Le total de la paire sera corrigé'
+    + (linkedRun ? ', et la course du '+fmtDate(linkedRun.date)+' ne sera plus associée à cette paire.' : '.');
+  askConfirm(msg, () => {
+    const hist = loadShoeHistory();
+    const idx = hist.findIndex(e => e.hid === hid);
+    if (idx === -1) return;
+    const entry = hist[idx];
+    hist.splice(idx, 1);
+    const shoes = loadShoes();
+    const shoe = shoes.find(s => s.id === +entry.shoeId);
+    if (shoe) {
+      // Annuler l'effet de l'entrée : un ajout est retiré, un retrait est rendu
+      shoe.total = Math.max(0, rnd(shoe.total - entry.sign * entry.km, 2));
+      refreshShoeLastDate(shoe, hist);
+    }
+    const runs = loadRuns();
+    const run = runs.find(r => r.histHid === hid);
+    if (run) { run.shoeId = null; run.histHid = null; saveRuns(runs); }
     saveShoeHistory(hist);
+    saveShoes(shoes);
     renderShoeHistory();
+    renderShoes();
   });
 }
 
@@ -1762,8 +1779,9 @@ function renderShoeHistory() {
     // Une seule entrée par chaussure — la plus récente
     const seen = new Set();
     entries = sorted.filter(e => {
-      if (seen.has(e.shoeId)) return false;
-      seen.add(e.shoeId);
+      const key = String(e.shoeId);
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     });
   } else {
@@ -1778,7 +1796,7 @@ function renderShoeHistory() {
     return `
       <div class="hist-entry">
         <div class="hist-entry-date">${d}/${mo}/${y.slice(2)}</div>
-        <div class="hist-entry-km" style="color:${e.sign > 0 ? shoeColor : '#cc4400'}">${shoeName ? shoeName+' · ' : ''}${e.sign > 0 ? '+' : '−'}${e.km} km</div>
+        <div class="hist-entry-km" style="color:${e.sign > 0 ? shoeColor : '#cc4400'}">${shoeName ? shoeName+' · ' : ''}${e.sign > 0 ? '+' : '−'}${e.km} km${e.reset ? ' (RAZ)' : ''}</div>
         ${currentHistFilter === 'all' ? '<button class="hist-entry-del" onclick="deleteHistEntry(\''+e.hid+'\')">✕</button>' : ''}
       </div>`;
   }).join('');
@@ -1789,7 +1807,7 @@ function openExport() {
   const data = { shoes_v2: loadShoes(), runs: loadRuns(), shoe_history: loadShoeHistory(), themeColor: localStorage.getItem('themeColor') || '#00c8ff', goals: loadGoals() };
   const text = JSON.stringify(data);
   const btn = document.querySelector('.bk-export');
-  const date = new Date().toISOString().split('T')[0];
+  const date = todayISO();
   const fileName = 'sauvegarde-course-' + date + '.json';
 
   const feedbackBtn = (orig) => {
@@ -1810,7 +1828,11 @@ function openExport() {
       const orig = btn.innerHTML;
       navigator.share({ files: [file] })
         .then(() => feedbackBtn(orig))
-        .catch(() => fallbackCopy(text, btn));
+        .catch(err => {
+          // Partage annulé par l'utilisateur : ne rien faire
+          if (err && err.name === 'AbortError') return;
+          fallbackCopy(text, btn);
+        });
       return;
     }
   }
@@ -1838,19 +1860,6 @@ function feedbackAndModal(btn, orig) {
     btn.style.color = '';
     document.getElementById('modal-export').classList.remove('on');
   }, 4000);
-}
-
-function copyBackup() {
-  const ta = document.getElementById('export-text');
-  ta.select();
-  navigator.clipboard.writeText(ta.value).then(() => {
-    const btn = document.querySelector('#modal-export .bk-copy');
-    btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Copié !';
-    setTimeout(() => btn.innerHTML = 'Tout copier', 2000);
-  }).catch(() => {
-    document.execCommand('copy');
-    alert('Copié ! Colle-le maintenant dans Notes.');
-  });
 }
 
 function loadImportFile(event) {
@@ -1889,9 +1898,9 @@ function doRestore() {
     if (data.goals && Array.isArray(data.goals)) saveGoals(data.goals);
     closeModals();
     renderShoes();
-    const btn = document.querySelector('#modal-import .bk-copy');
-    if (btn) { btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Restauré !'; }
-    setTimeout(() => { if (btn) btn.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i> Restaurer'; }, 2000);
+    renderGraph();
+    renderGoals();
+    alert('Sauvegarde restaurée.');
   } catch(e) {
     alert('Texte invalide, vérifie que tu as tout copié.');
   }
@@ -2035,7 +2044,9 @@ function saveGoalProgram() {
   const text = document.getElementById('goal-program-text').value;
   const goals = loadGoals();
   const idx = goals.findIndex(g => g.id === _goalProgramId);
-  const url = document.getElementById('goal-program-url')?.value.trim() || null;
+  let url = document.getElementById('goal-program-url')?.value.trim() || null;
+  // "www.site.com" → "https://www.site.com" (sinon le lien ne s'ouvre pas)
+  if (url && !/^[a-z][a-z0-9+.-]*:/i.test(url)) url = 'https://' + url;
   if (idx !== -1) {
     goals[idx].program = text;
     goals[idx].link = url;
@@ -2049,7 +2060,6 @@ function saveGoalProgram() {
 const loadGoals = () => { try { const g = localStorage.getItem('goals'); return g ? JSON.parse(g) : []; } catch(e) { return []; } };
 const saveGoals = arr => localStorage.setItem('goals', JSON.stringify(arr));
 
-let _bestPerfTimer = null;
 let _goalEditId = null;
 let _goalRefMode = 'best';
 let _goalRefCrit = 'chrono';
@@ -2099,54 +2109,28 @@ function setCritInputValues(prefix, crit, val) {
     const h = document.getElementById(prefix+'-h');
     const m = document.getElementById(prefix+'-m');
     const s = document.getElementById(prefix+'-s');
+    val = Math.round(val);
     if (h) { h.value = Math.floor(val/3600)||''; goalInputColor(h); }
     if (m) { m.value = Math.floor((val%3600)/60)||''; goalInputColor(m); }
-    if (s) { s.value = Math.round(val%60)||''; goalInputColor(s); }
+    if (s) { s.value = (val%60)||''; goalInputColor(s); }
   } else if (crit === 'vit') {
     const v = document.getElementById(prefix+'-vit');
     if (v) { v.value = val||''; goalInputColor(v); }
   } else if (crit === 'allure') {
     const am = document.getElementById(prefix+'-am');
     const as_ = document.getElementById(prefix+'-as');
+    val = Math.round(val);
     if (am) { am.value = Math.floor(val/60)||''; goalInputColor(am); }
-    if (as_) { as_.value = Math.round(val%60)||''; goalInputColor(as_); }
+    if (as_) { as_.value = (val%60)||''; goalInputColor(as_); }
   }
-}
-
-function updateBestPerfDisplay() {
-  const display = document.getElementById('goal-ref-best-display');
-  if (!display || _goalRefMode !== 'best') return;
-  const dist = parseFloat(document.getElementById('goal-dist')?.value) || 0;
-  const best = getBestRun(_goalCrit, dist > 0 ? dist : 0.1);
-  display.style.display = 'block';
-  const valEl = document.getElementById('goal-ref-best-val');
-  const subEl = document.getElementById('goal-ref-best-sub');
-  if (!valEl || !subEl) return;
-  if (!best) {
-    valEl.textContent = '—';
-    subEl.textContent = dist > 0 ? 'Aucune course trouvée' : 'Aucune course enregistrée';
-    return;
-  }
-  const val = _goalCrit === 'vit' ? best.vit : _goalCrit === 'chrono' ? best.tsec : best.allsec;
-  valEl.textContent = formatGoalVal(val, _goalCrit);
-  const extraParts = [];
-  if (_goalCrit !== 'vit') extraParts.push(rnd(best.vit,1)+' km/h');
-  if (_goalCrit !== 'allure') extraParts.push(fmtAllure(best.allsec)+'/km');
-  subEl.innerHTML = best.dist+' km · '+fmtDate(best.date)+'<br><span style="font-size:10px;color:'+getAccentDark()+'">'+extraParts.join(' · ')+'</span>';
-}
-
-function selectGoalRef(mode) {
-  _goalRefMode = mode;
-  ['best','custom'].forEach(m => document.getElementById('goal-ref-'+m).classList.toggle('on', m===mode));
-  document.getElementById('goal-ref-custom-fields').style.display = mode==='custom' ? 'block' : 'none';
-  if (mode === 'best') updateBestPerfDisplay();
-  else document.getElementById('goal-ref-best-display').style.display = 'none';
 }
 
 // Convertit une valeur d'un critère vers un autre (via vitesse comme intermédiaire)
-function convertCritValue(val, fromCrit, toCrit) {
+// distId : champ de distance à utiliser pour le chrono (objectif ou référence)
+function convertCritValue(val, fromCrit, toCrit, distId) {
   if (fromCrit === toCrit || val <= 0) return val;
-  const dist = parseFloat(document.getElementById('goal-dist')?.value) || 0;
+  const dist = parseFloat(document.getElementById(distId || 'goal-dist')?.value)
+    || parseFloat(document.getElementById('goal-dist')?.value) || 0;
   let vit = 0;
   if (fromCrit === 'vit') vit = val;
   else if (fromCrit === 'allure') vit = val > 0 ? 3600 / val : 0;
@@ -2164,7 +2148,7 @@ function selectGoalRefCrit(crit) {
   _goalRefCrit = crit;
   ['chrono','vit','allure'].forEach(c => { const el = document.getElementById('goal-ref-crit-'+c); if(el) el.classList.toggle('on', c===crit); });
   document.getElementById('goal-ref-crit-inputs').innerHTML = critInputsHTML('goal-ref-val', crit);
-  if (oldVal > 0) { const cv = convertCritValue(oldVal, oldCrit, crit); if(cv > 0) setCritInputValues('goal-ref-val', crit, cv); }
+  if (oldVal > 0) { const cv = convertCritValue(oldVal, oldCrit, crit, 'goal-ref-dist'); if(cv > 0) setCritInputValues('goal-ref-val', crit, cv); }
   const lbl = document.getElementById('goal-ref-dist-label');
   if (lbl) lbl.textContent = crit === 'chrono' ? 'Distance (km)' : 'Distance (km) — optionnel';
   selectGoalCrit(crit);
@@ -2186,7 +2170,7 @@ function selectGoalCrit(crit) {
   _goalRefCrit = crit;
   ['chrono','vit','allure'].forEach(c => { const el = document.getElementById('goal-ref-crit-'+c); if(el) el.classList.toggle('on', c===crit); });
   document.getElementById('goal-ref-crit-inputs').innerHTML = critInputsHTML('goal-ref-val', crit);
-  if (oldRefVal > 0) { const cv = convertCritValue(oldRefVal, oldRefCrit, crit); if(cv > 0) setCritInputValues('goal-ref-val', crit, cv); }
+  if (oldRefVal > 0) { const cv = convertCritValue(oldRefVal, oldRefCrit, crit, 'goal-ref-dist'); if(cv > 0) setCritInputValues('goal-ref-val', crit, cv); }
   const refLbl = document.getElementById('goal-ref-dist-label');
   if (refLbl) refLbl.textContent = crit === 'chrono' ? 'Distance (km)' : 'Distance (km) — optionnel';
 }
@@ -2215,8 +2199,8 @@ function openGoalModal(editId) {
   document.getElementById('goal-dist').style.color = '#888';
   document.getElementById('goal-ref-dist').value = '';
   document.getElementById('goal-ref-dist').style.color = '#888';
-  const today = new Date().toISOString().split('T')[0];
-  const inFourWeeks = new Date(Date.now() + 28*24*60*60*1000).toISOString().split('T')[0];
+  const today = todayISO();
+  const inFourWeeks = todayISO(28);
   document.getElementById('goal-date-start').value = today;
   document.getElementById('goal-date-end').value = inFourWeeks;
 
@@ -2255,10 +2239,6 @@ function openGoalModal(editId) {
 }
 
 function closeGoalModal() {
-  if (typeof _bestPerfTimer !== 'undefined' && _bestPerfTimer) {
-    clearTimeout(_bestPerfTimer);
-    _bestPerfTimer = null;
-  }
   document.getElementById('modal-goal').style.display = 'none';
   _goalEditId = null;
 }
@@ -2278,15 +2258,16 @@ function saveGoal() {
     return;
   }
 
-  const today = new Date().toISOString().split('T')[0];
-  const inFourWeeks = new Date(Date.now() + 28*24*60*60*1000).toISOString().split('T')[0];
+  const today = todayISO();
+  const inFourWeeks = todayISO(28);
   const start = dateStart || today;
   const end = dateEnd || inFourWeeks;
   if (end <= start) { alert('La date de fin doit être après le début.'); return; }
 
   let refVal = null, refDist = null, refCrit = _goalCrit;
   refDist = parseFloat(document.getElementById('goal-ref-dist').value) || 0;
-  refVal = getCritValue('goal-ref-val', _goalRefCrit);
+  refVal = getCritValue('goal-ref-val', _goalRefCrit) || null; // pas de départ saisi → null
+  refDist = refDist || null;
   refCrit = _goalRefCrit;
 
   const goals = loadGoals();
@@ -2310,15 +2291,32 @@ function toggleGoalCard(id) {
   renderGoals();
 }
 
-function getBestRun(crit, dist) {
-  const runs = loadRuns();
-  if (!runs.length) return null;
-  return runs.reduce((best, r) => {
-    if (!best) return r;
-    if (crit === 'vit') return r.vit > best.vit ? r : best;
-    if (crit === 'chrono') return r.tsec < best.tsec ? r : best;
-    return r.allsec < best.allsec ? r : best;
-  }, null);
+// Valeur d'une course pour le critère de l'objectif.
+// Chrono : ramené à la distance visée (allure × distance), pour comparer
+// équitablement une course de 11 km à un objectif sur 12 km.
+function goalRunVal(g, r) {
+  if (g.crit === 'vit') return r.vit;
+  if (g.crit === 'allure') return r.allsec;
+  return g.dist ? r.tsec * g.dist / r.dist : r.tsec;
+}
+const goalDistOk = (g, r) => !g.dist || (r.dist >= g.dist - 1 && r.dist <= g.dist + 1);
+// Meilleure course de la liste pour cet objectif → { run, val } ou null
+function bestGoalRun(g, runs) {
+  let best = null;
+  runs.forEach(r => {
+    if (!goalDistOk(g, r)) return;
+    const val = goalRunVal(g, r);
+    if (!best || (g.crit === 'vit' ? val > best.val : val < best.val)) best = { run: r, val };
+  });
+  return best;
+}
+const goalMeets = (g, val, target) => g.crit === 'vit' ? val >= target : val <= target;
+// % de progression du départ vers l'objectif (sans départ : 0 ou 100)
+function goalProgressPct(g, val) {
+  if (!g.refVal || g.goalVal === g.refVal) return goalMeets(g, val, g.goalVal) ? 100 : 0;
+  const range = Math.abs(g.goalVal - g.refVal);
+  const progress = g.crit === 'vit' ? (val - g.refVal) / range : (g.refVal - val) / range;
+  return Math.min(100, Math.max(0, Math.round(progress * 100)));
 }
 
 function deleteGoal(id) {
@@ -2335,7 +2333,7 @@ function renderGoals() {
     container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#333;font-size:13px"><div style="font-size:36px;margin-bottom:8px">🎯</div>Aucun objectif.<br>Ajoute-en un pour commencer !</div>';
     return;
   }
-  const now = new Date().toISOString().split('T')[0];
+  const now = todayISO();
   const sorted = [...goals].sort((a, b) => {
     // Objectifs en cours d'abord, puis par date de début la plus récente
     const aActive = now >= a.dateStart && now <= a.dateEnd;
@@ -2368,52 +2366,30 @@ function renderGoalCard(g) {
 
   const weeks = computeWeeks(g);
   const runs = loadRuns();
-  const now = new Date().toISOString().split('T')[0];
+  const now = todayISO();
 
   // Progression globale : meilleure course toutes semaines confondues
-  const distOk = r => !g.dist || (r.dist >= g.dist - 1 && r.dist <= g.dist + 1);
-  const allRuns = runs.filter(r => r.date >= g.dateStart && r.date <= g.dateEnd && distOk(r));
-  const globalBest = allRuns.length ? allRuns.reduce((best, r) => {
-    if (!best) return r;
-    if (g.crit === 'vit') return r.vit > best.vit ? r : best;
-    if (g.crit === 'chrono') return r.tsec < best.tsec ? r : best;
-    return r.allsec < best.allsec ? r : best;
-  }, null) : null;
-
-  let globalPct = 0;
-  if (globalBest && g.refVal && g.goalVal !== g.refVal) {
-    const bestVal = g.crit === 'vit' ? globalBest.vit : g.crit === 'chrono' ? globalBest.tsec : globalBest.allsec;
-    const range = Math.abs(g.goalVal - g.refVal);
-    const progress = g.crit === 'vit' ? (bestVal - g.refVal) / range : (g.refVal - bestVal) / range;
-    globalPct = Math.min(100, Math.max(0, Math.round(progress * 100)));
-  }
+  const gb = bestGoalRun(g, runs.filter(r => r.date >= g.dateStart && r.date <= g.dateEnd));
+  const globalBest = gb ? gb.run : null;
+  const globalBestVal = gb ? gb.val : null;
+  const globalPct = gb ? goalProgressPct(g, gb.val) : 0;
   const globalBarColor = globalPct >= 100 ? '#00cc66' : globalPct >= 60 ? accentColor : '#ffaa00';
 
   // Semaines
   const weeksHTML = weeks.map((w, i) => {
-    const isPast = now >= w.dateEnd;
+    const isPast = now > w.dateEnd; // le dernier jour de la semaine compte encore
     const isCurrent = now >= w.dateStart && now <= w.dateEnd;
     const isFuture = now < w.dateStart;
     const isLast = i === weeks.length - 1;
 
-    const weekRuns = runs.filter(r => r.date >= w.dateStart && r.date <= w.dateEnd && distOk(r));
-    const bestRun = weekRuns.length ? weekRuns.reduce((best, r) => {
-      if (!best) return r;
-      if (g.crit === 'vit') return r.vit > best.vit ? r : best;
-      if (g.crit === 'chrono') return r.tsec < best.tsec ? r : best;
-      return r.allsec < best.allsec ? r : best;
-    }, null) : null;
-
-    const bestVal = bestRun ? (g.crit === 'vit' ? bestRun.vit : g.crit === 'chrono' ? bestRun.tsec : bestRun.allsec) : null;
-    const achieved = bestVal !== null && (g.crit === 'vit' ? bestVal >= w.target : bestVal <= w.target);
-
-    // % progression de cette semaine
-    let pct = 0;
-    if (bestVal !== null && g.refVal && g.goalVal !== g.refVal) {
-      const range = Math.abs(g.goalVal - g.refVal);
-      const progress = g.crit === 'vit' ? (bestVal - g.refVal)/range : (g.refVal - bestVal)/range;
-      pct = Math.min(100, Math.max(0, Math.round(progress * 100)));
-    }
+    // Courses de la semaine, limitées à la période de l'objectif
+    const wFrom = w.dateStart > g.dateStart ? w.dateStart : g.dateStart;
+    const wTo = w.dateEnd < g.dateEnd ? w.dateEnd : g.dateEnd;
+    const wb = bestGoalRun(g, runs.filter(r => r.date >= wFrom && r.date <= wTo));
+    const bestRun = wb ? wb.run : null;
+    const bestVal = wb ? wb.val : null;
+    const achieved = bestVal !== null && goalMeets(g, bestVal, w.target);
+    const pct = bestVal !== null ? goalProgressPct(g, bestVal) : 0;
 
     // Couleurs
     const barColor = achieved ? '#bbb' : isCurrent ? '#bbb' : isPast ? '#bbb' : '#333';
@@ -2440,7 +2416,7 @@ function renderGoalCard(g) {
     let bestRunHTML = '';
     if (bestRun) {
       bestRunHTML = '<div style="font-size:9px;color:#bbb;margin-top:2px">'
-        + bestRun.dist+' km · '+formatGoalVal(bestVal, g.crit)
+        + bestRun.dist+' km · '+(g.crit === 'chrono' && g.dist && bestRun.dist !== g.dist ? '≈ ' : '')+formatGoalVal(bestVal, g.crit)
         + '</div>';
     } else if (!isFuture) {
       bestRunHTML = '<div style="font-size:9px;color:#444;margin-top:2px">Aucune course cette semaine</div>';
@@ -2475,7 +2451,7 @@ function renderGoalCard(g) {
     + '<span style="font-size:11px;color:'+accentColor+';display:inline-block;transform:'+(isExpanded?'rotate(180deg)':'rotate(0deg)')+'"><i class="fa-solid fa-chevron-down"></i></span>'
     + '</div>'
     + '<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
-    + (g.link ? '<a href="'+g.link+'" target="_blank" style="height:26px;padding:0 8px;font-size:9px;font-weight:700;background:transparent;border:1px solid '+accentColor+'88;border-radius:6px;color:'+accentColor+';cursor:pointer;flex-shrink:0;display:flex;align-items:center;text-decoration:none"><i class="fa-solid fa-link"></i></a>' : '')
+    + (g.link ? '<a href="'+String(g.link).replace(/"/g,'%22')+'" target="_blank" style="height:26px;padding:0 8px;font-size:9px;font-weight:700;background:transparent;border:1px solid '+accentColor+'88;border-radius:6px;color:'+accentColor+';cursor:pointer;flex-shrink:0;display:flex;align-items:center;text-decoration:none"><i class="fa-solid fa-link"></i></a>' : '')
     + '<button onclick="openGoalProgram('+g.id+')" style="height:26px;padding:0 8px;font-size:9px;font-weight:700;background:transparent;border:1px solid '+accentColor+'88;border-radius:6px;color:'+accentColor+';cursor:pointer;flex-shrink:0;white-space:nowrap">Prog.</button>'
     + '<button class="run-edit" onclick="openGoalModal('+g.id+')" style="width:28px;height:28px;border-color:'+accentColor+'88;color:'+accentColor+';"><i class="fa-solid fa-pen"></i></button>'
     + '<button class="goal-del-btn" onclick="deleteGoal('+g.id+')"><i class="fa-solid fa-xmark"></i></button>'
@@ -2495,7 +2471,7 @@ function renderGoalCard(g) {
     // Meilleur en cours (centre) si existe
     + (globalBest ? '<div style="text-align:center">'
       + '<div style="font-size:9px;color:#666;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Meilleur</div>'
-      + '<div style="font-size:15px;font-weight:800;color:'+globalBarColor+'">'+formatGoalVal(g.crit==='vit'?globalBest.vit:g.crit==='chrono'?globalBest.tsec:globalBest.allsec, g.crit)+'</div>'
+      + '<div style="font-size:15px;font-weight:800;color:'+globalBarColor+'">'+formatGoalVal(globalBestVal, g.crit)+'</div>'
       + '</div>' : (g.refVal ? '<i class="fa-solid fa-arrow-right" style="font-size:12px;color:#333"></i>' : ''))
     // Colonne droite : objectif
     + '<div style="text-align:right">'
@@ -2516,7 +2492,7 @@ function renderGoalCard(g) {
 
     + '</div>'
     // Graphique objectif + barre de progression
-    + '<div style="margin-top:8px">'    + '<canvas id="goal-chart-'+g.id+'" width="300" height="160" style="width:100%;height:160px;border-radius:8px;display:block;background:#000"></canvas>'    + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;margin-bottom:4px">'    + '<span style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px">Progression globale</span>'    + '<span style="font-size:12px;font-weight:800;color:'+globalBarColor+'">'+globalPct+'%</span>'    + '</div>'    + '<div style="background:#111;border-radius:6px;height:8px;overflow:hidden">'    + '<div style="width:'+globalPct+'%;height:100%;background:'+globalBarColor+';border-radius:6px;transition:width 0.4s"></div>'    + '</div>'    + (globalBest ? '<div style="font-size:9px;color:#555;margin-top:3px">Meilleure : '+formatGoalVal(g.crit==='vit'?globalBest.vit:g.crit==='chrono'?globalBest.tsec:globalBest.allsec, g.crit)+' · '+fmtDate(globalBest.date)+'</div>' : '')    + '</div>'    // Détails semaines (accordéon)
+    + '<div style="margin-top:8px">'    + '<canvas id="goal-chart-'+g.id+'" width="300" height="160" style="width:100%;height:160px;border-radius:8px;display:block;background:#000"></canvas>'    + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;margin-bottom:4px">'    + '<span style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px">Progression globale</span>'    + '<span style="font-size:12px;font-weight:800;color:'+globalBarColor+'">'+globalPct+'%</span>'    + '</div>'    + '<div style="background:#111;border-radius:6px;height:8px;overflow:hidden">'    + '<div style="width:'+globalPct+'%;height:100%;background:'+globalBarColor+';border-radius:6px;transition:width 0.4s"></div>'    + '</div>'    + (globalBest ? '<div style="font-size:9px;color:#555;margin-top:3px">Meilleure : '+formatGoalVal(globalBestVal, g.crit)+' · '+fmtDate(globalBest.date)+'</div>' : '')    + '</div>'    // Détails semaines (accordéon)
     + (isExpanded ? '<div style="border-top:1px solid #111;padding-top:6px;margin-top:8px">' + weeksHTML + '</div>' : '')    + '</div>';
 
 }
@@ -2545,18 +2521,12 @@ function drawGoalChart(g, weeks, runs, accentColor) {
   if (n === 0) return;
 
   const targets = weeks.map(w => w.target);
-  const distOk = r => !g.dist || (r.dist >= g.dist - 1 && r.dist <= g.dist + 1);
-  const perfs = weeks.map(w => {
-    const wr = runs.filter(r => r.date >= w.dateStart && r.date <= w.dateEnd && distOk(r));
-    if (!wr.length) return null;
-    return wr.reduce((best, r) => {
-      if (!best) return r;
-      if (g.crit === 'vit') return r.vit > best.vit ? r : best;
-      if (g.crit === 'chrono') return r.tsec < best.tsec ? r : best;
-      return r.allsec < best.allsec ? r : best;
-    }, null);
+  const perfVals = weeks.map(w => {
+    const wFrom = w.dateStart > g.dateStart ? w.dateStart : g.dateStart;
+    const wTo = w.dateEnd < g.dateEnd ? w.dateEnd : g.dateEnd;
+    const wb = bestGoalRun(g, runs.filter(r => r.date >= wFrom && r.date <= wTo));
+    return wb ? wb.val : null;
   });
-  const perfVals = perfs.map(r => r ? (g.crit === 'vit' ? r.vit : g.crit === 'chrono' ? r.tsec : r.allsec) : null);
 
   // Plage basée uniquement sur cibles + perfs (sans goalVal pour maximiser la plage visible)
   const allVals = [...targets, ...perfVals.filter(v => v !== null)];
@@ -2694,7 +2664,7 @@ function computeWeeks(g) {
   const end = new Date(g.dateEnd);
 
   // Trouver le lundi précédent ou égal à la date de début
-  const dayOfWeek = start.getDay(); // 0=dim, 1=lun, ..., 6=sam
+  const dayOfWeek = start.getUTCDay(); // 0=dim, 1=lun, ..., 6=sam (date lue en UTC)
   const daysToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
   const firstMonday = new Date(start.getTime() + daysToMonday * 24*60*60*1000);
 
@@ -2708,7 +2678,8 @@ function computeWeeks(g) {
   }
 
   const numWeeks = weeks.length;
-  const ref = (g.refVal !== null && g.refVal !== undefined) ? g.refVal : g.goalVal;
+  // Sans point de départ (vide ou 0), toutes les semaines visent directement l'objectif
+  const ref = g.refVal > 0 ? g.refVal : g.goalVal;
 
   // Interpolation linéaire du ref vers l'objectif
   weeks.forEach((w, i) => {
@@ -2789,12 +2760,11 @@ function selectThemeColor(color) {
 
 /* ── INIT ── */
 window.addEventListener('resize', () => {
-  const runs = loadRuns();
+  const runs = getGraphRuns();
   if (runs.length > 0) drawChart(runs); else drawEmptyChart();
 });
 initTheme();
 buildColorGrid();
-_shoeNextId = null;
 renderShoes();
 document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('sel'));
 document.getElementById('btn_'+mode).classList.add('sel');
