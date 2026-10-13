@@ -107,6 +107,10 @@ input::placeholder { color:var(--accent-dark); }
   letter-spacing:0.5px;
 }
 .shoe-history-btn:active { border-color:var(--accent); color:var(--accent); }
+.shoe-history-btn.on { border-color:var(--accent-dark); color:var(--accent); background:var(--accent-bg); }
+.shoe-move-btn { width:30px; height:26px; background:transparent; border:1px solid #666; border-radius:6px; color:#ddd; font-size:12px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.shoe-move-btn:disabled { opacity:0.2; cursor:default; }
+.shoe-move-btn:not(:disabled):active { background:#222; }
 
 /* Modale historique */
 .hist-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.80); z-index:800; align-items:flex-end; justify-content:center; }
@@ -375,7 +379,10 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
   <div class="screen" id="sc_shoes">
     <div class="graph-header">
       <div class="graph-title" id="shoes-count" style="color:#fff;font-weight:800">0 paire(s)</div>
-      <button class="shoe-history-btn" onclick="openShoeHistory()"><i class="fa-solid fa-list-ul"></i> Historique des km</button>
+      <div style="display:flex;gap:6px;align-self:flex-end">
+        <button class="shoe-history-btn" id="shoe-order-btn" onclick="toggleShoeOrderMode()"><i class="fa-solid fa-arrow-down-up-across-line"></i> Ordre</button>
+        <button class="shoe-history-btn" onclick="openShoeHistory()"><i class="fa-solid fa-list-ul"></i> Historique des km</button>
+      </div>
     </div>
     <div class="shoes-container" id="shoes-container"></div>
     <button class="add-shoe-btn" onclick="openNewShoeModal()">+ Ajouter une paire</button>
@@ -507,11 +514,11 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
       <div>
         <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Début</div>
-        <input type="date" id="goal-date-start" style="width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:14px;font-weight:700;padding:6px;outline:none;height:38px;box-sizing:border-box;color-scheme:dark;-webkit-appearance:none">
+        <input type="date" id="goal-date-start" style="width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:16px;font-weight:700;padding:6px;outline:none;height:38px;box-sizing:border-box;color-scheme:dark;-webkit-appearance:none">
       </div>
       <div>
         <div style="font-size:9px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Fin</div>
-        <input type="date" id="goal-date-end" style="width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:14px;font-weight:700;padding:6px;outline:none;height:38px;box-sizing:border-box;color-scheme:dark;-webkit-appearance:none">
+        <input type="date" id="goal-date-end" style="width:100%;background:#000;border:1px solid #333;border-radius:8px;color:#888;font-size:16px;font-weight:700;padding:6px;outline:none;height:38px;box-sizing:border-box;color-scheme:dark;-webkit-appearance:none">
       </div>
     </div>
 
@@ -546,7 +553,7 @@ canvas#chart { display:block; height:180px; border-radius:12px; }
 </div>
 
 <!-- Modal couleur objectif -->
-<div class="color-modal" id="modal-goal-color" style="z-index:900">
+<div class="color-modal" id="modal-goal-color" style="z-index:900" onclick="closeGoalColorPicker()">
   <div class="color-sheet" onclick="event.stopPropagation()">
     <div class="color-sheet-header">
       <div style="width:30px"></div>
@@ -747,6 +754,7 @@ function closeConfirm() {
 /* ── TABS ── */
 function showTab(t) {
   localStorage.setItem('lastTab', t);
+  if (t !== 'shoes' && _shoeOrderMode) toggleShoeOrderMode(); // quitter le mode Ordre en changeant d'onglet
   ['calc','shoes','graph','goal'].forEach(id => {
     document.getElementById('sc_'+id).classList.toggle('on', id===t);
     document.getElementById('tab_'+id).classList.toggle('on', id===t);
@@ -780,6 +788,8 @@ function sel(m) {
 const g   = id => { const v=parseFloat(document.getElementById(id).value); return isNaN(v)?0:v; };
 const pad = n  => n<10?'0'+n:''+n;
 const rnd = (v,d) => Math.round(v*10**d)/10**d;
+// Échappe un texte saisi par l'utilisateur avant de l'insérer dans du HTML
+const esc = t => String(t ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 // Date du jour (heure locale, pas UTC), décalée de `addDays` jours
 function todayISO(addDays) {
   const d = new Date();
@@ -870,11 +880,11 @@ function openShoePickerModal() {
     + shoes.map(s =>
       '<div class="shoe-pick-item" data-shoe-id="'+s.id+'" onclick="selectPickShoe('+s.id+')">'
       + '<div class="shoe-pick-swatch" style="background:'+(s.color||'#333')+'"></div>'
-      + '<div class="shoe-pick-name">'+(s.name||'Sans nom')+'</div>'
+      + '<div class="shoe-pick-name">'+esc(s.name||'Sans nom')+'</div>'
       + '<div class="shoe-pick-km">'+rnd(s.total,1)+' km</div>'
       + '</div>'
     ).join('');
-  _pendingShoeId = null;
+  selectPickShoe(null); // « Sans chaussure » visible comme choix par défaut
   document.getElementById('shoe-pick-dist').textContent = dist + ' km';
   const prfBtn = document.getElementById('shoe-pick-prf-btn');
   if (prfBtn) { prfBtn.dataset.selected = 'false'; applyPrfBtnStyle(prfBtn, false); }
@@ -1100,7 +1110,6 @@ function renderRunsList() {
     return runOrderAsc ? -cmp : cmp;
   });
   const shoes = loadShoes();
-  const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   list.innerHTML = sorted.map(r => {
     const shoe = r.shoeId ? shoes.find(s => s.id === +r.shoeId) : null;
     const shoeColor = shoe?.color || getAccentDark();
@@ -1149,6 +1158,10 @@ function openEditRun(id) {
   const currentShoeId = r.shoeId ? String(r.shoeId) : null;
   const shoeList = document.getElementById('edit-shoe-list');
   const items = [{ id: null, name: 'Aucune', color: '#444' }, ...shoes.map(s => ({ id: String(s.id), name: s.name || 'Sans nom', color: s.color || '#555' }))];
+  // Paire supprimée depuis : la garder sélectionnée pour ne pas perdre le lien sans le vouloir
+  if (currentShoeId && !shoes.some(s => String(s.id) === currentShoeId)) {
+    items.push({ id: currentShoeId, name: 'Paire supprimée', color: '#222' });
+  }
   shoeList.innerHTML = items.map(s => {
     const sel = String(s.id) === String(currentShoeId);
     const safeName = String(s.name).replace(/"/g, '&quot;');
@@ -1188,7 +1201,9 @@ function saveEditRun() {
   const s = parseInt(document.getElementById('edit-s').value) || 0;
   const tsec = h * 3600 + m * 60 + s;
   const date = document.getElementById('edit-date').value;
-  if (!dist || dist <= 0 || tsec <= 0 || !date) return;
+  if (!date) { alert('Indique la date de la course.'); return; }
+  if (!dist || dist <= 0) { alert('La distance doit être supérieure à 0.'); return; }
+  if (tsec <= 0) { alert('Le chrono doit être supérieur à 0.'); return; }
   const note = document.getElementById('edit-note').value.trim();
   const prf = document.getElementById('edit-prf-btn')?.dataset.selected === 'true';
   const newShoeId = getEditSelectedShoeId();
@@ -1565,7 +1580,7 @@ function closeMaxModal() {
 
 function saveMaxKm() {
   const val = parseInt(document.getElementById('max-km-input').value);
-  if (!val || val < 100) return;
+  if (!val || val < 100) { alert('La limite doit être d\'au moins 100 km.'); return; }
   if (_maxShoeIsNew) {
     const name = document.getElementById('max-km-name').value.trim();
     const color = _newShoeColor || '#4d9fff';
@@ -1653,21 +1668,45 @@ function resetShoeKm(id) {
   }, 'Remettre à zéro');
 }
 
+/* ── ORDRE DES PAIRES ── */
+let _shoeOrderMode = false;
+
+function toggleShoeOrderMode() {
+  _shoeOrderMode = !_shoeOrderMode;
+  const btn = document.getElementById('shoe-order-btn');
+  btn.classList.toggle('on', _shoeOrderMode);
+  btn.innerHTML = _shoeOrderMode
+    ? '<i class="fa-solid fa-check"></i> Terminé'
+    : '<i class="fa-solid fa-arrow-down-up-across-line"></i> Ordre';
+  renderShoes();
+}
+
+// Déplace une paire d'un cran vers le haut (dir = -1) ou le bas (dir = +1)
+function moveShoe(id, dir) {
+  const shoes = loadShoes();
+  const i = shoes.findIndex(s => s.id === +id);
+  const j = i + dir;
+  if (i === -1 || j < 0 || j >= shoes.length) return;
+  // Figer la couleur par défaut des paires sans couleur perso,
+  // pour qu'elle ne change pas avec leur position
+  shoes.forEach((s, k) => { if (!s.color && s.palette === undefined) s.palette = k % NUM_PALETTES; });
+  [shoes[i], shoes[j]] = [shoes[j], shoes[i]];
+  saveShoes(shoes);
+  renderShoes();
+}
+
 function renderShoes() {
   const shoes = loadShoes();
   document.getElementById('shoes-count').textContent = shoes.length + ' paire(s)';
   const container = document.getElementById('shoes-container');
 
-  container.innerHTML = shoes.map((shoe, idx) => {    const palette = idx % NUM_PALETTES;
+  container.innerHTML = shoes.map((shoe, idx) => {
+    const palette = shoe.palette !== undefined ? shoe.palette : idx % NUM_PALETTES;
     const accent = shoe.color || null; // couleur perso si définie
     const MAX = shoe.max || DEFAULT_MAX;
     const pct = Math.min(100, (shoe.total / MAX) * 100);
     const barColor = pct >= 90 ? '#ff4444' : pct >= 70 ? '#ffaa00' : (accent || null);
     const totalFmt = rnd(shoe.total, 1);
-    const remaining = rnd(MAX - shoe.total, 0);
-    const subText = shoe.total >= MAX
-      ? '<span style="color:#ff4444"><i class="fa-solid fa-triangle-exclamation"></i> Limite recommandée dépassée !</span>'
-      : `sur ${MAX} km — reste ${remaining} km`;
 
     // Style inline de surcharge si couleur perso
     const accentStyle = accent ? `color:${accent}` : '';
@@ -1684,9 +1723,12 @@ function renderShoes() {
         <button class="shoe-color-btn" onclick="openColorModal(${shoe.id})"
           style="background:${shoe.color||'#555'}"
           title="Changer la couleur"></button>
-        <div style="flex:1;font-size:15px;font-weight:700;color:#fff;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shoe.name||'Sans nom'}</div>
+        <div style="flex:1;font-size:15px;font-weight:700;color:#fff;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(shoe.name||'Sans nom')}</div>
+        ${_shoeOrderMode ? `
+        <button class="shoe-move-btn" onclick="moveShoe(${shoe.id},-1)" title="Monter" ${idx === 0 ? 'disabled' : ''}><i class="fa-solid fa-chevron-up"></i></button>
+        <button class="shoe-move-btn" onclick="moveShoe(${shoe.id},1)" title="Descendre" ${idx === shoes.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-down"></i></button>` : `
         <button class="run-edit" onclick="openMaxModal(${shoe.id}, ${MAX})" title="Limite km" style="width:26px;height:26px;border-color:${shoe.color || '#009fcc'};color:${shoe.color || '#009fcc'}"><i class="fa-solid fa-pen"></i></button>
-        <button class="shoe-delete-btn" onclick="deleteShoe(${shoe.id})" title="Supprimer">✕</button>
+        <button class="shoe-delete-btn" onclick="deleteShoe(${shoe.id})" title="Supprimer">✕</button>`}
       </div>
       <div class="km-total" id="km-total-${shoe.id}" ${accentStyle ? 'style="'+accentStyle+'"' : ''}>${totalFmt} <span>km</span></div>
       <div class="km-bar-wrap">
@@ -1796,14 +1838,17 @@ function renderShoeHistory() {
     return `
       <div class="hist-entry">
         <div class="hist-entry-date">${d}/${mo}/${y.slice(2)}</div>
-        <div class="hist-entry-km" style="color:${e.sign > 0 ? shoeColor : '#cc4400'}">${shoeName ? shoeName+' · ' : ''}${e.sign > 0 ? '+' : '−'}${e.km} km${e.reset ? ' (RAZ)' : ''}</div>
+        <div class="hist-entry-km" style="color:${e.sign > 0 ? shoeColor : '#cc4400'}">${esc(shoeName)} · ${e.sign > 0 ? '+' : '−'}${e.km} km${e.reset ? ' (RAZ)' : ''}</div>
         ${currentHistFilter === 'all' ? '<button class="hist-entry-del" onclick="deleteHistEntry(\''+e.hid+'\')">✕</button>' : ''}
       </div>`;
   }).join('');
 }
 
 /* ── SAUVEGARDE / RESTAURATION ── */
+let _exportBusy = false;
+
 function openExport() {
+  if (_exportBusy) return; // évite un double appui pendant le message de confirmation
   const data = { shoes_v2: loadShoes(), runs: loadRuns(), shoe_history: loadShoeHistory(), themeColor: localStorage.getItem('themeColor') || '#00c8ff', goals: loadGoals() };
   const text = JSON.stringify(data);
   const btn = document.querySelector('.bk-export');
@@ -1811,6 +1856,7 @@ function openExport() {
   const fileName = 'sauvegarde-course-' + date + '.json';
 
   const feedbackBtn = (orig) => {
+    _exportBusy = true;
     btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Enregistré !';
     btn.style.borderColor = getAccent();
     btn.style.color = getAccent();
@@ -1818,6 +1864,7 @@ function openExport() {
       btn.innerHTML = orig;
       btn.style.borderColor = '';
       btn.style.color = '';
+      _exportBusy = false;
     }, 4000);
   };
 
@@ -1831,25 +1878,38 @@ function openExport() {
         .catch(err => {
           // Partage annulé par l'utilisateur : ne rien faire
           if (err && err.name === 'AbortError') return;
-          fallbackCopy(text, btn);
+          fallbackCopy(text, btn, fileName);
         });
       return;
     }
   }
-  fallbackCopy(text, btn);
+  fallbackCopy(text, btn, fileName);
 }
 
-function fallbackCopy(text, btn) {
+function fallbackCopy(text, btn, fileName) {
   const orig = btn.innerHTML;
-  navigator.clipboard.writeText(text).then(() => {
-    feedbackAndModal(btn, orig);
-  }).catch(() => {
-    document.getElementById('modal-export').classList.add('on');
-    setTimeout(() => document.getElementById('modal-export').classList.remove('on'), 4000);
-  });
+  // Presse-papier indisponible ou refusé : télécharger le fichier à la place
+  // (avant, le message « copiée » s'affichait alors que rien n'était copié)
+  const fail = () => downloadBackup(text, fileName);
+  if (!navigator.clipboard || !navigator.clipboard.writeText) { fail(); return; }
+  navigator.clipboard.writeText(text).then(() => feedbackAndModal(btn, orig)).catch(fail);
+}
+
+function downloadBackup(text, fileName) {
+  try {
+    const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    alert('Copie impossible : la sauvegarde a été téléchargée dans le fichier ' + fileName + '.');
+  } catch (e) {
+    alert('La sauvegarde n\'a pas pu être copiée ni téléchargée. Réessaie.');
+  }
 }
 
 function feedbackAndModal(btn, orig) {
+  _exportBusy = true;
   btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Copié !';
   btn.style.borderColor = getAccent();
   btn.style.color = getAccent();
@@ -1859,6 +1919,7 @@ function feedbackAndModal(btn, orig) {
     btn.style.borderColor = '';
     btn.style.color = '';
     document.getElementById('modal-export').classList.remove('on');
+    _exportBusy = false;
   }, 4000);
 }
 
@@ -1882,8 +1943,16 @@ function openImport() {
 function doRestore() {
   const txt = document.getElementById('import-text').value.trim();
   if (!txt) { alert('Aucun texte collé.'); return; }
+  let data;
+  try { data = JSON.parse(txt); } catch (e) { data = null; }
+  const valid = data && typeof data === 'object' && (Array.isArray(data.shoes_v2) || data.shoes || Array.isArray(data.runs) || Array.isArray(data.goals) || Array.isArray(data.shoe_history));
+  if (!valid) { alert('Texte invalide, vérifie que tu as tout copié.'); return; }
+  document.getElementById('modal-import').classList.remove('on');
+  askConfirm('Restaurer cette sauvegarde ? Les données actuelles (courses, paires, objectifs) seront remplacées.', () => applyRestore(data), 'Restaurer');
+}
+
+function applyRestore(data) {
   try {
-    const data = JSON.parse(txt);
     if (data.shoes_v2 && Array.isArray(data.shoes_v2)) {
       saveShoes(data.shoes_v2);
     } else if (data.shoes) {
@@ -1902,7 +1971,7 @@ function doRestore() {
     renderGoals();
     alert('Sauvegarde restaurée.');
   } catch(e) {
-    alert('Texte invalide, vérifie que tu as tout copié.');
+    alert('La restauration a échoué : ' + e.message);
   }
 }
 
@@ -1955,7 +2024,7 @@ function openColorModal(id) {
   const current = shoe?.color || null;
 
   // Mettre à jour la sélection dans la grille
-  document.querySelectorAll('.color-cell').forEach(el => {
+  document.querySelectorAll('#color-grid .color-cell').forEach(el => {
     el.classList.toggle('sel', el.dataset.color === current);
   });
   document.getElementById('color-preview-swatch').style.background = current || '#555';
@@ -1964,7 +2033,7 @@ function openColorModal(id) {
 
 function selectColor(color) {
   document.getElementById('color-preview-swatch').style.background = color;
-  document.querySelectorAll('.color-cell').forEach(el => {
+  document.querySelectorAll('#color-grid .color-cell').forEach(el => {
     el.classList.toggle('sel', el.dataset.color === color);
   });
 
@@ -2310,12 +2379,28 @@ function bestGoalRun(g, runs) {
   });
   return best;
 }
+// Point de départ exprimé dans le critère de l'objectif et ramené à sa distance
+// (ex. départ « 10 km en 50' » pour un objectif sur 12 km → 1h00'00")
+function goalRef(g) {
+  const v = +g.refVal;
+  if (!(v > 0)) return null;
+  const rc = g.refCrit || g.crit;
+  const sameDist = !g.refDist || !g.dist || +g.refDist === +g.dist;
+  if (rc === g.crit && (g.crit !== 'chrono' || sameDist)) return v;
+  const d = +g.refDist || +g.dist || 0;
+  const vit = rc === 'vit' ? v : rc === 'allure' ? 3600 / v : (d ? d / (v / 3600) : 0);
+  if (!vit) return v;
+  if (g.crit === 'vit') return rnd(vit, 1);
+  if (g.crit === 'allure') return Math.round(3600 / vit);
+  return g.dist ? Math.round(g.dist / vit * 3600) : v;
+}
 const goalMeets = (g, val, target) => g.crit === 'vit' ? val >= target : val <= target;
 // % de progression du départ vers l'objectif (sans départ : 0 ou 100)
 function goalProgressPct(g, val) {
-  if (!g.refVal || g.goalVal === g.refVal) return goalMeets(g, val, g.goalVal) ? 100 : 0;
-  const range = Math.abs(g.goalVal - g.refVal);
-  const progress = g.crit === 'vit' ? (val - g.refVal) / range : (g.refVal - val) / range;
+  const ref = goalRef(g);
+  if (!ref || g.goalVal === ref) return goalMeets(g, val, g.goalVal) ? 100 : 0;
+  const range = Math.abs(g.goalVal - ref);
+  const progress = g.crit === 'vit' ? (val - ref) / range : (ref - val) / range;
   return Math.min(100, Math.max(0, Math.round(progress * 100)));
 }
 
@@ -2447,7 +2532,7 @@ function renderGoalCard(g) {
     // Ligne 1 : boutons hors zone cliquable
     + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
     + '<div onclick="toggleGoalCard('+g.id+')" style="cursor:pointer;display:flex;align-items:center;gap:8px;flex:1;min-width:0">'
-    + '<div class="goal-card-title" style="color:'+(g.name?'#fff':'#555')+'">'+(g.name || critLabel)+'</div>'
+    + '<div class="goal-card-title" style="color:'+(g.name?'#fff':'#555')+'">'+esc(g.name || critLabel)+'</div>'
     + '<span style="font-size:11px;color:'+accentColor+';display:inline-block;transform:'+(isExpanded?'rotate(180deg)':'rotate(0deg)')+'"><i class="fa-solid fa-chevron-down"></i></span>'
     + '</div>'
     + '<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
@@ -2466,7 +2551,7 @@ function renderGoalCard(g) {
     // Colonne gauche : point de départ si défini
     + (g.refVal ? '<div>'
       + '<div style="font-size:9px;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Départ</div>'
-      + '<div style="font-size:14px;font-weight:700;color:#555">'+formatGoalVal(g.refVal, g.crit)+'</div>'
+      + '<div style="font-size:14px;font-weight:700;color:#555">'+(goalRef(g) !== +g.refVal ? '≈ ' : '')+formatGoalVal(goalRef(g), g.crit)+'</div>'
       + '</div>' : '<div></div>')
     // Meilleur en cours (centre) si existe
     + (globalBest ? '<div style="text-align:center">'
@@ -2679,7 +2764,7 @@ function computeWeeks(g) {
 
   const numWeeks = weeks.length;
   // Sans point de départ (vide ou 0), toutes les semaines visent directement l'objectif
-  const ref = g.refVal > 0 ? g.refVal : g.goalVal;
+  const ref = goalRef(g) || g.goalVal;
 
   // Interpolation linéaire du ref vers l'objectif
   weeks.forEach((w, i) => {
